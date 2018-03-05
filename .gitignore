@@ -1,0 +1,3 @@
+//Parser ignores
+parser/examples/*
+model.png
