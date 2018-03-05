@@ -1,0 +1,40 @@
+{
+    "layers": [
+        {
+            "type": "Input",
+            "config": {"shape": [16], "normalization": 100},
+            "inputs": []
+        },
+		{
+            "type": "Dense",
+            "config": {"units": 8, "activation": "relu"},
+            "inputs": [0]
+        },
+		{
+            "type": "Input",
+            "config": {"shape": [32], "normalization": 100},
+            "inputs": []
+        },
+		{
+            "type": "Dense",
+            "config": {"units": 8, "activation": "relu"},
+            "inputs": [2]
+        },
+        {
+            "type": "Add",
+            "config": {},
+            "inputs": [1,3]
+        },
+		{
+            "type": "Dense",
+            "config": {"units": 4, "activation": "relu"},
+            "inputs": [4]
+        }
+    ],
+    "optimizer": {
+        "type": "Adam",
+        "config": {"lr": 1.0}
+    },
+    "batch_size": 1,
+    "loss": "mean_squared_error"
+}
