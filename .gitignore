@@ -1,3 +1,4 @@
 //Parser ignores
 parser/examples/*
+parser/__pycache__/*
 model.png
