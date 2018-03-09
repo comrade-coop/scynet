@@ -1,5 +1,7 @@
 //Parser ignores
 parser/examples/*
 !parser/examples/merge.json
-parser/__pycache__/*
+__pycache__
 model.png
+
+.cache
