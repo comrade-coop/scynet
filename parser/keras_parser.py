@@ -52,6 +52,9 @@ def buildModel(structure):
 		config.pop('regularization', None) #TODO: This too
 		#TODO: Handle stacked LSTM case (insert return_sequences when applicable)
 
+		if isInput:
+			config = {'shape':  config['shape']}
+
 		layerObj = kerasObject(layer['type'], config)
 
 		if isInput:
@@ -90,7 +93,8 @@ def run(filename):
 	try:
 		model = buildModel(data) #This will raise an exception for invalid config
 		plot_model(model, to_file="model.png")
-	except Exception as e: #TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
+		return model
+	except Exception: #TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
 		print("Invalid config!")
 		traceback.print_exc()
 	
