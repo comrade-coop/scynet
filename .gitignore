@@ -1,0 +1,7 @@
+//Parser ignores
+parser/examples/*
+!parser/examples/merge.json
+__pycache__
+model.png
+
+.cache
