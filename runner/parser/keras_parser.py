@@ -8,7 +8,7 @@ from keras.optimizers import *
 from keras.models import Model
 from keras.utils import plot_model
 
-from structure_exception import StructureException
+from .structure_exception import StructureException
 
 def loadJson(filename):
 	with open(filename) as f:
@@ -34,11 +34,11 @@ def kerasObject(className, config):
 def buildModel(structure):
 	layers = structure['layers']
 	outputs = [] #tensor outputs from layers
-	
+
 	modelInputs = [] #global model input tensors
-	
+
 	usedAsInput = {} # ID -> True/False; whether the given layer has been used as an input
-	
+
 	for i, layer in enumerate(layers):
 		layerDescription = "(type: %s, ID: %d, inputs: %s)" % (layer['type'], i, str(layer['inputs']))
 		usedAsInput[i] = False #default value
@@ -46,7 +46,7 @@ def buildModel(structure):
 		isInput = False
 		if layer['type'] == "Input":
 			isInput = True
-		
+
 		config = layer['config']
 		config.pop('normalization', None) #TODO: Handle this key
 		config.pop('regularization', None) #TODO: This too
@@ -66,7 +66,7 @@ def buildModel(structure):
 					raise StructureException("A non-input layer %s with no inputs." % layerDescription)
 				else:
 					inputs = []
-					
+
 					for inp in layer['inputs']:
 						inputs.append(outputs[inp])
 						usedAsInput[inp] = True
@@ -97,12 +97,12 @@ def run(filename):
 	except Exception: #TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
 		print("Invalid config!")
 		traceback.print_exc()
-	
+
 
 def init():
 	parser = argparse.ArgumentParser(description="Module that loads a JSON neural network model and builds a keras model based on that.")
 	parser.add_argument('input', help='The JSON file input.')
-	
+
 	args, _ = parser.parse_known_args()
 
 	run(args.input)

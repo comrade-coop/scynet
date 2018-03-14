@@ -78,9 +78,9 @@ class StatefulEnv():
 
         self.connector.write(reset=True)
 
-        self.connector.write(prefetch=self.normalizer.prefetch_rows)
+        self.connector.write(prefetch=self.normalizer.prefetch_tick_count)
         prefetched_rows = []
-        for i in range(self.normalizer.prefetch_rows):
+        for i in range(self.normalizer.prefetch_tick_count):
             prefetched_rows.append(self.connector.read().values)
 
         self.normalizer.fit(prefetched_rows)
