@@ -2,7 +2,6 @@ import sys
 from os import path
 import itertools
 import math
-import pandas
 
 from .spaces import TupleSpace, BoxSpace, SetSpace
 from .signal_reader import SignalReader
@@ -17,22 +16,28 @@ class RawIndicator():
 
 
 class StatelessEnv():
-    def __init__(self, normalizers, config, signals_base_path, *args, **kwargs):
-        self.normalizers = normalizers
+    def __init__(self, preprocessors, config, signals_base_path, *args, **kwargs):
+        self.preprocessors = preprocessors
 
         self.action_space = SetSpace([0, 1])
+        self.observation_space = None
 
-        spaces = [BoxSpace(-1, 1, tuple(layer['config']['shape'])) for layer in config['layers'] if layer['type'] == 'Input']
-        self.observation_space = TupleSpace(spaces)
+        self.data = None
+        self.data_iterator = None
+        self.last_action = None
+        self.buy_price = None
+        self.same_action_ticks = None
+        self.same_action_ticks_limit = 500
+        self.same_action_feedback_exp = 1.005
 
         self.debug_i = 0
-        self.collect_data(config, signals_base_path)  # Adds self.data
-        self.reset()  # Adds more properties
+        self.collect_data(config, signals_base_path)
+        self.reset()
 
     def step(self, action):
         if self.debug_i % 50 == 0:
             print('Env step %s' % self.debug_i, file=sys.stderr)
-            self.debug_i += 1
+        self.debug_i += 1
 
         try:
             next_item = self.data_iterator.__next__()
@@ -75,7 +80,7 @@ class StatelessEnv():
         feedback = math.tanh(feedback / 10) * 10
 
         return (
-            [normalizer.append_and_preprocess(list(input_row)[1:]) for normalizer, input_row in zip(self.normalizers, next_item)],
+            [preprocessor.append_and_preprocess(input_row[1:]) for preprocessor, input_row in zip(self.preprocessors, next_item)],
             feedback,
             False,
             {})
@@ -89,14 +94,14 @@ class StatelessEnv():
         self.same_action_feedback_exp = 1.005
 
         try:
-            for normalizer, input_data in zip(self.normalizers, self.data[1:]):
-                normalizer.reset_state()
-                normalizer.init(itertools.islice(input_data, normalizer.prefetch_tick_count))
+            for preprocessor, input_data in zip(self.preprocessors, self.data[1:]):
+                preprocessor.reset_state()
+                preprocessor.init((thing[1:] for thing in itertools.islice(input_data.itertuples(), preprocessor.prefetch_tick_count)))
         except StopIteration:
             raise Exception('Data finished before we could prefetch for normalization')
 
         next_item = self.data_iterator.__next__()[1:]
-        return [normalizer.append_and_preprocess(list(input_row)[1:]) for normalizer, input_row in zip(self.normalizers, next_item)]
+        return [preprocessor.append_and_preprocess(input_row[1:]) for preprocessor, input_row in zip(self.preprocessors, next_item)]
 
     def close(self):
         self.data_iterator = None
@@ -109,9 +114,14 @@ class StatelessEnv():
 
     def collect_data(self, config, signal_base_dir):
         self.data = []
+        self.observation_space = ()
+
+        spaces = []
+
         self.data.append(SignalReader(path.join(signal_base_dir, 'base-close.csv'), target_column='close').read_all())
         for layer in config['layers']:
             if layer['type'] == 'Input':
+                spaces.append(BoxSpace(-100, 100, (config['window_length'],) + tuple(layer['config']['shape'])))
                 result = None
                 source = layer['config']['source']
                 # if source['type'] == 'talib':
@@ -129,4 +139,5 @@ class StatelessEnv():
 
                 self.data.append(result)
 
-        assert(len(self.data) == len(self.normalizers) + 1)
+        self.observation_space = TupleSpace(spaces)
+        assert(len(self.data) == len(self.preprocessors) + 1)

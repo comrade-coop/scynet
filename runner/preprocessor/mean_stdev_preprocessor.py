@@ -4,8 +4,8 @@ import numpy
 
 class MeanStdevPreprocessor(Preprocessor):
     def __init__(self, preprocess_window_length, output_window_length, normalization_constant=0.7):
-        super(preprocess_window_length, output_window_length)
-        self.normalization_constant_atanh = numpy.atanh(normalization_constant)
+        super().__init__(preprocess_window_length, output_window_length)
+        self.normalization_constant_atanh = numpy.arctanh(normalization_constant)
 
     def _preprocess_window(self, window):
         mean, stdev = window.mean(axis=0), window.std(axis=0)

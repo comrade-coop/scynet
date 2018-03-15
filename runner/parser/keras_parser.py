@@ -53,7 +53,8 @@ def buildModel(structure):
 		#TODO: Handle stacked LSTM case (insert return_sequences when applicable)
 
 		if isInput:
-			config = {'shape':  config['shape']}
+			# 1 is because of keras-rl's implicit windowing
+			config = {'shape': (1, structure['window_length'],) + tuple(config['shape'])}
 
 		layerObj = kerasObject(layer['type'], config)
 

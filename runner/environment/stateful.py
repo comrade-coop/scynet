@@ -42,7 +42,7 @@ class Connector():
 
 
 class StatefulEnv():
-    def __init__(self, normalizer, config, input_stream=sys.stdin, output_stream=sys.stdout, *args, **kwargs):
+    def __init__(self, preprocessor, config, input_stream=sys.stdin, output_stream=sys.stdout, *args, **kwargs):
         self.action_space = SetSpace([0, 1])
         self.connector = Connector(input_stream, output_stream)
 
@@ -50,7 +50,7 @@ class StatefulEnv():
 
         self.observation_space = TupleSpace(spaces)
 
-        self.normalizer = normalizer
+        self.preprocessor = preprocessor
 
         self.last_action = 0
         self.debug_i = 0
@@ -66,7 +66,7 @@ class StatefulEnv():
         if hasattr(result, 'values'):
 
             return (
-                self.normalizer.normalize(result.values),
+                self.preprocessor.normalize(result.values),
                 getattr(result, 'feedback', 0.0),
                 False,
                 {})
@@ -74,20 +74,20 @@ class StatefulEnv():
             return (self.reset(), 0.0, True, {})
 
     def reset(self):
-        self.normalizer.reset()
+        self.preprocessor.reset()
 
         self.connector.write(reset=True)
 
-        self.connector.write(prefetch=self.normalizer.prefetch_tick_count)
+        self.connector.write(prefetch=self.preprocessor.prefetch_tick_count)
         prefetched_rows = []
-        for i in range(self.normalizer.prefetch_tick_count):
+        for i in range(self.preprocessor.prefetch_tick_count):
             prefetched_rows.append(self.connector.read().values)
 
-        self.normalizer.fit(prefetched_rows)
+        self.preprocessor.fit(prefetched_rows)
 
         result = self.connector.read()
 
-        return self.normalizer.normalize(result.values)
+        return self.preprocessor.normalize(result.values)
 
     def render(self, mode='human', close=False):
         self.connector.debug = 1

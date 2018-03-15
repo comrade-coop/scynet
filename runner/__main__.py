@@ -4,7 +4,7 @@ import json
 
 from environment import StatelessEnv
 from parser import buildModel
-from preprocessor import Preprocessor
+from preprocessor import MeanStdevPreprocessor
 
 from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy
@@ -16,9 +16,9 @@ line = sys.stdin.readline()
 print("LINE IS", line)
 config = json.loads(line)
 
-normalizers = [Preprocessor(0, 1), Preprocessor(0, 1)]
+preprocessors = [MeanStdevPreprocessor(100, config['window_length']), MeanStdevPreprocessor(100, config['window_length'])]
 
-env = StatelessEnv(normalizers, config, "runner/signals/")
+env = StatelessEnv(preprocessors, config, "runner/signals/")
 
 
 window_length = 3
@@ -51,10 +51,10 @@ dqn = DQNAgent(
     model=model,
     nb_actions=actions_count,
     memory=memory,
-    nb_steps_warmup=30,
+    nb_steps_warmup=100,
     target_model_update=1e-2,
     policy=policy,
-    processor=MultiInputProcessor(nb_inputs=len(normalizers)),
+    processor=MultiInputProcessor(nb_inputs=len(preprocessors)),
 )
 dqn.compile(model.optimizer, metrics=['mae'])
 
@@ -68,17 +68,16 @@ else:
     #     print(e)
     #     pass
 
-    for i in range(1):
-        dqn.fit(
-            env,
-            nb_steps=1440 * 20 / 10,
-            action_repetition=1,
-            visualize=False,
-            verbose=2,
-            callbacks=[PolicyCallback(policy, 0.98, 1000)]
-        )
+    dqn.fit(
+        env,
+        nb_steps=2000 * 20,
+        action_repetition=1,
+        visualize=False,
+        verbose=2,
+        callbacks=[PolicyCallback(policy, 0.99, 1000)]
+    )
 
-        env.reset()
+    env.reset()
 
     # dqn.save_weights('dqn_learner_weights.h5f', overwrite=True)
 
