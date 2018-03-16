@@ -1,3 +1,4 @@
+import sys
 import argparse
 import json
 import traceback
@@ -8,13 +9,17 @@ from keras.optimizers import *
 from keras.models import Model
 from keras.utils import plot_model
 
-from .structure_exception import StructureException
+from structure_exception import StructureException
+
+sys.path.insert(0, "../preprocessor")
+from preprocessor import Preprocessor
+from mean_stdev_preprocessor import MeanStdevPreprocessor
 
 def loadJson(filename):
 	with open(filename) as f:
 		return json.load(f)
 
-def getLayer(name):
+def searchNamespace(name):
 	#TODO: Don't rely on Keras's class naming.
 	#Have a dictionary from our names to keras's
 	#TODO: What to do in a collision?
@@ -24,18 +29,23 @@ def getLayer(name):
 		raise StructureException("Invalid class name %s." % name)
 	return returnClass
 
-def kerasObject(className, config):
-	layerClass = getLayer(className)
-	#TODO: Don't rely on Keras's argument naming
-	#Also have a translator dictionary
-
+def namespaceObject(className, config):
+	layerClass = searchNamespace(className)
+	
 	return layerClass(**config)
+
+def namespaceObjectFromDict(dct):
+	return namespaceObject(dct['type'], dct['config'])
+
+def kerasObject(className, config):
+	return namespaceObject(className, config)
 
 def buildModel(structure):
 	layers = structure['layers']
 	outputs = [] #tensor outputs from layers
 
 	modelInputs = [] #global model input tensors
+	inputMetadata = [] # [(Preprocessor, signal config), (...), ...]
 
 	usedAsInput = {} # ID -> True/False; whether the given layer has been used as an input
 
@@ -53,6 +63,12 @@ def buildModel(structure):
 		#TODO: Handle stacked LSTM case (insert return_sequences when applicable)
 
 		if isInput:
+			#include the window length in the preprocessor config
+			config['preprocessor']['config']['output_window_length'] = structure['window_length']
+			preprocessorObj = namespaceObjectFromDict(config['preprocessor'])
+			sourceCfg = config['source']
+			inputMetadata.append((preprocessorObj, sourceCfg))
+
 			# 1 is because of keras-rl's implicit windowing
 			config = {'shape': (1, structure['window_length'],) + tuple(config['shape'])}
 
@@ -87,13 +103,18 @@ def buildModel(structure):
 	optimizerObj = kerasObject(optimizer['type'], optimizer['config']) #TODO: Don't rely on keras's optimizer namigs
 	model.compile(optimizerObj, loss=structure['loss']) #TODO: Don't rely on keras's loss namings
 
-	return model
+	return (model, inputMetadata)
 
 def run(filename):
 	data = loadJson(filename)
 	try:
-		model = buildModel(data) #This will raise an exception for invalid config
+		model, inputMetadata = buildModel(data) #This will raise an exception for invalid config
 		plot_model(model, to_file="model.png")
+
+		#print the metadata for test purposes
+		for tup in inputMetadata:
+			print(tup[0], tup[1])
+		
 		return model
 	except Exception: #TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
 		print("Invalid config!")
