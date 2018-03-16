@@ -11,6 +11,9 @@ keras = "*"
 tensorflow = "*"
 pydot = "*"
 graphviz = "*"
+pandas = "*"
+keras-rl = "*"
+"h5py" = "*"
 
 
 [dev-packages]
