@@ -2,7 +2,7 @@
     "layers": [
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "preprocess_window_length": 100}, "source": {"type": "MarketSource", "config": {"signal": "high"}}},
+            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"type": "MarketSource", "config": {"signal": "high"}}},
             "inputs": []
         },
         {
@@ -12,7 +12,7 @@
         },
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "preprocess_window_length": 100}, "source": {"type": "MarketSource", "config": {"signal": "low"}}},
+            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"type": "MarketSource", "config": {"signal": "low"}}},
             "inputs": []
         },
         {

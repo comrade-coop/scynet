@@ -15,7 +15,11 @@ class Preprocessor():
         self.window.append(row)
 
     def get_output_window(self):
-        return numpy.asanyarray(self._preprocess_window(numpy.asanyarray(self.window))[-self.output_window_length:])
+        return numpy.asanyarray(
+            self._preprocess_window(
+                numpy.asanyarray(self.window)
+            )[-self.output_window_length:]
+        )
 
     def append_and_preprocess(self, row):
         self.append_row(row)
@@ -25,7 +29,7 @@ class Preprocessor():
         raise NotImplementedError()
 
     def _preprocess_window(self, window):
-        return window
+        raise NotImplementedError()
 
     def get_state(self):
         return {}

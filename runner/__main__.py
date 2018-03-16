@@ -13,19 +13,15 @@ from rl.callbacks import Callback
 from rl.processors import MultiInputProcessor
 
 line = sys.stdin.readline()
-print("LINE IS", line)
 config = json.loads(line)
 
+
+model = buildModel(config)
 preprocessors = [MeanStdevPreprocessor(100, config['window_length']), MeanStdevPreprocessor(100, config['window_length'])]
 
+
 env = StatelessEnv(preprocessors, config, "runner/signals/")
-
-
-window_length = 3
 actions_count = len(env.action_space)
-
-# Next, we build a very simple model.
-model = buildModel(config)
 
 
 class PolicyCallback(Callback):
@@ -52,7 +48,7 @@ dqn = DQNAgent(
     nb_actions=actions_count,
     memory=memory,
     nb_steps_warmup=100,
-    target_model_update=1e-2,
+    target_model_update=0.01,
     policy=policy,
     processor=MultiInputProcessor(nb_inputs=len(preprocessors)),
 )
