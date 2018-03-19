@@ -1,19 +1,17 @@
-import sys
 import argparse
 import json
 import traceback
 
 import keras
-from keras.layers import * #we need all layers in the global namespace
+from keras.layers import *  # we need all layers in the global namespace
 from keras.optimizers import *
 from keras.models import Model
 from keras.utils import plot_model
 
-from structure_exception import StructureException
+from .structure_exception import StructureException
 
-sys.path.insert(0, "../preprocessor")
-from preprocessor import Preprocessor
-from mean_stdev_preprocessor import MeanStdevPreprocessor
+from ..preprocessor import *
+
 
 def loadJson(filename):
 	with open(filename) as f:
@@ -31,7 +29,7 @@ def searchNamespace(name):
 
 def namespaceObject(className, config):
 	layerClass = searchNamespace(className)
-	
+
 	return layerClass(**config)
 
 def namespaceObjectFromDict(dct):
@@ -105,6 +103,7 @@ def buildModel(structure):
 
 	return (model, inputMetadata)
 
+
 def run(filename):
 	data = loadJson(filename)
 	try:
@@ -114,9 +113,9 @@ def run(filename):
 		#print the metadata for test purposes
 		for tup in inputMetadata:
 			print(tup[0], tup[1])
-		
+
 		return model
-	except Exception: #TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
+	except Exception:  # TODO: List all possible exceptions, don't try to catch all exceptions (even system ones like MemoryError)
 		print("Invalid config!")
 		traceback.print_exc()
 
@@ -128,6 +127,7 @@ def init():
 	args, _ = parser.parse_known_args()
 
 	run(args.input)
+
 
 if __name__ == "__main__":
 	init()

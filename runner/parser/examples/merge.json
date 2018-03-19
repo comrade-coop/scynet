@@ -2,7 +2,7 @@
     "layers": [
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"type": "MarketSource", "config": {"signal": "high"}}},
+            "config": {"shape": [1], "preprocessor": {"type": "RawPreprocessor", "config": {"preprocess_window_length": 0}}, "source": {"from": "local", "name": "market.close"}},
             "inputs": []
         },
         {
@@ -12,7 +12,7 @@
         },
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"type": "MarketSource", "config": {"signal": "low"}}},
+            "config": {"shape": [2], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"from": "local", "name": "state"}},
             "inputs": []
         },
         {
@@ -21,7 +21,7 @@
             "inputs": [2]
         },
         {
-            "type": "Add",
+            "type": "Concatenate",
             "config": {},
             "inputs": [1, 3]
         },

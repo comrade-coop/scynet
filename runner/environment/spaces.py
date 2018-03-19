@@ -34,16 +34,19 @@ class BoxSpace():
             assert low.shape == high.shape
             self.low = low
             self.high = high
+            self.shape = (1,)
         else:
             assert np.isscalar(low) and np.isscalar(high)
             self.low = low + np.zeros(shape)
             self.high = high + np.zeros(shape)
+            self.shape = shape
 
     def sample(self, seed=None):
         random = np.random.RandomState(seed)
         return random.uniform(low=self.low, high=self.high, size=self.low.shape)
 
     def contains(self, x):
+        x = np.asanyarray(x)
         return x.shape == self.shape and (x >= self.low).all() and (x <= self.high).all()
 
 
