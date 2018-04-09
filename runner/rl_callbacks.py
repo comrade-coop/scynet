@@ -1,4 +1,5 @@
 # import numpy
+import sys
 from rl.callbacks import Callback, TrainEpisodeLogger as TrainEpisodeLoggerOrig
 import collections
 
@@ -23,7 +24,6 @@ class TrainEpisodeLogger(TrainEpisodeLoggerOrig):
         super().__init__(*args, **kwargs)
 
     def on_episode_end(self, episode, logs):
-
         def flatten(l):
             for el in l:
                 if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):

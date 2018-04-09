@@ -6,7 +6,7 @@ scalaVersion := "2.12.1"
 
 lazy val akkaHttpVersion = "10.0.10"
 lazy val akkaVersion    = "2.5.6"
-lazy val gattakkaProject = RootProject(uri("git://github.com/obecto/gattakka.git#dbdb5bba04fcd848e40c283a1cbf95167cd9ab3a"))
+lazy val gattakkaProject = RootProject(uri("git://github.com/obecto/gattakka.git#63f77896a7d5cb6497c88767136000663fefa543"))
 
 lazy val root = (project in file(".")).dependsOn(gattakkaProject)
   .settings(

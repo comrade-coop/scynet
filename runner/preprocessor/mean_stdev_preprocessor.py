@@ -3,8 +3,8 @@ import numpy
 
 
 class MeanStdevPreprocessor(Preprocessor):
-    def __init__(self, preprocess_window_length, output_window_length, normalization_constant=0.7):
-        super().__init__(preprocess_window_length, output_window_length)
+    def __init__(self, preprocess_window_length, output_window_length, normalization_constant=0.7, **kwargs):
+        super().__init__(preprocess_window_length, output_window_length, **kwargs)
         self.normalization_constant_atanh = numpy.arctanh(normalization_constant)
 
     def _preprocess_window(self, window):

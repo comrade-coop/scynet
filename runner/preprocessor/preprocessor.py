@@ -3,7 +3,7 @@ import numpy
 
 
 class Preprocessor():
-    def __init__(self, preprocess_window_length, output_window_length):
+    def __init__(self, preprocess_window_length, output_window_length, **kwargs):
         self.prefetch_tick_count = max(preprocess_window_length, output_window_length)
         self.window = deque(maxlen=self.prefetch_tick_count)
         self.output_window_length = output_window_length

@@ -17,6 +17,13 @@ object Descriptors {
   private def makeLayer(_type: String, inputs: Int, config: Seq[MapGeneGroupDescriptor.GroupField]): MapGeneGroupDescriptor = {
     makeLayer(_type, List(_type), inputs, config)
   }
+  private def makeInputLayer(name: String, shape: List[Int], source: GeneDescriptor): MapGeneGroupDescriptor = {
+    makeLayer(name, List("Input"), 0, Seq(
+      "shape" -> EnumGeneDescriptor(List(shape)),
+      "preprocessor" -> PreprocessorDescriptor,
+      "source" -> source
+    ))
+  }
   private def makeInitializerRegularizerConstraint(property: String): Seq[MapGeneGroupDescriptor.GroupField] = {
     Seq(
       s"${property}_regularizer" -> RegularizerDescriptor
@@ -36,12 +43,12 @@ object Descriptors {
   /// Helper descriptors
 
   val ActivationDescriptor = EnumGeneDescriptor("linear", "tanh", "sigmoid", "hard_sigmoid", "elu", "selu", "softplus", "softsign", "softmax")
-  val NormalizationDescriptor = MapGeneGroupDescriptor(
-    "type" -> EnumGeneDescriptor("mean_stdev", "minmax"),
+  val PreprocessorDescriptor = MapGeneGroupDescriptor(
+    "type" -> EnumGeneDescriptor("RawPreprocessor", "MeanStdevPreprocessor"),
     "config" -> MapGeneGroupDescriptor(
-      "param" -> DoubleGeneDescriptor(0, 1)
-    ),
-    "window_length" -> LongGeneDescriptor(1, 255)
+      "preprocess_window_length" -> LongGeneDescriptor(1, 200),
+      "normalization_constant" -> DoubleGeneDescriptor(0.1, 0.9)
+    )
   )
   val RegularizerDescriptor = MapGeneGroupDescriptor(
     "type" -> EnumGeneDescriptor(List("l1_l2")),
@@ -65,23 +72,17 @@ object Descriptors {
 
   /// Input Layers
 
-  // val additionalInputSignals = List()
-  // val AdditionalInputLayer = MapGeneGroupDescriptor("InputLayer",
-  //   "type" -> EnumGeneDescriptor(List("Input")),
-  //   "inputs" -> EnumGeneDescriptor(List(List())),
-  //   "config" -> EnumGeneDescriptor(inputSignals),
-  // )
 
-  val MarketInputLayer = makeLayer("Input", 0, Seq(
-    "shape" -> EnumGeneDescriptor(List(List(1))),
-    "normalization" -> NormalizationDescriptor,
-    "source" -> MapGeneGroupDescriptor(
-      "type" -> EnumGeneDescriptor(List("market")),
-      "config" -> MapGeneGroupDescriptor(
-        "signal" -> EnumGeneDescriptor("close", "open", "high", "low", "volume", "price")
-      )
-    )
-  ))
+  val InputLayers = Seq(
+    makeInputLayer("StateInput", List(2), MapGeneGroupDescriptor(
+      "from" -> EnumGeneDescriptor("local"),
+      "name" -> EnumGeneDescriptor("state")
+    )),
+    makeInputLayer("MarketInput", List(1), MapGeneGroupDescriptor(
+      "from" -> EnumGeneDescriptor("local"),
+      "name" -> EnumGeneDescriptor("market.close", "market.open", "market.high", "market.low", "market.volumefrom", "market.volumeto")
+    ))
+  )
 
 
   /// Common Layers
@@ -267,17 +268,14 @@ object Descriptors {
       "config" -> MapGeneGroupDescriptor("lr" -> DoubleGeneDescriptor(0, 2))
     ),
     "batch_size" -> EnumGeneDescriptor(List(1)),
-    "loss" -> EnumGeneDescriptor(List("mean_squared_error"))
+    "loss" -> EnumGeneDescriptor(List("mean_squared_error")),
+    "window_length" -> LongGeneDescriptor(1, 5)
   )
 
   /// Lists
 
   val Configs = List[GeneDescriptor](
     AdamConfig
-  )
-
-  val InputLayers = List[GeneDescriptor](
-    MarketInputLayer
   )
 
   val Layers = List[GeneDescriptor]( // Some are duplicated to give them additional weigth
@@ -287,7 +285,6 @@ object Descriptors {
     DropoutLayer,
     GaussianNoiseLayer,
     FlattenLayer,
-    MarketInputLayer,
     ActivityRegularizationLayer,
     MergeOpLayer,
     MergeOpLayer,
@@ -313,6 +310,7 @@ object Descriptors {
     CroppingLayers ++
     UpSamplingLayers ++
     ZeroPaddingLayers ++
+    InputLayers ++
     PoolingLayers
 
   object AnyJsonProtocol {
