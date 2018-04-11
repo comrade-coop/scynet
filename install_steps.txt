@@ -1,0 +1,10 @@
+First, install CUDA (runfile), following these instructions: http://docs.nvidia.com/cuda/cuda-installation-guide-linux
+
+Don't forget to read and do all post-install sections (http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#post-installation-actions)!!!
+
+Install CUDNN, by downloading the .tgz archive and copying the files as defined here: http://docs.nvidia.com/deeplearning/sdk/cudnn-install/index.html
+
+You'll likely need to compile tensorflow manually to make sure that the Cuda/CUDNN versions match. Follow here: https://www.tensorflow.org/install/install_linux (only ignore the install of cuda-command-line-tools, they are already installed)
+
+Install TF build dependencies, build and enjoy (keep in mind to build for pyhton3, not python!)
+
