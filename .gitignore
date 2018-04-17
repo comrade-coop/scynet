@@ -1,6 +1,8 @@
 //Parser ignores
 parser/examples/*
 !parser/examples/merge.json
+results/*
+!results/.gitkeep
 __pycache__
 model.png
 

@@ -3,6 +3,7 @@ package com.obecto.trading_bot_breeder
 import com.obecto.gattakka.Individual
 import com.obecto.gattakka.genetics.{Genome}
 import com.obecto.gattakka.messages.individual.Initialize
+import java.io.{IOException, File, PrintWriter}
 import spray.json._
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
@@ -10,6 +11,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   var process: scala.sys.process.Process = null
   var stopping = false
+  val strategy = mapGenomeToStringStrategy()
+  var startTime = 0l
 
   override def customReceive = {
     case Initialize(data) =>
@@ -23,11 +26,28 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     }
   }
 
+  override def dispatchFitness(fitness: Double): Unit = {
+    super.dispatchFitness(fitness)
+    if (!fitness.isNaN) {
+      val shortHash = BigInt(strategy.hashCode()).abs.toString(16).padTo(6, '0').substring(0, 6)
+      val endTime = System.currentTimeMillis / 1000
+      printToFile(new File(f"../results/${fitness}%08.0f-${shortHash}.txt")) { p =>
+        p.println(s"score = $fitness")
+        p.println(s"chromosome = $strategy")
+        p.println(s"time = ${endTime - startTime}s")
+      }
+    }
+  }
+
+  private def printToFile(f: File)(op: PrintWriter => Unit): Unit = {
+    val p = new PrintWriter(f)
+    try { op(p) } finally { p.close() }
+  }
+
   private def startProcess(): Unit = {
     import scala.sys.process._
-    import java.io.IOException
-    val strategy = mapGenomeToStringStrategy()
     println(strategy.replaceAll("\n", ""))
+    startTime = System.currentTimeMillis / 1000
 
     val io = new ProcessIO(
       in => {
@@ -62,7 +82,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         err.close()
       })
 
-    process = Process(Main.commandToRun, new java.io.File("../")) run io
+    process = Process(Main.commandToRun, new File("../")) run io
   }
 
   private def mapGenomeToStringStrategy(): String = {

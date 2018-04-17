@@ -31,7 +31,7 @@ concatenated_outputs = Concatenate(-1)(reshaped_outputs) if len(reshaped_outputs
 dense_transform = Dense(actions_count)(concatenated_outputs)
 outer_model = Model(inputs=internal_model.inputs, outputs=dense_transform)
 
-if True:
+if False:
     from keras.utils import plot_model
     plot_model(outer_model, to_file='model-{pid}-.png'.format(pid=os.getpid()))
 
