@@ -4,8 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import com.obecto.gattakka.genetics.operators._
 import com.obecto.gattakka.genetics.descriptors.{GeneDescriptor}
 import com.obecto.gattakka.genetics.{Chromosome, Genome}
-import com.obecto.gattakka.{Pipeline, PipelineOperator, Population, IndividualDescriptor}
-import com.obecto.gattakka.messages.population.RefreshPopulation
+import com.obecto.gattakka.{Pipeline, PipelineOperator, Population}
 
 import scala.util.Random
 
@@ -19,14 +18,21 @@ object Main extends App {
   } else {
     implicit val system = ActorSystem("gattakka")
 
-    def generateRandomChromosome(descriptors: Seq[GeneDescriptor]): Chromosome = {
-      descriptors(Random.nextInt(descriptors.size)).createChromosome()
+    def generateRandomChromosome(descriptors: Traversable[(Double, GeneDescriptor)]): () => Chromosome = {
+      val totalWeigth = descriptors.view.map(_._1).sum
+      () => {
+        var left = Random.nextDouble * totalWeigth
+        descriptors.find(x => {left -= x._1; left <= 0.0}).get._2.createChromosome()
+      }
     }
+
+    val generateRandomInput = generateRandomChromosome(Descriptors.InputLayers)
+    val generateRandomLayer = generateRandomChromosome(Descriptors.Layers)
 
     val initialChromosomes = (1 to 20).map((i: Int) => {
       new Genome(List(
         Descriptors.AdamConfig.createChromosome()
-      ) ++ (1 to (Random.nextInt(3) + 1)).map(x => generateRandomChromosome(Descriptors.InputLayers)))
+      ) ++ (1 to (Random.nextInt(3) + 1)).map(x => generateRandomInput()))
       // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomChromosome(Descriptors.Layers)))
     }).toList
 
@@ -50,12 +56,19 @@ object Main extends App {
         val bitFlipChance = 0.05
       },
       new InsertMutationOperator {
-        val mutationChance = 0.1
-        def createChromosome() = generateRandomChromosome(Descriptors.Layers)
+        val mutationChance = 0.2
+        def createChromosome() = generateRandomLayer()
+        override def apply(genome: Genome): Genome = {
+          if (genome.chromosomes.size < 20) {
+            super.apply(genome)
+          } else {
+            genome
+          }
+        }
         val insertionChance = 0.1
       },
       new DropMutationOperator {
-        val mutationChance = 0.1
+        val mutationChance = 0.15
         override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor)
         val dropChance = 0.1
       },
@@ -68,12 +81,11 @@ object Main extends App {
     val pipelineActor = system.actorOf(Pipeline.props(pipelineOperators))
 
     val evaluator = system.actorOf(Props(classOf[CustomEvaluator]), "evaluator")
-    val populationActor = system.actorOf(Population.props(
+    system.actorOf(Population.props(
       classOf[CustomIndividualActor],
       initialChromosomes,
       evaluator,
       pipelineActor
     ), "population")
-
   }
 }

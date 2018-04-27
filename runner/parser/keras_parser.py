@@ -5,6 +5,7 @@ import traceback
 import keras
 from keras.layers import *  # we need all layers in the global namespace
 from keras.optimizers import *
+from keras.regularizers import *
 from keras.models import Model
 from keras.utils import plot_model
 
@@ -56,8 +57,6 @@ def buildModel(structure):
 			isInput = True
 
 		config = layer['config']
-		config.pop('normalization', None) #TODO: Handle this key
-		config.pop('regularization', None) #TODO: This too
 		#TODO: Handle stacked LSTM case (insert return_sequences when applicable)
 
 		if isInput:
@@ -68,7 +67,13 @@ def buildModel(structure):
 			inputMetadata.append((preprocessorObj, sourceCfg))
 
 			# 1 is because of keras-rl's implicit windowing
-			config = {'shape': (1, structure['window_length'],) + tuple(config['shape'])}
+			config = {'shape': (1, structure['window_length'],) + tuple(config['shape']), 'name': sourceCfg['name']}
+		else:
+			for key in config.keys():
+				if isinstance(config[key], dict) and 'type' in config[key] and 'config' in config[key]:
+					config[key] = namespaceObjectFromDict(config[key])
+				elif isinstance(config[key], dict) and 'type' in config[key] and config[key]['type'] == 'None':
+					config[key] = None
 
 		layerObj = kerasObject(layer['type'], config)
 
@@ -76,21 +81,21 @@ def buildModel(structure):
 			output = layerObj
 			modelInputs.append(layerObj)
 		else:
-			try:
-				if len(layer['inputs']) == 0:
-					raise StructureException("A non-input layer %s with no inputs." % layerDescription)
-				else:
-					inputs = []
+			if len(layer['inputs']) == 0:
+				raise StructureException("A non-input layer %s with no inputs." % layerDescription)
+			else:
+				inputs = []
 
-					for inp in layer['inputs']:
+				for inp in layer['inputs']:
+					try:
 						inputs.append(outputs[inp])
-						usedAsInput[inp] = True
+					except IndexError:
+						raise StructureException("A layer %s, requesting inputs defined after it." % layerDescription)
+					usedAsInput[inp] = True
 
-					if len(inputs) == 1: #don't pass a list of size 1
-						inputs = inputs[0]
-					output = layerObj(inputs)
-			except IndexError:
-				raise StructureException("A layer %s, requesting inputs defined after it." % layerDescription)
+				if len(inputs) == 1: #don't pass a list of size 1
+					inputs = inputs[0]
+				output = layerObj(inputs)
 		outputs.append(output)
 
 	#all output tensors that haven't been used as an input in the graph are model outputs

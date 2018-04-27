@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 
 
@@ -12,11 +10,8 @@ class SetSpace():
         return len(self.elements)
 
     def sample(self, seed=None):
-        if seed is None:
-            return random.choice(self.elements_list)
-        else:
-            r = random.Random(seed)
-            return r.choice(self.elements_list)
+        random = np.random.RandomState(seed)
+        return self.elements_list[random.choice(len(self.elements_list))]
 
     def contains(self, x):
         return x in self.elements

@@ -26,9 +26,9 @@ object Descriptors {
   }
   private def makeInitializerRegularizerConstraint(property: String): Seq[MapGeneGroupDescriptor.GroupField] = {
     Seq(
-      s"${property}_regularizer" -> RegularizerDescriptor
-      // s"${property}_constraint" -> ConstraintDescriptor,
-      // s"${property}_initializer" -> InitializerDescriptor
+      s"${property}_regularizer" -> RegularizerDescriptor,
+      s"${property}_constraint" -> ConstraintDescriptor,
+      s"${property}_initializer" -> InitializerDescriptor
     )
   }
   private def tupleify(n: Int, descriptor: GeneDescriptor): GeneDescriptor = {
@@ -57,13 +57,34 @@ object Descriptors {
       "l2" -> DoubleGeneDescriptor(0.0, 0.2)
     )
   )
-  val ConstraintDescriptor = MapGeneGroupDescriptor(
-    "type" -> EnumGeneDescriptor("max_norm", "non_neg", "unit_norm", "min_max_norm"),
-    "config" -> MapGeneGroupDescriptor(
-      "min" -> DoubleGeneDescriptor(-5.0, 5.0),
-      "max" -> DoubleGeneDescriptor(-5.0, 5.0)
-    )
+  val ConstraintDescriptor = EnumGeneDescriptor(
+    null,
+    null,
+    null,
+    null, // Duplicated to make it more likely to be used
+    "max_norm",
+    "non_neg",
+    "unit_norm",
+    "min_max_norm"
   )
+  val InitializerDescriptor = EnumGeneDescriptor(
+    "zero",
+    "one",
+    "constant",
+    "uniform",
+    "normal",
+    "truncated_normal",
+    "glorot_uniform",
+    "glorot_normal",
+    "he_uniform",
+    "he_normal",
+    "lecun_uniform",
+    "lecun_normal"
+  )
+  // val InitializerDescriptorMatrix = EnumGeneDescriptor(InitializerDescriptor.values ++ List(
+  //   "identity",
+  //   "orthogonal"
+  // ))
   val BooleanDescriptor = EnumGeneDescriptor(true, false)
   val UnitsDescriptor = LongGeneDescriptor(8)
   // val ImageDataFormatDescriptor = EnumGeneDescriptor("channels_first", "channels_last")
@@ -73,15 +94,15 @@ object Descriptors {
   /// Input Layers
 
 
-  val InputLayers = Seq(
-    makeInputLayer("StateInput", List(2), MapGeneGroupDescriptor(
+  val InputLayers = List(
+    (1 * 0.8, makeInputLayer("StateInput", List(2), MapGeneGroupDescriptor(
       "from" -> EnumGeneDescriptor("local"),
       "name" -> EnumGeneDescriptor("state")
-    )),
-    makeInputLayer("MarketInput", List(1), MapGeneGroupDescriptor(
+    ))),
+    (6 * 0.8, makeInputLayer("MarketInput", List(1), MapGeneGroupDescriptor(
       "from" -> EnumGeneDescriptor("local"),
       "name" -> EnumGeneDescriptor("market.close", "market.open", "market.high", "market.low", "market.volumefrom", "market.volumeto")
-    ))
+    )))
   )
 
 
@@ -155,29 +176,29 @@ object Descriptors {
     "data_format" -> ImageDataFormatDescriptor
   ))
 
-  val CroppingLayers = Range.inclusive(1, 3).toList.map(dims => makeLayer(s"Cropping${dims}D", 1, Seq(
+  val CroppingLayers = Range.inclusive(1, 3).toList.map(dims => (0.3, makeLayer(s"Cropping${dims}D", 1, Seq(
       "cropping" -> tupleify(dims, GeneGroupDescriptor(LongGeneDescriptor(0, 16), LongGeneDescriptor(0, 16)))
     ) ++ (if (dims > 1) Seq("data_format" -> ImageDataFormatDescriptor) else Seq())
-  ))
+  )))
 
-  val UpSamplingLayers = Range.inclusive(1, 3).toList.map(dims => makeLayer(s"UpSampling${dims}D", 1, Seq(
+  val UpSamplingLayers = Range.inclusive(1, 3).toList.map(dims => (0.3, makeLayer(s"UpSampling${dims}D", 1, Seq(
       "size" -> tupleify(dims, LongGeneDescriptor(1, 16))
     ) ++ (if (dims > 1) Seq("data_format" -> ImageDataFormatDescriptor) else Seq())
-  ))
+  )))
 
-  val ZeroPaddingLayers = Range.inclusive(1, 3).toList.map(dims => makeLayer(s"ZeroPadding${dims}D", 1, Seq(
+  val ZeroPaddingLayers = Range.inclusive(1, 3).toList.map(dims => (0.3, makeLayer(s"ZeroPadding${dims}D", 1, Seq(
       "padding" -> tupleify(dims, GeneGroupDescriptor(LongGeneDescriptor(0, 16), LongGeneDescriptor(0, 16)))
     ) ++ (if (dims > 1) Seq("data_format" -> ImageDataFormatDescriptor) else Seq())
-  ))
+  )))
 
 
   /// Pooling Layers
 
-  val PoolingLayers = Range.inclusive(1, 3).toList.map(dims => makeLayer(s"Pooling${dims}D", List(s"MaxPooling${dims}D", s"AveragePooling${dims}D"), 1, Seq(
+  val PoolingLayers = Range.inclusive(1, 3).toList.map(dims => (0.3, makeLayer(s"Pooling${dims}D", List(s"MaxPooling${dims}D", s"AveragePooling${dims}D"), 1, Seq(
       "pool_size" -> tupleify(dims, LongGeneDescriptor(0, 16)),
       "padding" -> EnumGeneDescriptor("valid", "same")
     ) ++ (if (dims > 1) Seq("data_format" -> ImageDataFormatDescriptor) else Seq())
-  ))
+  )))
 
   val GlobalPooling1DLayer = makeLayer("GlobalPooling1D", List("GlobalMaxPooling1D", "GlobalAveragePooling1D"), 1, Seq())
   val GlobalPooling2DLayer = makeLayer("GlobalPooling2D", List("GlobalMaxPooling2D", "GlobalAveragePooling2D"), 1, Seq(
@@ -278,40 +299,38 @@ object Descriptors {
     AdamConfig
   )
 
-  val Layers = List[GeneDescriptor]( // Some are duplicated to give them additional weigth
-    DenseLayer,
-    DenseLayer,
-    ActivationLayer,
-    DropoutLayer,
-    GaussianNoiseLayer,
-    FlattenLayer,
-    ActivityRegularizationLayer,
-    MergeOpLayer,
-    MergeOpLayer,
-    MergeOpLayer,
-    ConcatenateLayer,
-    DotLayer,
-    LeakyReLULayer,
-    ELULayer,
-    PReLULayer,
-    ThresholdedReLU,
-    Conv1DLayer,
-    Conv2DLayer,
-    SeparableConv2DLayer,
-    Conv3DLayer,
-    LocallyConnected1DLayer,
-    LocallyConnected2DLayer,
-    GlobalPooling1DLayer,
-    GlobalPooling2DLayer,
-    SimpleRNNLayer,
-    GRULayer,
-    LSTMLayer
+  val Layers = List( // weigth -> descriptor
+    (8.0, DenseLayer),
+    (1.0, ActivationLayer),
+    (1.0, DropoutLayer),
+    (0.6, GaussianNoiseLayer),
+    (1.0, FlattenLayer),
+    (0.5, ActivityRegularizationLayer),
+    (5.0, MergeOpLayer),
+    (1.0, ConcatenateLayer),
+    (1.0, DotLayer),
+    (0.5, LeakyReLULayer),
+    (0.5, ELULayer),
+    (0.5, PReLULayer),
+    (0.5, ThresholdedReLU),
+    (0.5, Conv1DLayer),
+    (0.5, Conv2DLayer),
+    (0.5, SeparableConv2DLayer),
+    (0.5, Conv3DLayer),
+    (0.5, LocallyConnected1DLayer),
+    (0.5, LocallyConnected2DLayer),
+    (0.5, GlobalPooling1DLayer),
+    (0.5, GlobalPooling2DLayer),
+    (1.0, SimpleRNNLayer),
+    (1.0, GRULayer),
+    (1.0, LSTMLayer)
   ) ++
     CroppingLayers ++
     UpSamplingLayers ++
     ZeroPaddingLayers ++
     InputLayers ++
-    PoolingLayers
+    PoolingLayers ++
+    List()
 
   object AnyJsonProtocol {
     implicit val AnyFormat = new JsonFormat[Any] {

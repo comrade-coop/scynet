@@ -4,7 +4,6 @@ import itertools
 import math
 import pandas
 import numpy
-import random
 
 from .spaces import TupleSpace, BoxSpace, SetSpace
 from .signal_reader import SignalReader
@@ -111,8 +110,8 @@ class StatelessEnv():
         if self.validation:
             print('Starting validation episode')
         else:
-            learn_from = random.randint(0, self.learning_rows - 100)
-            learn_to = random.randint(learn_from + 100, self.learning_rows)
+            learn_from = 0  # int(numpy.random.uniform(0, self.learning_rows - 100))
+            learn_to = self.learning_rows  # int(numpy.random.uniform(learn_from + 100, self.learning_rows))
             self.data_iterator = itertools.islice(self.data_iterator, learn_from, learn_to)
             print('Starting learning episode from {start} to {end} ({range} rows out of {total} rows)'.format(
                 start=learn_from,

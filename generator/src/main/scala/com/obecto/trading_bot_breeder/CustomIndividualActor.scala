@@ -1,9 +1,10 @@
 package com.obecto.trading_bot_breeder
 
-import com.obecto.gattakka.Individual
+import com.obecto.gattakka.{Individual}
 import com.obecto.gattakka.genetics.{Genome}
-import com.obecto.gattakka.messages.individual.Initialize
+import com.obecto.gattakka.messages.individual.{Initialize}
 import java.io.{IOException, File, PrintWriter}
+import java.security.{MessageDigest}
 import spray.json._
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
@@ -12,6 +13,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   var process: scala.sys.process.Process = null
   var stopping = false
   val strategy = mapGenomeToStringStrategy()
+  // val shortHash = BigInt(strategy.hashCode()).abs.toString(16).padTo(6, '0').substring(0, 6)
+  val shortHash = MessageDigest.getInstance("MD5").digest(strategy.getBytes()).map("%02x".format(_)).mkString.substring(0, 10)
   var startTime = 0l
 
   override def customReceive = {
@@ -28,13 +31,13 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   override def dispatchFitness(fitness: Double): Unit = {
     super.dispatchFitness(fitness)
-    if (!fitness.isNaN) {
-      val shortHash = BigInt(strategy.hashCode()).abs.toString(16).padTo(6, '0').substring(0, 6)
+    if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
       printToFile(new File(f"../results/${fitness}%08.0f-${shortHash}.txt")) { p =>
         p.println(s"score = $fitness")
-        p.println(s"chromosome = $strategy")
         p.println(s"time = ${endTime - startTime}s")
+        p.println(s"hash = $shortHash")
+        p.println(s"chromosome = $strategy")
       }
     }
   }
@@ -46,7 +49,9 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   private def startProcess(): Unit = {
     import scala.sys.process._
-    println(strategy.replaceAll("\n", ""))
+    var errorText = ""
+    var shouldPrintError = false
+    println(f"Started $shortHash")
     startTime = System.currentTimeMillis / 1000
 
     val io = new ProcessIO(
@@ -71,14 +76,27 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         } catch {
           case ex: Throwable => {
             if (!stopping) {
-              println((ex, strategy.replaceAll("\n", "")))
               dispatchFitness(Double.NaN)
+            }
+            if (errorText == "") {
+              shouldPrintError = true
+            } else {
+              printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
+                p.println(s"chromosome = $strategy")
+                p.println(errorText)
+              }
             }
           }
         }
       },
       err => {
-        scala.io.Source.fromInputStream(err).mkString // The child usually dies if we don't wait for it to finish working
+        errorText = scala.io.Source.fromInputStream(err).mkString // The child usually dies if we don't wait for it to finish working
+        if (shouldPrintError) {
+          printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
+            p.println(s"chromosome = $strategy")
+            p.println(errorText)
+          }
+        }
         err.close()
       })
 
