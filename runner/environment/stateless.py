@@ -24,7 +24,7 @@ class StatelessEnv():
         self.observation_space = None
 
         self.output_stream = output_stream
-        self.validation = False
+        self.phase = "learning"
         self.data = None
         self.validation_data = None
         self.data_iterator = None
@@ -32,7 +32,8 @@ class StatelessEnv():
         self.last_action = 0
         self.same_action_ticks = 0
         self.same_action_ticks_limit = 500
-        self.validation_rows = 365 * 24  # 1 year
+        self.test_rows = 365 * 24 // 2  # ½ year
+        self.validation_rows = 365 * 24 // 2  # ½ year
         self.learning_rows = None
         self.same_action_feedback_exp = 1.005
         self.interactive = not sys.stderr.closed
@@ -42,7 +43,6 @@ class StatelessEnv():
 
         self.debug_i = 0
         self.collect_data(signals_base_path)
-        self.reset()
 
     def state_generator(self):
         while True:
@@ -50,7 +50,7 @@ class StatelessEnv():
 
     def data_wrapper(self, columns):
         def _inner():
-            data_source = self.validation_data if self.validation else self.learning_data
+            data_source = {"learning": self.learning_data, "validation": self.validation_data, "test": self.test_data}[self.phase]
             return (data_source[columns].itertuples())
         return _inner
 
@@ -83,7 +83,8 @@ class StatelessEnv():
 
         merged_data = pandas.concat(dataframes_to_merge, axis=1)
         self.validation_data = merged_data.iloc[-self.validation_rows:]
-        self.learning_data = merged_data.iloc[:-self.validation_rows]
+        self.test_data = merged_data.iloc[-self.test_rows-self.validation_rows:-self.validation_rows]
+        self.learning_data = merged_data.iloc[:-self.test_rows-self.validation_rows]
         self.learning_rows = self.learning_data.shape[0]
 
         spaces = []
@@ -94,8 +95,9 @@ class StatelessEnv():
         self.observation_space = TupleSpace(spaces)
         assert(len(self.data) == len(self.preprocessors) + 1)
 
-        print('Loaded Data: {learning} training rows and {validation} validation rows'.format(
+        print('Loaded Data: {learning} training rows, {test} test rows, and {validation} validation rows'.format(
             learning=self.learning_data.shape[0],
+            test=self.test_data.shape[0],
             validation=self.validation_data.shape[0],
         ))
 
@@ -107,12 +109,14 @@ class StatelessEnv():
         self.same_action_ticks = 0
         self.balance_currency = self.starting_currency
         self.balance_asset = 0.0
-        if self.validation:
-            print('Starting validation episode')
-        else:
+        if self.phase == "validation":
+            print('Starting validation episode ({date})'.format(date = iter(self.data[0]()).__next__()[0]))
+        elif self.phase == "test":
+            print('Starting test episode ({date})'.format(date = iter(self.data[0]()).__next__()[0]))
+        elif self.phase == "learning":
             learn_from = 0  # int(numpy.random.uniform(0, self.learning_rows - 100))
             learn_to = self.learning_rows  # int(numpy.random.uniform(learn_from + 100, self.learning_rows))
-            self.data_iterator = itertools.islice(self.data_iterator, learn_from, learn_to)
+            # self.data_iterator = itertools.islice(self.data_iterator, learn_from, learn_to)
             print('Starting learning episode from {start} to {end} ({range} rows out of {total} rows)'.format(
                 start=learn_from,
                 end=learn_to,
@@ -135,8 +139,10 @@ class StatelessEnv():
         self.balance_asset = 0.0
         self.data_iterator = None
         print('')  # Makes a newline on stderr
-        if self.validation:
+        if self.phase == "test":
             print('score = {result}'.format(result=self.balance_currency - self.starting_currency), file=self.output_stream)
+        elif self.phase == "validation":
+            print('display_score = {result}'.format(result=self.balance_currency - self.starting_currency), file=self.output_stream)
         else:
             print('score = {result: >+8.2f}'.format(result=self.balance_currency - self.starting_currency))
 
@@ -179,14 +185,14 @@ class StatelessEnv():
                 self.buy_price = price
                 self.balance_asset += self.balance_currency / price
                 self.balance_currency = 0.0
-                # if self.validation:
+                # if self.phase == "validation":
                 #     real_feedback -= price * 0.0015
 
             elif action == 0:
                 real_feedback += price - self.buy_price
                 self.balance_currency += self.balance_asset * price
                 self.balance_asset = 0.0
-                # if self.validation:
+                # if self.phase == "validation":
                 #     # real_feedback -= self.buy_price * 0.0015
                 #     real_feedback -= price * 0.0025
         else:
@@ -195,10 +201,10 @@ class StatelessEnv():
                 learning_feedback -= self.same_action_feedback_exp ** (self.same_action_ticks - self.same_action_ticks_limit) - 1
 
         self.last_price = price
-        if self.validation:
-            feedback = math.tanh(real_feedback / 10) * 10
-        else:
+        if self.phase == "learning":
             feedback = math.tanh((real_feedback + learning_feedback) / 10) * 10
+        else:
+            feedback = math.tanh(real_feedback / 10) * 10
 
         return (
             collapse_single_item([preprocessor.append_and_preprocess(input_row[1:]) for preprocessor, input_row in zip(self.preprocessors, next_item)]),

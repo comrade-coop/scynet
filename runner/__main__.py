@@ -97,7 +97,9 @@ else:
     dqn.save_weights(weigths_file, overwrite=True)
 
 # dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-env.validation = True
+env.phase = "test"
+dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+env.phase = "validation"
 dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
 
 env.close()

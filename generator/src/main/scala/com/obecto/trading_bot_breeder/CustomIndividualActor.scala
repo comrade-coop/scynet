@@ -29,12 +29,13 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     }
   }
 
-  override def dispatchFitness(fitness: Double): Unit = {
+  def dispatchFitness(fitness: Double, displayScore: Double): Unit = {
     super.dispatchFitness(fitness)
     if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
-      printToFile(new File(f"../results/${fitness}%08.0f-${shortHash}.txt")) { p =>
-        p.println(s"score = $fitness")
+      printToFile(new File(f"../results/${displayScore}%08.0f-${shortHash}.txt")) { p =>
+        p.println(s"fitness = $fitness")
+        p.println(s"score = $displayScore")
         p.println(s"time = ${endTime - startTime}s")
         p.println(s"hash = $shortHash")
         p.println(s"chromosome = $strategy")
@@ -64,19 +65,24 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         }
       },
       out => {
-        val result = scala.io.Source.fromInputStream(out).mkString
-        val resultLines = result.split('\n')
+        val resultLines = scala.io.Source.fromInputStream(out).getLines.toList
+        val resultMap = resultLines.view.map({line =>
+          val parts = line.split("=", 2)
+          if (parts.length == 2) Some((parts(0).trim, parts(1).trim))
+          else None
+        }).flatten.toMap
         out.close()
 
         try {
-          val scoreIndex = resultLines.lastIndexWhere(_.startsWith("score"))
+          val score = resultMap.getOrElse("score", "0").toDouble
+          val displayScore = resultMap.getOrElse("display_score", "0").toDouble
           if (!stopping) {
-            dispatchFitness(resultLines(scoreIndex).split("=")(1).toDouble)
+            dispatchFitness(score, displayScore)
           }
         } catch {
           case ex: Throwable => {
             if (!stopping) {
-              dispatchFitness(Double.NaN)
+              dispatchFitness(Double.NaN, Double.NaN)
             }
             if (errorText == "") {
               shouldPrintError = true
