@@ -1,3 +1,5 @@
+// Taken from https://github.com/Zvezdin/blockchain-predictor/blob/master/data-downloader.js
+
 //Downloads certain blockchain data of the given time period and saves it as the given file (.json)
 var https = require("https");
 var fs = require('fs');
