@@ -1,0 +1,13 @@
+{
+  "name": "blockchain-predictions",
+  "version": "1.0.0",
+  "description": "A deep learning network that acceps processed blockchain data to predict the price of a given cryptocurrency",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "download": "node index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
