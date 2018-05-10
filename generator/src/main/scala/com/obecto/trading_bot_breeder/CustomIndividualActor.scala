@@ -29,13 +29,14 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     }
   }
 
-  def dispatchFitness(fitness: Double, displayScore: Double): Unit = {
+  def dispatchFitness(fitness: Double, displayScore: Double, iterations: Int): Unit = {
     super.dispatchFitness(fitness)
     if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
       printToFile(new File(f"../results/${displayScore}%08.0f-${shortHash}.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
+        p.println(s"iterations = $iterations")
         p.println(s"time = ${endTime - startTime}s")
         p.println(s"hash = $shortHash")
         p.println(s"chromosome = $strategy")
@@ -73,24 +74,21 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         }).flatten.toMap
         out.close()
 
-        try {
+        println(f"Finished $shortHash")
+
+        if (resultMap.contains("score")) {
           val score = resultMap.getOrElse("score", "0").toDouble
           val displayScore = resultMap.getOrElse("display_score", "0").toDouble
-          if (!stopping) {
-            dispatchFitness(score, displayScore)
-          }
-        } catch {
-          case ex: Throwable => {
-            if (!stopping) {
-              dispatchFitness(Double.NaN, Double.NaN)
-            }
-            if (errorText == "") {
-              shouldPrintError = true
-            } else {
-              printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
-                p.println(s"chromosome = $strategy")
-                p.println(errorText)
-              }
+          val iterations = resultMap.getOrElse("iterations", "-1").toInt
+          dispatchFitness(score, displayScore, iterations)
+        } else if (!stopping) {
+          dispatchFitness(Double.NaN, Double.NaN, -1)
+          if (errorText == "") {
+            shouldPrintError = true
+          } else {
+            printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
+              p.println(s"chromosome = $strategy")
+              p.println(errorText)
             }
           }
         }

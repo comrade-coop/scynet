@@ -67,7 +67,7 @@ def buildModel(structure):
 			inputMetadata.append((preprocessorObj, sourceCfg))
 
 			# 1 is because of keras-rl's implicit windowing
-			config = {'shape': (1, structure['window_length'],) + tuple(config['shape']), 'name': sourceCfg['name']}
+			config = {'shape': (1, structure['window_length'],) + tuple(config['shape']), 'name': sourceCfg['name'].replace(',', '_') + '-' + str(i)}
 		else:
 			for key in config.keys():
 				if isinstance(config[key], dict) and 'type' in config[key] and 'config' in config[key]:

@@ -46,7 +46,7 @@ if False and all(layer['type'] == 'Input' for layer in config['layers']):
 
 (internal_model, inputs) = buildModel(config)
 
-env = StatelessEnv(inputs, "runner/signals/", real_stdout)
+env = StatelessEnv(inputs, "runner/signals/", "-v" in sys.argv)
 actions_count = len(env.action_space)
 
 
@@ -75,32 +75,87 @@ dqn = DQNAgent(
 )
 dqn.compile(internal_model.optimizer, metrics=['mae'])
 
+validation_score = None
+test_score = None
+
 if os.path.isfile(weigths_file):
     dqn.load_weights(weigths_file)
-else:
-    # dqn.load_weights(weigths_file)
-    step_count = 30 * 1000
-    policy_steps = 1000
-    final_tau = 0.5
+else: # For some reason, learning from learned weights didn't work in the past
 
-    dqn.fit(
-        env,
-        nb_steps=step_count,
-        action_repetition=1,
-        visualize=False,
-        verbose=0,
-        callbacks=[PolicyCallback(policy, 0.99, step_count * 10 ** (-math.log(final_tau, 10) / policy_steps)), TrainEpisodeLogger()]
-    )
+    # Steps
+    max_iterations = 200
+    iteration_learning_episodes = 2
+    # Policy (exploration versus exploitation of actions)
+    final_tau = 0.7
+    # Early-stopping (will stop if (current - last) / (last - second_to_last) < stopping_difference_ratio)
+    stopping_difference_ratio = 0.5
+    patience = 2
+    ## IDEA: Save weigths from X iterations ago, and revert to them after early-stopping ends
+    ## The rationale is that we have to find the exact start of the overfit, otherwise validation/test perf will suffer
 
-    env.finish_episode()
+    # Internal variables
+    iterations = 0
+    last_score = 0.0
+    last_difference = 1.0
+    stopping_episodes = 0
+    policy_tau_change = final_tau ** (1 / max_iterations)
+
+    for i in range(max_iterations):
+        iterations += 1
+        policy.tau *= policy_tau_change
+
+        env.mode = "learning"
+        dqn.fit(
+            env,
+            nb_steps=env.learning_rows * iteration_learning_episodes,
+            action_repetition=1,
+            visualize=False,
+            verbose=0,
+            callbacks=[TrainEpisodeLogger()]
+        )
+        env.finish_episode()
+
+        env.mode = "validation"
+        dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+
+        current_score = env.last_episode_result
+        current_difference = current_score - last_score
+        if abs(current_difference) < 0.1: current_difference = 0.1
+
+        # print("Debug:", current_score, last_score, current_difference, last_difference)
+        # print("Ratio is:", current_difference / last_difference)
+
+        if current_difference / last_difference < stopping_difference_ratio:
+            stopping_episodes += 1
+            if stopping_episodes > patience:
+                break
+        else:
+            stopping_episodes = 0
+
+        last_score = current_score
+        last_difference = current_difference
+
+    validation_score = last_score
+
+    print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
 
     dqn.save_weights(weigths_file, overwrite=True)
 
-# dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-env.phase = "test"
-dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-env.phase = "validation"
-dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+
+# dqn.model.reset_states()  # Unneeded, as it is done automatically by keras-rl
+
+if validation_score is None:
+    env.mode = "validation"
+    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    validation_score = env.last_episode_result
+
+if test_score is None:
+    env.mode = "test"
+    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    test_score = env.last_episode_result
+
+print('score = {result}'.format(result=validation_score), file=real_stdout)
+print('display_score = {result}'.format(result=test_score), file=real_stdout)
 
 env.close()
 K.get_session().close()

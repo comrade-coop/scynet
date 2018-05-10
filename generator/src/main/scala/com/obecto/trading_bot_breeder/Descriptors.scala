@@ -102,6 +102,10 @@ object Descriptors {
     (6 * 0.8, makeInputLayer("MarketInput", List(1), MapGeneGroupDescriptor(
       "from" -> EnumGeneDescriptor("local"),
       "name" -> EnumGeneDescriptor("market.close", "market.open", "market.high", "market.low", "market.volumefrom", "market.volumeto")
+    ))),
+    (1 * 0.8 * 4, makeInputLayer("CombinedMarketInput", List(6), MapGeneGroupDescriptor(
+      "from" -> EnumGeneDescriptor("local"),
+      "name" -> EnumGeneDescriptor("market.all")
     )))
   )
 
@@ -210,7 +214,6 @@ object Descriptors {
   val RNNBase = Seq(
     "go_backwards" -> BooleanDescriptor,
     "return_sequences" -> BooleanDescriptor,
-    "return_state" -> BooleanDescriptor,
     "stateful" -> BooleanDescriptor,
     "unroll" -> BooleanDescriptor,
     "activity_regularizer" -> RegularizerDescriptor
