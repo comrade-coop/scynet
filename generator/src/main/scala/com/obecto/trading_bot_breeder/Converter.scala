@@ -5,21 +5,45 @@ import com.obecto.gattakka.genetics.descriptors._
 
 object Converter {
 
-  def serialize(genome: Genome): Map[Any, Any] = {
+  def serialize(genome: Genome, useStack: Boolean = true): Map[Any, Any] = {
     val configOpt = genome.chromosomes.find(x => Descriptors.Configs.contains(x.descriptor))
     var config = configOpt.get.value.asInstanceOf[Map[Any, Any]]
 
     def fixLayers(layers: Seq[Map[Any, Any]]): Seq[Map[Any, Any]] = {
       var result = List[Map[Any, Any]]()
       var pending = Set[Map[Any, Any]]()
+      var stack = List[Int]()
 
       def tryAddLayerToResult(layer: Map[Any, Any]): Unit = {
         val inputs = layer("inputs").asInstanceOf[List[Long]]
-        if (inputs.size <= result.size) {
+        if (inputs.size <= stack.size && useStack) {
 
-          val modifiedInputs = inputs.map(_ % result.size)
-          val modifiedLayer = layer ++ Map("inputs" -> modifiedInputs)
-          result = result :+ modifiedLayer
+          val modifiedInputs = stack.take(inputs.size)
+          stack = stack.drop(inputs.size)
+
+          if (layer contains "special") {
+            if (layer("special") == "duplicate") {
+              stack = stack :+ modifiedInputs(0)
+              stack = stack :+ modifiedInputs(0)
+            } else if (layer("special") == "swap") {
+              stack = stack :+ modifiedInputs(1)
+              stack = stack :+ modifiedInputs(0)
+            }
+          } else {
+            val modifiedLayer = layer ++ Map("inputs" -> modifiedInputs)
+            stack = stack :+ result.size
+            result = result :+ modifiedLayer
+          }
+
+          pending = pending - layer
+          pending.foreach(tryAddLayerToResult)
+        } else if (inputs.size <= result.size && !useStack) {
+
+          if (!layer.contains("special")) {
+            val modifiedInputs = inputs.map(_ % result.size)
+            val modifiedLayer = layer ++ Map("inputs" -> modifiedInputs)
+            result = result :+ modifiedLayer
+          }
 
           pending = pending - layer
           pending.foreach(tryAddLayerToResult)

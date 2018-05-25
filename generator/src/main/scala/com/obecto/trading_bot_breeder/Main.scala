@@ -31,9 +31,10 @@ object Main extends App {
 
     val initialChromosomes = (1 to 20).map((i: Int) => {
       new Genome(List(
-        Descriptors.AdamConfig.createChromosome()
-      ) ++ (1 to (Random.nextInt(3) + 1)).map(x => generateRandomInput()))
-      // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomChromosome(Descriptors.Layers)))
+        Descriptors.AdamConfig.createChromosome(),
+        generateRandomInput()
+      ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomLayer()))
+      // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomLayer(Descriptors.Layers)))
     }).toList
 
 
@@ -71,6 +72,9 @@ object Main extends App {
         val mutationChance = 0.15
         override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor)
         val dropChance = 0.1
+      },
+      new ShuffleMutationOperator {
+        val mutationChance = 0.1
       },
       new DeduplicationOperator {},
       new LimitSizeOperator {

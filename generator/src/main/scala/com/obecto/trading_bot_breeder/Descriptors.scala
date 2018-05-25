@@ -296,6 +296,11 @@ object Descriptors {
     "window_length" -> LongGeneDescriptor(1, 5)
   )
 
+  /// Configs
+
+  val DuplicateLayer = EnumGeneDescriptor(List(Map("special" -> "duplicate", "inputs" -> List(0))))
+  val SwapLayer = EnumGeneDescriptor(List(Map("special" -> "swap", "inputs" -> List(0, 1))))
+
   /// Lists
 
   val Configs = List[GeneDescriptor](
@@ -303,6 +308,8 @@ object Descriptors {
   )
 
   val Layers = List( // weigth -> descriptor
+    (1.0, DuplicateLayer),
+    (1.0, SwapLayer),
     (8.0, DenseLayer),
     (1.0, ActivationLayer),
     (1.0, DropoutLayer),
