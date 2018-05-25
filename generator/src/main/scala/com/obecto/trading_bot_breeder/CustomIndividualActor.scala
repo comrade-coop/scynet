@@ -108,42 +108,9 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   private def mapGenomeToStringStrategy(): String = {
-    val configOpt = genome.chromosomes.find(x => Descriptors.Configs.contains(x.descriptor))
-    var config = configOpt.get.value.asInstanceOf[Map[Any, Any]]
-
-    def fixLayers(layers: Seq[Map[Any, Any]]): Seq[Map[Any, Any]] = {
-      var result = List[Map[Any, Any]]()
-      var pending = Set[Map[Any, Any]]()
-
-      def tryAddLayerToResult(layer: Map[Any, Any]): Unit = {
-        val inputs = layer("inputs").asInstanceOf[List[Long]]
-        if (inputs.size <= result.size) {
-
-          val modifiedInputs = inputs.map(_ % result.size)
-          val modifiedLayer = layer ++ Map("inputs" -> modifiedInputs)
-          result = result :+ modifiedLayer
-
-          pending = pending - layer
-          pending.foreach(tryAddLayerToResult)
-        } else {
-          pending = pending + layer
-        }
-      }
-
-      layers.foreach(tryAddLayerToResult)
-
-      result
-    }
-
-
-    config = config ++ Map(
-      "layers" -> fixLayers(genome.chromosomes.filterNot(_ == configOpt.get).map(_.value.asInstanceOf[Map[Any, Any]]))
-    )
-
     import DefaultJsonProtocol._
     import Descriptors.AnyJsonProtocol._
 
-    config.toJson.compactPrint
-    //Descriptors.Descriptor(brain, genome.chromosomes.map(mapChromosomeToSignal).filter(_ != null)).toJson.compactPrint
+    Converter.serialize(genome).toJson.compactPrint
   }
 }

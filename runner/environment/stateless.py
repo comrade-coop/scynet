@@ -51,7 +51,7 @@ class StatelessEnv():
     def data_wrapper(self, columns):
         def _inner():
             data_source = {"learning": self.learning_data, "validation": self.validation_data, "test": self.test_data}[self.mode]
-            return (data_source[columns].itertuples())
+            return data_source[columns].itertuples()
         return _inner
 
     def collect_data(self, signal_base_dir):
@@ -76,6 +76,7 @@ class StatelessEnv():
                 if name[0] == 'state':
                     result = self.state_generator
 
+
             if result is None:
                 raise NotImplementedError('Unsupported source config: ' + source)
 
@@ -85,6 +86,7 @@ class StatelessEnv():
         self.learning_data = merged_data.iloc[:-self.validation_rows-self.test_rows]
         self.test_data = merged_data.iloc[-self.validation_rows-self.test_rows:-self.test_rows]
         self.validation_data = merged_data.iloc[-self.test_rows:]
+
         self.learning_rows = self.learning_data.shape[0]
 
         spaces = []

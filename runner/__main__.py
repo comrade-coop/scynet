@@ -26,7 +26,7 @@ config_line = sys.stdin.readline()
 config = json.loads(config_line)
 
 short_hash = md5(config_line.encode('utf-8')).hexdigest()[0:10]
-numpy_seed(config.get('seed', adler32(config_line.encode('utf-8'), 1337)))  # Ensure same results for a given chromosome
+#numpy_seed(config.get('seed', adler32(config_line.encode('utf-8'), 1337)))  # Ensure same results for a given chromosome
 
 
 weigths_file = 'results/weights-%s.h5f' % short_hash
@@ -40,10 +40,6 @@ tensorflow_session = tensorflow.Session(config=tensorflow_config)
 K.set_session(tensorflow_session)
 
 
-if False and all(layer['type'] == 'Input' for layer in config['layers']):
-    raise NotImplementedError('All layers are input: ' + str([layer['type'] for layer in config['layers']]))
-
-
 (internal_model, inputs) = buildModel(config)
 
 env = StatelessEnv(inputs, "runner/signals/", "-v" in sys.argv)
@@ -55,7 +51,7 @@ concatenated_outputs = Concatenate(-1)(reshaped_outputs) if len(reshaped_outputs
 dense_transform = Dense(actions_count)(concatenated_outputs)
 outer_model = Model(inputs=internal_model.inputs, outputs=dense_transform)
 
-if False:
+if True:
     from keras.utils import plot_model
     plot_model(outer_model, to_file=model_image_file.format(pid=os.getpid()))
 
@@ -64,7 +60,7 @@ if False:
 # even the metrics!
 memory = SequentialMemory(limit=4000, window_length=1)
 policy = BoltzmannQPolicy()
-dqn = DQNAgent(
+agent = DQNAgent(
     model=outer_model,
     nb_actions=actions_count,
     memory=memory,
@@ -73,13 +69,13 @@ dqn = DQNAgent(
     policy=policy,
     processor=MultiInputProcessor(nb_inputs=len(inputs)) if len(inputs) > 1 else None,
 )
-dqn.compile(internal_model.optimizer, metrics=['mae'])
+agent.compile(internal_model.optimizer, metrics=['mae'])
 
 validation_score = None
 test_score = None
 
 if os.path.isfile(weigths_file):
-    dqn.load_weights(weigths_file)
+    agent.load_weights(weigths_file)
 else: # For some reason, learning from learned weights didn't work in the past
 
     # Steps
@@ -105,7 +101,7 @@ else: # For some reason, learning from learned weights didn't work in the past
         policy.tau *= policy_tau_change
 
         env.mode = "learning"
-        dqn.fit(
+        agent.fit(
             env,
             nb_steps=env.learning_rows * iteration_learning_episodes,
             action_repetition=1,
@@ -116,7 +112,7 @@ else: # For some reason, learning from learned weights didn't work in the past
         env.finish_episode()
 
         env.mode = "validation"
-        dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+        agent.test(env, nb_episodes=1, action_repetition=1, visualize=False)
 
         current_score = env.last_episode_result
         current_difference = current_score - last_score
@@ -139,19 +135,19 @@ else: # For some reason, learning from learned weights didn't work in the past
 
     print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
 
-    dqn.save_weights(weigths_file, overwrite=True)
+    agent.save_weights(weigths_file, overwrite=True)
 
 
-# dqn.model.reset_states()  # Unneeded, as it is done automatically by keras-rl
+# agent.model.reset_states()  # Unneeded, as it is done automatically by keras-rl
 
 if validation_score is None:
     env.mode = "validation"
-    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    agent.test(env, nb_episodes=1, action_repetition=1, visualize=False)
     validation_score = env.last_episode_result
 
 if test_score is None:
     env.mode = "test"
-    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    agent.test(env, nb_episodes=1, action_repetition=1, visualize=False)
     test_score = env.last_episode_result
 
 print('score = {result}'.format(result=validation_score), file=real_stdout)
