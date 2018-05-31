@@ -42,7 +42,7 @@ object Descriptors {
 
   /// Helper descriptors
 
-  val ActivationDescriptor = EnumGeneDescriptor("linear", "tanh", "sigmoid", "hard_sigmoid", "elu", "selu", "softplus", "softsign", "softmax")
+  val ActivationDescriptor = EnumGeneDescriptor("linear", "tanh", "sigmoid", "hard_sigmoid", "relu", "elu", "selu", "softplus", "softsign", "softmax")
   val PreprocessorDescriptor = MapGeneGroupDescriptor(
     "type" -> EnumGeneDescriptor("RawPreprocessor", "MeanStdevPreprocessor"),
     "config" -> MapGeneGroupDescriptor(

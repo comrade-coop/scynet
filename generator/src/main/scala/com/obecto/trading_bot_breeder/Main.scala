@@ -5,17 +5,29 @@ import com.obecto.gattakka.genetics.operators._
 import com.obecto.gattakka.genetics.descriptors.{GeneDescriptor}
 import com.obecto.gattakka.genetics.{Chromosome, Genome}
 import com.obecto.gattakka.{Pipeline, PipelineOperator, Population}
+import scala.io.Source
 
 import scala.util.Random
 
 object Main extends App {
-  val commandToRun = args.partition(_ == "--")._2
+  val argParts = args.splitAt(args indexOf "--")
+  val filesToRead = argParts._1
+  val commandToRun = argParts._2.tail
 
   if (commandToRun.length < 1) {
     println("Please give a command to run")
     println("Something like `sbt \"run -- myexec myparams\"`")
     println("The parameters JSON will then be passed over stdin to your executable")
   } else {
+    val inputGenomes = for (file <- filesToRead) yield {
+      import spray.json._
+      import DefaultJsonProtocol._
+      import Descriptors.AnyJsonProtocol._
+
+      val contents = Source.fromFile(file).mkString
+      Converter.deserialize(contents.parseJson.convertTo[Map[Any, Any]])
+    }
+
     implicit val system = ActorSystem("gattakka")
 
     def generateRandomChromosome(descriptors: Traversable[(Double, GeneDescriptor)]): () => Chromosome = {
@@ -29,7 +41,7 @@ object Main extends App {
     val generateRandomInput = generateRandomChromosome(Descriptors.InputLayers)
     val generateRandomLayer = generateRandomChromosome(Descriptors.Layers)
 
-    val initialChromosomes = (1 to 20).map((i: Int) => {
+    val initialChromosomes = inputGenomes.toList ++ (1 to 20 - inputGenomes.size).map((i: Int) => {
       new Genome(List(
         Descriptors.AdamConfig.createChromosome(),
         generateRandomInput()

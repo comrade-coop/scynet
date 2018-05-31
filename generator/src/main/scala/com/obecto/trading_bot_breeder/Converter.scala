@@ -67,21 +67,33 @@ object Converter {
 
   def deserialize(config: Map[Any, Any]): Genome = {
     def matchChromosome(result: Any, descriptors: Iterable[GeneDescriptor]): Option[Chromosome] = {
-      descriptors
+      val chromosome = descriptors
         .map(matchGeneDescriptor(result, _))
         .find(_.isDefined).map(_.get)
         .map(gene => Chromosome(gene.toByteArray, gene.descriptor))
+      if (chromosome.isEmpty) {
+        println(result)
+      }
+      chromosome
     }
 
     def matchGeneDescriptor(result: Any, descriptor: GeneDescriptor): Option[Gene] = {
       Option(descriptor match {
-        case descriptor: DoubleGeneDescriptor if (result.isInstanceOf[Double]) =>
-          descriptor(result.asInstanceOf[Double])
+        case descriptor: DoubleGeneDescriptor =>
+          if (result.isInstanceOf[Double])
+            descriptor(result.asInstanceOf[Double])
+          else if (result.isInstanceOf[Int])
+            descriptor(result.asInstanceOf[Int].toDouble)
+          else if (result.isInstanceOf[Long])
+            descriptor(result.asInstanceOf[Long].toDouble)
+          else null
 
-        case descriptor: LongGeneDescriptor if (result.isInstanceOf[Int]) =>
-          descriptor(result.asInstanceOf[Int].toLong)
-        case descriptor: LongGeneDescriptor if (result.isInstanceOf[Long]) =>
-          descriptor(result.asInstanceOf[Long])
+        case descriptor: LongGeneDescriptor =>
+          if (result.isInstanceOf[Int])
+            descriptor(result.asInstanceOf[Int].toLong)
+          else if (result.isInstanceOf[Long])
+            descriptor(result.asInstanceOf[Long])
+          else null
 
         case d: EnumGeneDescriptor[Any] =>
           d.values.find(x => x == result).map(value => d(value)).orNull
@@ -93,7 +105,15 @@ object Converter {
 
         case d: MapGeneGroupDescriptor if (result.isInstanceOf[Map[Any, Any]]) =>
           val value = result.asInstanceOf[Map[Any, Any]]
-          val submatches = d.geneDescriptors.map({case (key, desc) => matchGeneDescriptor(value(key), desc)})
+          val submatches = d.geneDescriptors.map({
+            case (key, desc) =>
+              if (value contains key) {
+                matchGeneDescriptor(value(key), desc)
+              } else {
+                Some(desc())
+              }
+            })
+          // println(submatches.zip(d.geneDescriptors).map(x => x._2._1.toString + "->" + (x._1 != None).toString).mkString(", "))
           if (submatches contains None) null else MapGeneGroup(submatches.map(_.get), d)
         case _ => null
       })
@@ -101,7 +121,7 @@ object Converter {
 
     Genome(
       matchChromosome(config, Descriptors.Configs).get +:
-      config("layers").asInstanceOf[List[Any]].flatMap(x => matchChromosome(x, Descriptors.Configs))
+      config("layers").asInstanceOf[Vector[Any]].view.flatMap(x => matchChromosome(x, Descriptors.Layers.map(_._2))).toList
     )
   }
 }
