@@ -28,6 +28,9 @@ class StatelessEnv():
         self.validation_data = None
         self.data_iterator = None
         self.buy_price = None
+        self.observed_min_price = None
+        self.observed_max_price = None
+        self.observed_min_before_max = False
         self.last_action = 0
         self.same_action_ticks = 0
         self.same_action_ticks_limit = 500
@@ -107,6 +110,9 @@ class StatelessEnv():
         self.data_iterator = zip(*[iter(input_data()) for input_data in self.data])
         self.last_action = 0
         self.last_price = 0.0
+        self.observed_min_price = None
+        self.observed_max_price = None
+        self.observed_min_before_max = False
         self.buy_price = None
         self.same_action_ticks = 0
         self.balance_currency = self.starting_currency
@@ -139,12 +145,51 @@ class StatelessEnv():
     def finish_episode(self):
         if self.data_iterator is None:
             return
+
         self.balance_currency += self.balance_asset * self.last_price
         self.balance_asset = 0.0
         self.data_iterator = None
-        self.last_episode_result = self.balance_currency - self.starting_currency
+
+        baseline_currency = self.starting_currency
+        if False:
+            start_price = iter(self.data[0]()).__next__().close
+            baseline_asset = baseline_currency / start_price # Buy at start
+            baseline_currency = baseline_asset * self.last_price # Sell at end
+            print("Baseline is Buy({start}) Sell({end})".format(
+                start = start_price,
+                end = self.last_price,
+            ))
+        elif self.observed_min_before_max:
+            baseline_asset = baseline_currency / self.observed_min_price # Buy at min
+            baseline_currency = baseline_asset * self.observed_max_price # Sell at max
+            print("Baseline is Buy({min}) Sell({max})".format(
+                max = self.observed_max_price,
+                min = self.observed_min_price,
+            ))
+        else:
+            start_price = iter(self.data[0]()).__next__().close
+            baseline_asset = baseline_currency / start_price # Buy at start
+            baseline_currency = baseline_asset * self.observed_max_price # Sell at max
+            baseline_asset = baseline_currency / self.observed_min_price # Buy at min
+            baseline_currency = baseline_asset * self.last_price # Sell at end
+            print("Baseline is Buy({start}) Sell({max}) Buy({min}) Sell({end})".format(
+                start = start_price,
+                max = self.observed_max_price,
+                min = self.observed_min_price,
+                end = self.last_price,
+            ))
+        baseline_result = baseline_currency - self.starting_currency
+
+        agent_result = self.balance_currency - self.starting_currency
+
+        self.last_episode_result = (agent_result / baseline_result) * 100
         print('')  # Makes a newline on stderr
-        print('{mode} episode score: {result: >+8.2f}'.format(mode=self.mode.capitalize(), result=self.last_episode_result))
+        print('{mode} episode score: {result: >+4.2f} (agent: {agent: >+8.2f}, baseline: {baseline: >+8.2f})'.format(
+            mode=self.mode.capitalize(),
+            result=self.last_episode_result,
+            agent=agent_result,
+            baseline=baseline_result
+        ))
 
     def step(self, action):
         self.debug_i += 1
@@ -166,6 +211,12 @@ class StatelessEnv():
         next_item = next_item[1:]
         real_feedback = 0.0
         learning_feedback = 0.0
+        if self.observed_min_price is None or self.observed_min_price > price:
+            self.observed_min_price = price
+            self.observed_min_before_max = False
+        if self.observed_max_price is None or self.observed_max_price < price:
+            self.observed_max_price = price
+            self.observed_min_before_max = True
 
         if action != self.last_action:
 
