@@ -1,0 +1,163 @@
+{
+	"layers": [
+		{
+            "type": "Input",
+            "config": {
+				"shape": [80, 80],
+				"preprocessor": {
+					"type": "RawPreprocessor",
+					"config": {
+						"preprocess_window_length": 0
+					}
+				},
+				"source": {
+					"from": "local",
+					"name": "market.close"
+				}
+			},
+            "inputs": []
+		},
+		{
+			"type": "Conv2D",
+			"config": {
+				"filters": 32,
+				"kernel_size": [3,3],
+				"padding": "same"
+			},
+			"inputs": [0]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "relu"
+			},
+			"inputs": [1]
+		},
+		{
+			"type": "Conv2D",
+			"config": {
+				"filters": 32,
+				"kernel_size": [3,3]
+			},
+			"inputs": [2]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "relu"
+			},
+			"inputs": [3]
+		},
+		{
+			"type": "MaxPooling2D",
+			"config": {
+				"pool_size": [2,2]
+			},
+			"inputs": [4]
+		},
+		{
+			"type": "Dropout",
+			"config": {
+				"rate": 0.25
+			},
+			"inputs": [5]
+		},
+		{
+			"type": "Conv2D",
+			"config": {
+				"filters": 32,
+				"kernel_size": [3,3],
+				"padding": "same"
+			},
+			"inputs": [6]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "relu"
+			},
+			"inputs": [7]
+		},
+		{
+			"type": "Conv2D",
+			"config": {
+				"filters": 64,
+				"kernel_size": [3,3]
+			},
+			"inputs": [8]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "relu"
+			},
+			"inputs": [9]
+		},
+		{
+			"type": "MaxPooling2D",
+			"config": {
+				"pool_size": [2,2]
+			},
+			"inputs": [10]
+		},
+		{
+			"type": "Dropout",
+			"config": {
+				"rate": 0.25
+			},
+			"inputs": [11]
+		},
+		{
+			"type": "Flatten",
+			"config": {
+
+			},
+			"inputs": [12]
+		},
+		{
+			"type": "Dense",
+			"config": {
+				"units": 512
+			},
+			"inputs": [13]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "relu"
+			},
+			"inputs": [14]
+		},
+		{
+			"type": "Dropout",
+			"config": {
+				"rate": 0.5
+			},
+			"inputs": [15]
+		},
+		{
+			"type": "Dense",
+			"config": {
+				"units": 1
+			},
+			"inputs": [16]
+		},
+		{
+			"type": "Activation",
+			"config": {
+				"activation": "linear"
+			},
+			"inputs": [17]
+		}
+	],
+	"optimizer": {
+        "type": "RMSprop",
+        "config": {
+			"lr": 0.0001,
+			"decay": 1e-6
+		}
+	},
+	"window_length": 24,
+    "batch_size": 1,
+    "loss": "mean_squared_error"
+}
