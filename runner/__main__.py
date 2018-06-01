@@ -8,6 +8,7 @@ from hashlib import md5
 import tensorflow
 from numpy.random import seed as numpy_seed
 from keras import Model, backend as K
+from keras.utils import plot_model
 from keras.layers import Dense, Reshape, Concatenate
 from .environment import StatelessEnv
 from .parser import buildModel
@@ -17,13 +18,40 @@ from rl.policy import BoltzmannQPolicy
 from rl.memory import SequentialMemory
 from rl.processors import MultiInputProcessor
 
+
+def main():
+    real_stdout = sys.stdout
+    sys.stdout = sys.stderr  # Trick debug prints to output to stderr
+
+    json_conf, weights_file, model_image_file = init()
+    dqn, environment = build_model(json_conf)
+
+    plot_model(dqn.model, to_file=model_image_file.format(pid=os.getpid()))
+
+    if os.path.isfile(weights_file):
+        dqn.load_weights(weights_file)
+        validation_score = validate(environment, dqn)
+    else:
+        validation_score, iterations = train(environment, dqn)
+        print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
+
+    test_score = test(environment, dqn)
+
+    print('score = {result}'.format(result=validation_score), file=real_stdout)
+    print('display_score = {result}'.format(result=test_score), file=real_stdout)
+
+    dqn.save_weights(weights_file, overwrite=True)
+
+    environment.close()
+    K.get_session().close()
+
+
 def init():
     config_line = sys.stdin.readline()
     config = json.loads(config_line)
 
     short_hash = md5(config_line.encode('utf-8')).hexdigest()[0:10]
     numpy_seed(config.get('seed', adler32(config_line.encode('utf-8'), 1337)))  # Ensure same results for a given chromosome
-
 
     weigths_file = 'results/weights-%s.h5f' % short_hash
     model_image_file = 'results/model-%s.png' % short_hash
@@ -33,9 +61,6 @@ def init():
     tensorflow_config.gpu_options.visible_device_list = "%d" % random.randint(0, 3)
     tensorflow_session = tensorflow.Session(config=tensorflow_config)
     K.set_session(tensorflow_session)
-
-    if False and all(layer['type'] == 'Input' for layer in config['layers']):
-        raise NotImplementedError('All layers are input: ' + str([layer['type'] for layer in config['layers']]))
 
     return config, weigths_file, model_image_file
 
@@ -51,9 +76,6 @@ def build_model(config):
     dense_transform = Dense(actions_count)(concatenated_outputs)
     outer_model = Model(inputs=internal_model.inputs, outputs=dense_transform)
 
-
-    # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
-    # even the metrics!
     memory = SequentialMemory(limit=4000, window_length=1)
     policy = BoltzmannQPolicy()
     dqn = DQNAgent(
@@ -66,7 +88,10 @@ def build_model(config):
         processor=MultiInputProcessor(nb_inputs=len(inputs)) if len(inputs) > 1 else None,
     )
 
-    return dqn, env, internal_model.optimizer
+    dqn.compile(optimizer=internal_model.optimizer, metrics=['mae'])
+
+    return dqn, env
+
 
 def validate(env, dqn):
     env.mode = "validation"
@@ -74,11 +99,13 @@ def validate(env, dqn):
     validation_score = env.last_episode_result
     return validation_score
 
+
 def test(env, dqn):
     env.mode = "test"
     dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
     test_score = env.last_episode_result
     return test_score
+
 
 def learn(env, dqn, learning_episodes):
     env.mode = "learning"
@@ -91,7 +118,8 @@ def learn(env, dqn, learning_episodes):
         callbacks=[TrainEpisodeLogger()]
     )
 
-def train(dqn, env):
+
+def train(env, dqn):
     # Steps
     max_iterations = 200
     iteration_learning_episodes = 2
@@ -138,34 +166,6 @@ def train(dqn, env):
 
     return last_score, iterations
 
-############################################# Main ###############################################
-real_stdout = sys.stdout
-sys.stdout = sys.stderr  # Trick debug prints to output to stderr
 
-json_conf, weights_file, model_image_file= init()
-dqn, environment, optimizer = build_model(json_conf)
-
-#if False:
-    #from keras.utils import plot_model
-    #plot_model(dqn.model, to_file=model_image_file.format(pid=os.getpid()))
-
-dqn.compile(optimizer=optimizer, metrics=['mae'])
-
-if os.path.isfile(weights_file):
-    dqn.load_weights(weights_file)
-    validation_score = validate(environment, dqn)
-else:
-    validation_score, iterations = train(dqn, environment)
-    print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
-
-test_score = test(environment, dqn)
-
-print('score = {result}'.format(result=validation_score), file=real_stdout)
-print('display_score = {result}'.format(result=test_score), file=real_stdout)
-
-dqn.save_weights(weights_file, overwrite=True)
-
-environment.close()
-K.get_session().close()
-
-
+if __name__ == '__main__':
+    main()
