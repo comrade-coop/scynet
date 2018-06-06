@@ -11,7 +11,7 @@ from keras import Model, backend as K
 from keras.utils import plot_model
 from keras.layers import Dense, Reshape, Concatenate
 from .environment import StatelessEnv
-from .parser import buildModel
+from .parser import build_model as parser_model_build
 from .rl_patches import TrainEpisodeLogger, DQNAgent
 
 from rl.policy import BoltzmannQPolicy
@@ -51,9 +51,10 @@ def init():
     config = json.loads(config_line)
 
     short_hash = md5(config_line.encode('utf-8')).hexdigest()[0:10]
-    numpy_seed(config.get('seed', adler32(config_line.encode('utf-8'), 1337)))  # Ensure same results for a given chromosome
+    numpy_seed(
+        config.get('seed', adler32(config_line.encode('utf-8'), 1337)))  # Ensure same results for a given chromosome
 
-    weigths_file = 'results/weights-%s.h5f' % short_hash
+    weights_file = 'results/weights-%s.h5f' % short_hash
     model_image_file = 'results/model-%s.png' % short_hash
 
     tensorflow_config = tensorflow.ConfigProto()
@@ -62,11 +63,11 @@ def init():
     tensorflow_session = tensorflow.Session(config=tensorflow_config)
     K.set_session(tensorflow_session)
 
-    return config, weigths_file, model_image_file
+    return config, weights_file, model_image_file
 
 
 def build_model(config):
-    (internal_model, inputs) = buildModel(config)
+    (internal_model, inputs) = parser_model_build(config)
 
     env = StatelessEnv(inputs, "runner/signals/", "-v" in sys.argv)
     actions_count = len(env.action_space)
@@ -131,8 +132,8 @@ def train(env, dqn):
     stopping_difference_ratio = 0.5
     patience = 2
 
-    ## IDEA: Save weigths from X iterations ago, and revert to them after early-stopping ends
-    ## The rationale is that we have to find the exact start of the overfit, otherwise validation/test perf will suffer
+    # IDEA: Save weights from X iterations ago, and revert to them after early-stopping ends
+    # The rationale is that we have to find the exact start of the overfit, otherwise validation/test perf will suffer
 
     # Internal variables
     iterations = 0
