@@ -116,7 +116,6 @@ object Descriptors {
 
   val DenseLayer = makeLayer("Dense", 1, Seq(
     "units" -> UnitsDescriptor, // TODO: Extend
-    "activation" -> ActivationDescriptor,
     "use_bias" -> BooleanDescriptor,
     "activity_regularizer" -> RegularizerDescriptor
   ) ++
@@ -142,7 +141,6 @@ object Descriptors {
   /// Conv Layers
 
   val ConvBase = Seq(
-    "activation" -> ActivationDescriptor,
     "filters" -> LongGeneDescriptor(1, 250),
     "kernel_size" -> LongGeneDescriptor(1, 30), // NOTE: crashy
     "padding" -> EnumGeneDescriptor("valid", "same"),
@@ -224,7 +222,6 @@ object Descriptors {
 
   val SimpleRNNLayer = makeLayer("SimpleRNN", 1, RNNBase ++ Seq(
     "units" -> UnitsDescriptor,
-    "activation" -> ActivationDescriptor,
     "dropout" -> DoubleGeneDescriptor(0, 1),
     "recurrent_dropout" -> DoubleGeneDescriptor(0, 1),
     "use_bias" -> BooleanDescriptor
@@ -232,7 +229,6 @@ object Descriptors {
 
   val GRULayer = makeLayer("GRU", 1, RNNBase ++ Seq(
     "units" -> UnitsDescriptor,
-    "activation" -> ActivationDescriptor,
     "recurrent_activation" -> ActivationDescriptor,
     "dropout" -> DoubleGeneDescriptor(0, 1),
     "recurrent_dropout" -> DoubleGeneDescriptor(0, 1),
@@ -242,7 +238,6 @@ object Descriptors {
 
   val LSTMLayer = makeLayer("LSTM", 1, RNNBase ++ Seq(
     "units" -> UnitsDescriptor,
-    "activation" -> ActivationDescriptor,
     "recurrent_activation" -> ActivationDescriptor,
     "dropout" -> DoubleGeneDescriptor(0, 1),
     "recurrent_dropout" -> DoubleGeneDescriptor(0, 1),
@@ -262,11 +257,13 @@ object Descriptors {
     "axes" -> LongGeneDescriptor(1, 3)
   ))
 
-  /// Activation Layers
+  val MergeLayers = List(
+    (5.0, MergeOpLayer),
+    (1.0, ConcatenateLayer),
+    (1.0, DotLayer)
+  )
 
-  val ActivationLayer = makeLayer("Activation", 1, Seq(
-    "activation" -> ActivationDescriptor
-  ))
+  /// Activation Layers
 
   val LeakyReLULayer = makeLayer("LeakyReLU", 1, Seq(
     "alpha" -> DoubleGeneDescriptor(0, 1)
@@ -283,6 +280,15 @@ object Descriptors {
   val ThresholdedReLU = makeLayer("ELU", 1, Seq(
     "theta" -> DoubleGeneDescriptor(0, 2)
   ))
+
+  val ActivationLayers = List(
+    (0.7, LeakyReLULayer),
+    (0.7, ELULayer),
+    (0.7, PReLULayer),
+    (0.7, ThresholdedReLU)
+  ) ++ ActivationDescriptor.values.map(x => (0.7, makeLayer("Activation_" + x, List("Activation"), 1, Seq(
+    "activation" -> EnumGeneDescriptor(List(x))
+  ))))
 
   /// Configs
 
@@ -307,22 +313,14 @@ object Descriptors {
     AdamConfig
   )
 
-  val Layers = List( // weigth -> descriptor
+  val NonInputLayers = List( // weigth -> descriptor
     (1.0, DuplicateLayer),
     (1.0, SwapLayer),
     (8.0, DenseLayer),
-    (1.0, ActivationLayer),
     (1.0, DropoutLayer),
     (0.6, GaussianNoiseLayer),
     (1.0, FlattenLayer),
     (0.5, ActivityRegularizationLayer),
-    (5.0, MergeOpLayer),
-    (1.0, ConcatenateLayer),
-    (1.0, DotLayer),
-    (0.5, LeakyReLULayer),
-    (0.5, ELULayer),
-    (0.5, PReLULayer),
-    (0.5, ThresholdedReLU),
     (0.5, Conv1DLayer),
     (0.5, Conv2DLayer),
     (0.5, SeparableConv2DLayer),
@@ -335,12 +333,15 @@ object Descriptors {
     (1.0, GRULayer),
     (1.0, LSTMLayer)
   ) ++
+    ActivationLayers ++
     CroppingLayers ++
+    MergeLayers ++
+    PoolingLayers ++
     UpSamplingLayers ++
     ZeroPaddingLayers ++
-    InputLayers ++
-    PoolingLayers ++
     List()
+
+  val Layers = NonInputLayers ++ InputLayers
 
   object AnyJsonProtocol {
     implicit val AnyFormat = new JsonFormat[Any] {

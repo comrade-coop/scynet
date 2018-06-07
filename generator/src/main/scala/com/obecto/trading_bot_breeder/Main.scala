@@ -39,14 +39,14 @@ object Main extends App {
     }
 
     val generateRandomInput = generateRandomChromosome(Descriptors.InputLayers)
-    val generateRandomLayer = generateRandomChromosome(Descriptors.Layers)
+    val generateRandomNonInputLayer = generateRandomChromosome(Descriptors.NonInputLayers)
 
     val initialChromosomes = inputGenomes.toList ++ (1 to 20 - inputGenomes.size).map((i: Int) => {
       new Genome(List(
         Descriptors.AdamConfig.createChromosome(),
         generateRandomInput()
-      ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomLayer()))
-      // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomLayer(Descriptors.Layers)))
+      ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomNonInputLayer()))
+      // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomChromosome(Descriptors.Layers)))
     }).toList
 
 
@@ -70,7 +70,8 @@ object Main extends App {
       },
       new InsertMutationOperator {
         val mutationChance = 0.2
-        def createChromosome() = generateRandomLayer()
+        val insertionChance = 0.1
+        def createChromosome() = generateRandomNonInputLayer()
         override def apply(genome: Genome): Genome = {
           if (genome.chromosomes.size < 20) {
             super.apply(genome)
@@ -78,12 +79,29 @@ object Main extends App {
             genome
           }
         }
-        val insertionChance = 0.1
       },
       new DropMutationOperator {
         val mutationChance = 0.15
-        override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor)
         val dropChance = 0.1
+        override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor)
+      },
+      new PipelineOperator with MutationBaseOperator {
+        val mutationChance = 0.15
+        val transmuteChance = 0.1
+        def apply(genome: Genome): Genome = {
+          new Genome(genome.chromosomes.map { chromosome =>
+            if (rnd.nextFloat() < updateChance) apply(chromosome) else chromosome
+          })
+        }
+        val groups = List(Descriptors.ActivationLayers, Descriptors.MergeLayers, Descriptors.InputLayers)
+        val generators = groups.map(generateRandomChromosome)
+        def apply(chromosome: Chromosome): Chromosome = {
+          var result = chromosome
+          for ((group, generator) <- groups.zip(generators) if (group contains chromosome)) {
+            result = generator()
+          }
+          result
+        }
       },
       new ShuffleMutationOperator {
         val mutationChance = 0.1
