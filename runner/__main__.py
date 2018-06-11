@@ -30,11 +30,11 @@ def main():
 
     if os.path.isfile(weights_file):
         dqn.load_weights(weights_file)
-        validation_score = validate(environment, dqn)
     else:
-        validation_score, iterations = train(environment, dqn)
+        iterations = train(environment, dqn)
         print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
 
+    validation_score = validate(environment, dqn)
     test_score = test(environment, dqn)
 
     print('score = {result}'.format(result=validation_score), file=real_stdout)
@@ -76,7 +76,7 @@ def build_model(config):
     dense_transform = Dense(actions_count)(concatenated_outputs)
     outer_model = Model(inputs=internal_model.inputs, outputs=dense_transform)
 
-    memory = SequentialMemory(limit=4000, window_length=1)
+    memory = SequentialMemory(limit=4000, window_length=config['window_length'])
     policy = BoltzmannQPolicy()
     dqn = DQNAgent(
         model=outer_model,
@@ -94,29 +94,30 @@ def build_model(config):
 
 
 def validate(env, dqn):
-    env.mode = "validation"
+    env.set_mode("validation")
     dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-    validation_score = env.last_episode_result
-    return validation_score
+    dqn.reset_states()
+    return env.mode.last_result
 
 
 def test(env, dqn):
-    env.mode = "test"
+    env.set_mode("test")
     dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-    test_score = env.last_episode_result
-    return test_score
+    dqn.reset_states()
+    return env.mode.last_result
 
 
 def learn(env, dqn, learning_episodes):
-    env.mode = "learning"
+    env.set_mode("learning")
     dqn.fit(
         env,
-        nb_steps=env.learning_rows * learning_episodes,
+        nb_steps=env.mode.steps * learning_episodes,
         action_repetition=1,
         visualize=False,
         verbose=0,
         callbacks=[TrainEpisodeLogger()]
     )
+    dqn.reset_states()
 
 
 def train(env, dqn):
@@ -146,7 +147,6 @@ def train(env, dqn):
         dqn.policy.tau *= policy_tau_change
 
         learn(env, dqn, iteration_learning_episodes)
-        env.finish_episode()
 
         current_score = validate(env, dqn)
 
@@ -164,7 +164,7 @@ def train(env, dqn):
         last_score = current_score
         last_difference = current_difference
 
-    return last_score, iterations
+    return iterations
 
 
 if __name__ == '__main__':

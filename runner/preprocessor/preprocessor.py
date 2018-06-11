@@ -3,10 +3,12 @@ import numpy
 
 
 class Preprocessor():
-    def __init__(self, preprocess_window_length, output_window_length, **kwargs):
-        self.prefetch_tick_count = max(preprocess_window_length, output_window_length)
+    def __init__(self, preprocess_window_length=0, output_window_length=-1, **kwargs):
+        self.output_single_rows = output_window_length <= 0
+        self.output_window_length = output_window_length if output_window_length > 0 else 1
+
+        self.prefetch_tick_count = max(preprocess_window_length, self.output_window_length)
         self.window = deque(maxlen=self.prefetch_tick_count)
-        self.output_window_length = output_window_length
 
     def init(self, initial_rows):
         self.window.extend(initial_rows)
@@ -14,16 +16,16 @@ class Preprocessor():
     def append_row(self, row):
         self.window.append(row)
 
-    def get_output_window(self):
-        return numpy.asanyarray(
-            self._preprocess_window(
-                numpy.asanyarray(self.window)
-            )[-self.output_window_length:]
-        )
+    def get_output(self):
+        preprocessed = self._preprocess_window(numpy.asanyarray(self.window))
+        if self.output_single_rows:
+            return preprocessed[-1]
+        else:
+            return numpy.asanyarray(preprocessed[-self.output_window_length:])
 
     def append_and_preprocess(self, row):
         self.append_row(row)
-        return self.get_output_window()
+        return self.get_output()
 
     def inverse_preprocess(row):
         raise NotImplementedError()

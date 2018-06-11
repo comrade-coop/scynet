@@ -44,8 +44,6 @@ def keras_object(class_name, config):
 def process_input_layer(layer, idx, window_length):
     config = layer['config']
 
-    # include the window length in the preprocessor config
-    config['preprocessor']['config']['output_window_length'] = window_length
     preprocessor_obj = namespace_object_from_dict(config['preprocessor'])
     source_cfg = config['source']
 
