@@ -1,4 +1,25 @@
 {
+  "cryptocompare": {
+    "market": {
+      "type": "cryptocompare",
+      "config": {
+        "shape": [
+          6
+        ],
+        "components": [
+          "close",
+          "high",
+          "low",
+          "open",
+          "volumefrom",
+          "volumeto"
+        ],
+        "granularity": 3,
+        "available_from": 11,
+        "available_to": 27
+      }
+    }
+  },
   "blockchain": {
     "market": {
       "type": "dataserver",
@@ -12,4 +33,3 @@
       }
     }
   }
-}

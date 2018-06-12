@@ -1,10 +1,13 @@
 import json
 import argparse
+import pandas
 
 from .data_server_signal_reader import DataServerSignalReader
+from .cryptocompare_signal_reader import CryptocompareSignalReader
 
 class_map = {
-    'dataserver': DataServerSignalReader
+    'dataserver': DataServerSignalReader,
+    'cryptocompare': CryptocompareSignalReader
 }
 
 
@@ -50,7 +53,7 @@ def init():
         for prop in item:
             signal_reader = item[prop]
             print("Reader: ", signal_reader)
-            for x in signal_reader.iterate(5, 6):
+            for x in signal_reader.iterate(1528720881, 999999999999999):
                 print("X: ", x)
 
 
