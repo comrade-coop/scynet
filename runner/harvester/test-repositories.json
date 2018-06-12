@@ -1,0 +1,15 @@
+{
+  "blockchain": {
+    "market": {
+      "type": "dataserver",
+      "config": {
+        "shape": [
+          5
+        ],
+        "granularity": 2,
+        "available_from": 5,
+        "available_to": 10
+      }
+    }
+  }
+}

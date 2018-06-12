@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 keras = "*"
 tensorflow = "*"
 pydot = "*"
@@ -14,12 +11,9 @@ graphviz = "*"
 pandas = "*"
 keras-rl = "*"
 "h5py" = "*"
-
+requests = "*"
 
 [dev-packages]
 
-
-
 [requires]
-
 python_version = "3.6"
