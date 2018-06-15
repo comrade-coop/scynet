@@ -14,22 +14,10 @@
           "volumefrom",
           "volumeto"
         ],
-        "granularity": 3,
-        "available_from": 11,
-        "available_to": 27
-      }
-    }
-  },
-  "blockchain": {
-    "market": {
-      "type": "dataserver",
-      "config": {
-        "shape": [
-          5
-        ],
-        "granularity": 2,
-        "available_from": 5,
-        "available_to": 10
+        "granularity": 3600,
+        "available_from": 1,
+        "available_to": 999999999999999
       }
     }
   }
+}

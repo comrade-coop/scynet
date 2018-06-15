@@ -1,6 +1,6 @@
 import json
 import argparse
-import pandas
+import pandas as pd
 
 from .data_server_signal_reader import DataServerSignalReader
 from .cryptocompare_signal_reader import CryptocompareSignalReader
@@ -38,6 +38,59 @@ def parse_repositories(filename):
 
     return signals_map
 
+def print_tick_tuple(tick):
+    dt = pd.to_datetime(tick[0], unit='s')
+    tuple = (dt, tick[1])
+    print(tuple)
+
+
+def test_iterate(readers):
+    for provider in readers:
+        item = readers[provider]
+        print()
+        for prop in item:
+            signal_reader = item[prop]
+            print("Reader: ", signal_reader)
+
+            for x in signal_reader.iterate(1528718400, 1528736400):
+                print_tick_tuple(x)
+
+            print()
+            print("NEXT 2")
+            print()
+
+            for x in signal_reader.iterate(1528804800, 1528822800):
+                print_tick_tuple(x)
+
+            print()
+            print("NEXT 3")
+            print()
+
+            for x in signal_reader.iterate(1528632000, 1528909200):
+                print_tick_tuple(x)
+
+
+
+
+def test_iterate_component(readers, component):
+    for provider in readers:
+        item = readers[provider]
+        print()
+        for prop in item:
+            signal_reader = item[prop]
+            print("Reader: ", signal_reader)
+
+            for x in signal_reader.iterate_component(component, 1528826400, 1528999200):
+                # for x in signal_reader.iterate_components('high', 1528720881, 1528910156):
+                print(x)
+
+            '''print()
+            print("NEXT")
+            print()
+
+            for x in signal_reader.iterate_component(component, 1528891200, 1528920000):
+                print(x)'''
+
 
 def init():
     parser = argparse.ArgumentParser(description="harvester")
@@ -46,15 +99,8 @@ def init():
     filename = args.input
 
     readers = parse_repositories(filename)
-
-    for provider in readers:
-        item = readers[provider]
-        print()
-        for prop in item:
-            signal_reader = item[prop]
-            print("Reader: ", signal_reader)
-            for x in signal_reader.iterate(1528720881, 999999999999999):
-                print("X: ", x)
+    test_iterate(readers)
+    #test_iterate_component(readers, 'high')
 
 
 if __name__ == "__main__":
