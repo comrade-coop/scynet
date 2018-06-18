@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 class SignalReader:
     def __init__(self, name, shape, components, granularity, available_from, available_to):
         self.name = name
@@ -10,6 +7,7 @@ class SignalReader:
         self.available_from = available_from
         self.available_to = available_to
         self.signal_cache = {}
+        self.limit = 10
 
     def iterate(self, from_time, to_time):
         for tick in self._iterate_and_cache(from_time, to_time):
@@ -24,6 +22,7 @@ class SignalReader:
         filtered_cache = {k: v for (k, v) in self.signal_cache.items() if (from_time <= k <= to_time)}
 
         if len(filtered_cache) > 0:
+            # times are sorted from oldest to newest
             sorted_filtered_cache = sorted(filtered_cache)
 
             if from_time < sorted_filtered_cache[0]:
@@ -37,7 +36,9 @@ class SignalReader:
 
             while cache_counter < len(sorted_filtered_cache):
                 current_cache_time = sorted_filtered_cache[cache_counter]
+
                 if current_time == current_cache_time:
+                    # current_cache_time is the actual time that should come next
                     tick = (current_cache_time, self.signal_cache[current_cache_time])
                     current_time = current_time + self.granularity
                     cache_counter = cache_counter + 1

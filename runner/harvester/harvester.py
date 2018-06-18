@@ -70,8 +70,6 @@ def test_iterate(readers):
                 print_tick_tuple(x)
 
 
-
-
 def test_iterate_component(readers, component):
     for provider in readers:
         item = readers[provider]
