@@ -47,8 +47,9 @@ class Portfolio():  # TODO: Commisions?
 
 
 class StatelessEnv():
-    def __init__(self, inputs, signals_base_path, interactive, *args, **kwargs):
+    def __init__(self, inputs, signals_base_path, interactive, trades_output=None, *args, **kwargs):
         self.inputs = inputs
+        self.trades_output = trades_output
 
         self.action_space = SetSpace([0, 1])
         self.observation_space = None
@@ -107,7 +108,7 @@ class StatelessEnv():
                 #    result = self.state_generator
 
             if result is None:
-                raise NotImplementedError('Unsupported source config: ' + source)
+                raise NotImplementedError('Unsupported source config: ' + str(source))
 
             self.signals.append(result)
 
@@ -185,6 +186,14 @@ class StatelessEnv():
             preprocessor.init((thing[1:] for thing in itertools.islice(signal.get_iterator(self.mode.from_date, self.mode.to_date), preprocessor.prefetch_tick_count)))
 
         print('Started {mode.name} episode ({mode.from_date})'.format(mode=self.mode))
+        if self.trades_output and self.mode.name != 'learning':
+            print('', file=self.trades_output)
+            print('{mode}\t{from_date}\t{to_date}'.format(
+                mode=self.mode.name,
+                from_date=pandas.to_datetime(self.mode.from_date).strftime('%Y-%m-%dT%H:%MZ'),
+                to_date=pandas.to_datetime(self.mode.to_date).strftime('%Y-%m-%dT%H:%MZ')
+            ), file=self.trades_output)
+            print('action\tdate\tprice\tbalance', file=self.trades_output)
 
         observation, date, is_final = self._get_next_observation()
 
@@ -216,13 +225,13 @@ class StatelessEnv():
         feedback = 0.0
 
         if action != self.last_action:
-            # if self.mode.name != 'learning':
-            #     print('{mode}: {action}({step: =6}, {price})                         \n'.format(
-            #         mode=self.mode.name,
-            #         step=self.debug_i,
-            #         price=price,
-            #         action='Buy ' if action == 1 else 'Sell'
-            #     ), end='')
+            if self.trades_output and self.mode.name != 'learning':
+                print('{action}\t{date}\t{price}\t{balance}'.format(
+                    date=pandas.to_datetime(date).strftime('%Y-%m-%dT%H:%MZ'),
+                    price=price,
+                    action='Buy' if action == 1 else 'Sell',
+                    balance=self.portfolio.get_total_balance(price),
+                ), file=self.trades_output)
 
             self.last_action = action
             self.same_action_ticks = 0

@@ -23,25 +23,30 @@ def main():
     real_stdout = sys.stdout
     sys.stdout = sys.stderr  # Trick debug prints to output to stderr
 
-    json_conf, weights_file, model_image_file = init()
-    dqn, environment = build_model(json_conf)
+    json_conf, weights_file, model_image_file, trades_file = init()
+    agent, environment = build_model(json_conf)
+    if '-d' in sys.argv:  # debug mode
+        environment.trades_output = open(trades_file, 'w')
 
-    plot_model(dqn.model, to_file=model_image_file.format(pid=os.getpid()))
+    plot_model(agent.model, to_file=model_image_file.format(pid=os.getpid()))
 
     if os.path.isfile(weights_file):
-        dqn.load_weights(weights_file)
+        agent.load_weights(weights_file)
     else:
-        iterations = train(environment, dqn)
+        iterations = train(environment, agent)
         print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
 
-    validation_score = validate(environment, dqn)
-    test_score = test(environment, dqn)
+    environment.trades_output = environment.trades_output or open(trades_file, 'w')
+
+    validation_score = validate(environment, agent)
+    test_score = test(environment, agent)
 
     print('score = {result}'.format(result=validation_score), file=real_stdout)
     print('display_score = {result}'.format(result=test_score), file=real_stdout)
 
-    dqn.save_weights(weights_file, overwrite=True)
+    agent.save_weights(weights_file, overwrite=True)
 
+    environment.trades_output.close()
     environment.close()
     K.get_session().close()
 
@@ -55,6 +60,7 @@ def init():
 
     weights_file = 'results/weights-%s.h5f' % short_hash
     model_image_file = 'results/model-%s.png' % short_hash
+    trades_file = 'results/trades-%s.csv' % short_hash
 
     tensorflow_config = tensorflow.ConfigProto()
     tensorflow_config.gpu_options.allow_growth = True
@@ -62,7 +68,7 @@ def init():
     tensorflow_session = tensorflow.Session(config=tensorflow_config)
     K.set_session(tensorflow_session)
 
-    return config, weights_file, model_image_file
+    return config, weights_file, model_image_file, trades_file
 
 
 def build_model(config):
@@ -78,7 +84,7 @@ def build_model(config):
 
     memory = SequentialMemory(limit=4000, window_length=config['window_length'])
     policy = BoltzmannQPolicy()
-    dqn = DQNAgent(
+    agent = DQNAgent(
         model=outer_model,
         nb_actions=actions_count,
         memory=memory,
@@ -88,28 +94,28 @@ def build_model(config):
         processor=MultiInputProcessor(nb_inputs=len(inputs)) if len(inputs) > 1 else None,
     )
 
-    dqn.compile(optimizer=internal_model.optimizer, metrics=['mae'])
+    agent.compile(optimizer=internal_model.optimizer, metrics=['mae'])
 
-    return dqn, env
+    return agent, env
 
 
-def validate(env, dqn):
+def validate(env, agent):
     env.set_mode("validation")
-    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-    dqn.reset_states()
+    agent.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    agent.reset_states()
     return env.mode.last_result
 
 
-def test(env, dqn):
+def test(env, agent):
     env.set_mode("test")
-    dqn.test(env, nb_episodes=1, action_repetition=1, visualize=False)
-    dqn.reset_states()
+    agent.test(env, nb_episodes=1, action_repetition=1, visualize=False)
+    agent.reset_states()
     return env.mode.last_result
 
 
-def learn(env, dqn, learning_episodes):
+def learn(env, agent, learning_episodes):
     env.set_mode("learning")
-    dqn.fit(
+    agent.fit(
         env,
         nb_steps=env.mode.steps * learning_episodes,
         action_repetition=1,
@@ -117,10 +123,10 @@ def learn(env, dqn, learning_episodes):
         verbose=0,
         callbacks=[TrainEpisodeLogger()]
     )
-    dqn.reset_states()
+    agent.reset_states()
 
 
-def train(env, dqn):
+def train(env, agent):
     # Steps
     max_iterations = 200
     iteration_learning_episodes = 2
@@ -139,27 +145,27 @@ def train(env, dqn):
     iterations = 0
     last_score = 0.0
     last_difference = 1.0
-    stopping_episodes = 0
+    stopping_iterations = 0
     policy_tau_change = final_tau ** (1 / max_iterations)
 
     for i in range(max_iterations):
         iterations += 1
-        dqn.policy.tau *= policy_tau_change
+        agent.policy.tau *= policy_tau_change
 
-        learn(env, dqn, iteration_learning_episodes)
+        learn(env, agent, iteration_learning_episodes)
 
-        current_score = validate(env, dqn)
+        current_score = validate(env, agent)
 
         current_difference = current_score - last_score
         if abs(current_difference) < 0.1:
             current_difference = 0.1
 
         if current_difference / last_difference < stopping_difference_ratio:
-            stopping_episodes += 1
-            if stopping_episodes > patience:
+            stopping_iterations += 1
+            if stopping_iterations > patience:
                 break
         else:
-            stopping_episodes = 0
+            stopping_iterations = 0
 
         last_score = current_score
         last_difference = current_difference
