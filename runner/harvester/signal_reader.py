@@ -24,51 +24,35 @@ class SignalReader:
         filtered_cache = {k: v for (k, v) in self.signal_cache.items() if (from_time <= k <= to_time)}
 
         if len(filtered_cache) > 0:
-            # newest to oldest
-            sorted_filtered_cache = sorted(filtered_cache, reverse=True)
-            print()
-            print('has in cache')
-            print()
+            sorted_filtered_cache = sorted(filtered_cache)
 
-            if to_time > sorted_filtered_cache[0]:
-                print(1)
-                # we don't have the range (newest_time_in_list - to_time)
-                print()
-                print("we don't have the range (newest_time_in_list - to_time)")
-                print()
-
-                for tick in self._iterate(sorted_filtered_cache[0] + self.granularity, to_time):
+            if from_time < sorted_filtered_cache[0]:
+                # missing range (from_time - oldest_time_in_list)
+                for tick in self._iterate(from_time, sorted_filtered_cache[0] - self.granularity):
                     self.signal_cache[tick[0]] = tick[1]
                     yield tick
 
-            print("finished")
-
-            current_time = sorted_filtered_cache[0]  # must yield it
+            current_time = sorted_filtered_cache[0]
             cache_counter = 0
 
             while cache_counter < len(sorted_filtered_cache):
                 current_cache_time = sorted_filtered_cache[cache_counter]
                 if current_time == current_cache_time:
                     tick = (current_cache_time, self.signal_cache[current_cache_time])
-                    current_time = current_time - self.granularity
+                    current_time = current_time + self.granularity
                     cache_counter = cache_counter + 1
                     yield tick
                 else:
-                    print()
-                    print("range missing")
-                    print()
-
-                    new_time_from = current_cache_time + self.granularity
-                    new_time_to = current_time
-
-                    for tick in self._iterate(new_time_from, new_time_to):
+                    # missing range (current_time -> current_cache_time - 1)
+                    for tick in self._iterate(current_time, current_cache_time - self.granularity):
                         self.signal_cache[tick[0]] = tick[1]
                         yield tick
 
-                    current_time = current_cache_time # in next iteration we should yield current_cache_time
+                    current_time = current_cache_time  # in next iteration we should yield current_cache_time
 
-            if current_time > from_time:
-                for tick in self._iterate(from_time, current_time):
+            # missing range (newest_time_in_list - to_time)
+            if current_time < to_time:
+                for tick in self._iterate(current_time, to_time):
                     self.signal_cache[tick[0]] = tick[1]
                     yield tick
 

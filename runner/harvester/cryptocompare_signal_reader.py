@@ -9,12 +9,12 @@ class CryptocompareSignalReader(SignalReader):
         super().__init__(name, **kwargs)
 
     def _iterate(self, from_time, to_time):
-        uri = 'https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=10&e=CCCAGG&toTs='+str(to_time)
-        response = requests.get(uri, stream=True)
+        limit = 10
 
-        # print()
-        # print('from_time', pd.to_datetime(from_time, unit='s'))
-        # print('to_time', pd.to_datetime(to_time, unit='s'))
+        uri = 'https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=' + str(limit) + '&e=CCCAGG'
+        to_ts = '&toTs=' + str(from_time + limit*self.granularity)
+        uri = uri + to_ts
+        response = requests.get(uri, stream=True)
 
         if response.ok:
             for chunk in response.iter_content(chunk_size=None):
@@ -22,18 +22,17 @@ class CryptocompareSignalReader(SignalReader):
                     break
 
                 chunk_data = json.loads(chunk)['Data']
-                oldest_time_in_chunk = chunk_data[0]['time']
-                # print('oldest_time_in_chunk', pd.to_datetime(oldest_time_in_chunk, unit='s'))
+                newest_time_in_chunk = chunk_data[len(chunk_data)-1]['time']
 
-                # newest to oldest
-                for json_tick in reversed(chunk_data):
-                    if json_tick['time'] < from_time:
+                # oldest to newest
+                for json_tick in chunk_data:
+                    if json_tick['time'] > to_time:
                         break
 
                     yield self._create_tuple(json_tick)
 
-                if oldest_time_in_chunk >= from_time:
-                    for tuple_tick in self._iterate(from_time, oldest_time_in_chunk - self.granularity):
+                if newest_time_in_chunk < to_time:
+                    for tuple_tick in self._iterate(newest_time_in_chunk + self.granularity, to_time):
                         yield tuple_tick
 
     def _create_tuple(self, tick):
