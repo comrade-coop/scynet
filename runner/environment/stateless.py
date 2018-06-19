@@ -135,7 +135,7 @@ class StatelessEnv():
             date_reached += timespan
 
         spaces = []
-        for preprocessor, signal in zip(self.preprocessors, self.signals[1:]):
+        for preprocessor, signal in zip(self.preprocessors, self.signals):
             if preprocessor.output_single_rows:
                 spaces.append(BoxSpace(-100, 100, signal.shape))
             else:
@@ -181,9 +181,9 @@ class StatelessEnv():
         self.same_action_ticks = 0
         self.portfolio = Portfolio(self.starting_currency)
 
-        for preprocessor, signal in zip(self.preprocessors, self.signals[1:]):
+        for preprocessor, signal in zip(self.preprocessors, self.signals):
             preprocessor.reset_state()
-            preprocessor.init((thing[1:] for thing in itertools.islice(signal.get_iterator(self.mode.from_date, self.mode.to_date), preprocessor.prefetch_tick_count)))
+            preprocessor.init((thing[1:] for thing in signal.get_iterator(self.mode.from_date, self.mode.from_date + signal.granularity * preprocessor.prefetch_tick_count)))
 
         print('Started {mode.name} episode ({mode.from_date})'.format(mode=self.mode))
         if self.trades_output and self.mode.name != 'learning':

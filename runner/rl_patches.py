@@ -1,5 +1,4 @@
 import numpy
-import sys
 from rl.agents.dqn import DQNAgent as DQNAgentOrig
 from rl.callbacks import Callback, TrainEpisodeLogger as TrainEpisodeLoggerOrig
 import collections
@@ -34,6 +33,7 @@ class TrainEpisodeLogger(TrainEpisodeLoggerOrig):
         self.observations[episode] = list(flatten(self.observations[episode]))
 
         super().on_episode_end(episode, logs)
+
 
 class DQNAgent(DQNAgentOrig):
     def process_state_batch(self, batch):

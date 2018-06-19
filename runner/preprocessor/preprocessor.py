@@ -37,7 +37,7 @@ class Preprocessor():
         return {}
 
     def reset_state(self):
-        pass
+        self.window.clear()
 
     def load_state(self):
         pass
