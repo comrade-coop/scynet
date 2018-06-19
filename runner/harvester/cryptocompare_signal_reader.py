@@ -1,7 +1,6 @@
 from .signal_reader import SignalReader
 import requests
 import json
-import pandas as pd
 
 
 class CryptocompareSignalReader(SignalReader):

@@ -52,21 +52,21 @@ def test_iterate(readers):
             signal_reader = item[prop]
             print("Reader: ", signal_reader)
 
-            for x in signal_reader.iterate(1528718400, 1528736400):
+            for x in signal_reader.iterate(1454284800, 1454389200):
                 print_tick_tuple(x)
 
             print()
             print("NEXT 2")
             print()
 
-            for x in signal_reader.iterate(1528804800, 1528822800):
+            for x in signal_reader.iterate(1454407200, 1454432400):
                 print_tick_tuple(x)
 
             print()
             print("NEXT 3")
             print()
 
-            for x in signal_reader.iterate(1528632000, 1528909200):
+            for x in signal_reader.iterate(1454277600, 1454450400):
                 print_tick_tuple(x)
 
 
@@ -79,15 +79,7 @@ def test_iterate_component(readers, component):
             print("Reader: ", signal_reader)
 
             for x in signal_reader.iterate_component(component, 1528826400, 1528999200):
-                # for x in signal_reader.iterate_components('high', 1528720881, 1528910156):
                 print(x)
-
-            '''print()
-            print("NEXT")
-            print()
-
-            for x in signal_reader.iterate_component(component, 1528891200, 1528920000):
-                print(x)'''
 
 
 def init():

@@ -1,11 +1,11 @@
 class SignalReader:
-    def __init__(self, name, shape, components, granularity, available_from, available_to):
+    def __init__(self, name, shape, granularity, available_from, available_to, components=[]):
         self.name = name
         self.shape = shape
-        self.components = components
         self.granularity = granularity
         self.available_from = available_from
         self.available_to = available_to
+        self.components = components
         self.signal_cache = {}
         self.limit = 10
 
@@ -19,6 +19,8 @@ class SignalReader:
             yield component_tick
 
     def _iterate_and_cache(self, from_time, to_time):
+        self._validate(from_time, to_time)
+
         filtered_cache = {k: v for (k, v) in self.signal_cache.items() if (from_time <= k <= to_time)}
 
         if len(filtered_cache) > 0:
@@ -65,3 +67,13 @@ class SignalReader:
     def _iterate(self, from_time, to_time):
         """ Returns a tuple (time, list[component])"""
         return NotImplementedError()
+
+    def _validate(self, from_time, to_time):
+        if from_time > to_time:
+            raise ValueError("from_time must be >= to_time")
+
+        if not self.available_from <= from_time < self.available_to:
+            raise ValueError("Invalid from_time: %s <= from_time < %s" %(str(self.available_from), str(self.available_to)))
+
+        if not self.available_from < to_time <= self.available_to:
+            raise ValueError("Invalid to_time: %s < to_time <= %s" %(str(self.available_from), str(self.available_to)))

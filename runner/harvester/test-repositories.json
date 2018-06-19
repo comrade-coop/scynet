@@ -19,5 +19,18 @@
         "available_to": 999999999999999
       }
     }
+  },
+  "blockchain": {
+    "closePrice": {
+      "type": "dataserver",
+      "config": {
+        "shape": [
+          1
+        ],
+        "granularity": 3600,
+        "available_from": 1,
+        "available_to": 999999999999999
+      }
+    }
   }
 }
