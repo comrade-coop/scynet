@@ -7,7 +7,7 @@ class SignalReader:
         self.available_to = available_to
         self.components = components
         self.signal_cache = {}
-        self.limit = 10
+        self.limit = 1000
 
     def iterate(self, from_time, to_time):
         for tick in self._iterate_and_cache(from_time, to_time):
@@ -73,7 +73,8 @@ class SignalReader:
             raise ValueError("from_time must be >= to_time")
 
         if not self.available_from <= from_time < self.available_to:
-            raise ValueError("Invalid from_time: %s <= from_time < %s" %(str(self.available_from), str(self.available_to)))
+            raise ValueError(
+                "Invalid from_time: %s <= from_time < %s" % (str(self.available_from), str(self.available_to)))
 
         if not self.available_from < to_time <= self.available_to:
-            raise ValueError("Invalid to_time: %s < to_time <= %s" %(str(self.available_from), str(self.available_to)))
+            raise ValueError("Invalid to_time: %s < to_time <= %s" % (str(self.available_from), str(self.available_to)))

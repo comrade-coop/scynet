@@ -38,6 +38,7 @@ def parse_repositories(filename):
 
     return signals_map
 
+
 def print_tick_tuple(tick):
     dt = pd.to_datetime(tick[0], unit='s')
     tuple = (dt, tick[1])
@@ -52,7 +53,7 @@ def test_iterate(readers):
             signal_reader = item[prop]
             print("Reader: ", signal_reader)
 
-            for x in signal_reader.iterate(1454284800, 1454389200):
+            '''for x in signal_reader.iterate(1454284800, 1454389200):
                 print_tick_tuple(x)
 
             print()
@@ -64,7 +65,7 @@ def test_iterate(readers):
 
             print()
             print("NEXT 3")
-            print()
+            print()'''
 
             for x in signal_reader.iterate(1454277600, 1454450400):
                 print_tick_tuple(x)
@@ -90,7 +91,7 @@ def init():
 
     readers = parse_repositories(filename)
     test_iterate(readers)
-    #test_iterate_component(readers, 'high')
+    # test_iterate_component(readers, 'high')
 
 
 if __name__ == "__main__":
