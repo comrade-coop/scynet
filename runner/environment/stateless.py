@@ -77,8 +77,8 @@ class StatelessEnv():
         self.debug_i = 0
         self.collect_data(signals_base_path, [
             ('learning', None),
-            ('test', '180 d'),
             ('validation', '180 d'),
+            ('test', '180 d'),
         ])
         self.set_mode('learning')
 
