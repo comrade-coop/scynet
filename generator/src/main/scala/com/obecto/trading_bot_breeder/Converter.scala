@@ -96,7 +96,8 @@ object Converter {
           else null
 
         case d: EnumGeneDescriptor[Any] =>
-          d.values.find(x => x == result).map(value => d(value)).orNull
+          val index = d.values.indexOf(result)
+          if (index == -1) null else d(index)
 
         case d: GeneGroupDescriptor if (result.isInstanceOf[Iterable[Any]]) =>
           val value = result.asInstanceOf[Iterable[Any]]

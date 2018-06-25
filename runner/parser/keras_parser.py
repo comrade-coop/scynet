@@ -44,8 +44,6 @@ def keras_object(class_name, config):
 def process_input_layer(layer, idx, window_length):
     config = layer['config']
 
-    # include the window length in the preprocessor config
-    config['preprocessor']['config']['output_window_length'] = window_length
     preprocessor_obj = namespace_object_from_dict(config['preprocessor'])
     source_cfg = config['source']
 
@@ -61,7 +59,6 @@ def process_input_layer(layer, idx, window_length):
 
 def process_non_input_layer(layer, idx, outputs):
     config = layer['config']
-    layer_obj = keras_object(layer['type'], config)
     layer_description = "(type: %s, ID: %d, inputs: %s)" % (layer['type'], idx, str(layer['inputs']))
 
     for key in config.keys():
@@ -87,6 +84,7 @@ def process_non_input_layer(layer, idx, outputs):
         if len(inputs) == 1:  # don't pass a list of size 1
             inputs = inputs[0]
 
+        layer_obj = keras_object(layer['type'], config)
         output = layer_obj(inputs)
 
     return output, used_input_indexes

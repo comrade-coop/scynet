@@ -1,69 +1,81 @@
 {
-	"layers": [
-		{
-            "type": "Input",
-            "config": {
-				"shape": [80],
-				"preprocessor": {
-					"type": "RawPreprocessor",
-					"config": {
-						"preprocess_window_length": 0
-					}
-				},
-				"source": {
-					"from": "local",
-					"name": "market.close"
-				}
-			},
-            "inputs": []
+  "layers": [
+    {
+      "type": "Input",
+      "config": {
+        "shape": [
+          6
+        ],
+        "preprocessor": {
+          "type": "RawPreprocessor",
+          "config": {
+            "preprocess_window_length": 1
+          }
         },
-		{
-			"type": "LSTM",
-			"config": {
-				"units": 128,
-				"return_sequences": true,
-				"stateful": false
-			},
-			"inputs": [0]
-		},
-		{
-			"type": "Dropout",
-			"config": {
-				"rate": 0.1
-			},
-			"inputs": [1]
-		},
-		{
-			"type": "LSTM",
-			"config": {
-				"units": 256,
-				"return_sequences": false,
-				"stateful": false
-			},
-			"inputs": [2]
-		},
-		{
-			"type": "Dense",
-			"config": {
-				"units": 1
-			},
-			"inputs": [3]
-		},
-		{
-			"type": "Activation",
-			"config": {
-				"activation": "linear"
-			},
-			"inputs": [4]
-		}
-	],
-	"optimizer": {
-        "type": "Adam",
-        "config": {
-			"lr": 0.0001
-		}
+        "source": {
+          "from": "local",
+          "name": "market.all"
+        }
+      },
+      "inputs": []
     },
-	"window_length": 24,
-    "batch_size": 1,
-    "loss": "mean_squared_error"
+    {
+      "type": "LSTM",
+      "config": {
+        "units": 128,
+        "return_sequences": true,
+        "stateful": false
+      },
+      "inputs": [
+        0
+      ]
+    },
+    {
+      "type": "Dropout",
+      "config": {
+        "rate": 0.1
+      },
+      "inputs": [
+        1
+      ]
+    },
+    {
+      "type": "LSTM",
+      "config": {
+        "units": 256,
+        "return_sequences": false,
+        "stateful": false
+      },
+      "inputs": [
+        2
+      ]
+    },
+    {
+      "type": "Dense",
+      "config": {
+        "units": 1
+      },
+      "inputs": [
+        3
+      ]
+    },
+    {
+      "type": "Activation",
+      "config": {
+        "activation": "linear"
+      },
+      "inputs": [
+        4
+      ]
+    }
+  ],
+  "optimizer": {
+    "type": "Adam",
+    "config": {
+      "lr": 0.0001
+    }
+  },
+  "window_length": 24,
+  "batch_size": 1,
+  "loss": "mean_squared_error"
 }

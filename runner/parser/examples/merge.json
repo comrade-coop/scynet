@@ -2,7 +2,7 @@
     "layers": [
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "RawPreprocessor", "config": {"preprocess_window_length": 0}}, "source": {"from": "local", "name": "market.close"}},
+            "config": {"shape": [1], "preprocessor": {"type": "RawPreprocessor", "config": {"preprocess_window_length": 0}}, "source": {"from": "local", "name": "market_close"}},
             "inputs": []
         },
         {

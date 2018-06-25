@@ -90,7 +90,7 @@ object Main extends App {
         val transmuteChance = 0.1
         def apply(genome: Genome): Genome = {
           new Genome(genome.chromosomes.map { chromosome =>
-            if (rnd.nextFloat() < updateChance) apply(chromosome) else chromosome
+            if (rnd.nextFloat() < transmuteChance) apply(chromosome) else chromosome
           })
         }
         val groups = List(Descriptors.ActivationLayers, Descriptors.MergeLayers, Descriptors.InputLayers)
