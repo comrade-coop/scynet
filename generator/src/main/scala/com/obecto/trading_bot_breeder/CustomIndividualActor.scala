@@ -109,7 +109,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   private def mapGenomeToStringStrategy(): String = {
     import DefaultJsonProtocol._
-    import Descriptors.AnyJsonProtocol._
+    import Converter.AnyJsonProtocol._
 
     Converter.serialize(genome).toJson.compactPrint
   }

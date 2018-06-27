@@ -2,8 +2,41 @@ package com.obecto.trading_bot_breeder
 
 import com.obecto.gattakka.genetics._
 import com.obecto.gattakka.genetics.descriptors._
+import spray.json._
+
 
 object Converter {
+
+  object AnyJsonProtocol {
+    implicit val AnyFormat = new JsonFormat[Any] {
+      def write(thing: Any): JsValue = thing match {
+        case d: Double => JsNumber(d)
+        case l: Long => JsNumber(l)
+        case i: Int => JsNumber(i)
+        case s: String => JsString(s)
+        case b: Boolean => JsBoolean(b)
+        case o: Some[_] => write(o.get)
+        case null => JsNull
+        case None => JsNull
+        case m: Map[_, _] => JsObject(m.map(x => (x._1.toString, write(x._2))))
+        case a: Seq[_] => JsArray(a.view.map(write(_)).toVector)
+        case _ => JsObject()
+      }
+
+      def read(value: JsValue): Any = value match {
+        case JsNumber(n) => {
+          if (n.isValidInt) n.toInt
+          else if (n.isValidLong) n.toLong
+          else n.toDouble
+        }
+        case JsString(s) => s
+        case JsBoolean(b) => b
+        case JsNull => null
+        case JsArray(a) => a.map(read(_)).toVector
+        case JsObject(o) => o.map(x => (x._1, read(x._2))).toMap
+      }
+    }
+  }
 
   def serialize(genome: Genome, useStack: Boolean = true): Map[Any, Any] = {
     val configOpt = genome.chromosomes.find(x => Descriptors.Configs.contains(x.descriptor))

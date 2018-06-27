@@ -22,7 +22,7 @@ object Main extends App {
     val inputGenomes = for (file <- filesToRead) yield {
       import spray.json._
       import DefaultJsonProtocol._
-      import Descriptors.AnyJsonProtocol._
+      import Converter.AnyJsonProtocol._
 
       val contents = Source.fromFile(file).mkString
       Converter.deserialize(contents.parseJson.convertTo[Map[Any, Any]])
@@ -65,6 +65,7 @@ object Main extends App {
         val parentSelectionStrategy = new TournamentSelectionStrategy(8)
       },
       new BinaryMutationOperator {
+        override def killParent = false
         val mutationChance = 0.1
         val bitFlipChance = 0.05
       },

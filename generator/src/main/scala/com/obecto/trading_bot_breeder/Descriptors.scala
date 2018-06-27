@@ -93,21 +93,36 @@ object Descriptors {
 
   /// Input Layers
 
+  import DefaultJsonProtocol._
+  import Converter.AnyJsonProtocol._
+  val repositories_text = scala.io.Source.fromFile("../repositories.json").mkString
+  val repositories = repositories_text.asJson.convertTo[Map[Any, Any]]
 
-  val InputLayers = List(
-    (1 * 0.8, makeInputLayer("StateInput", List(2), MapGeneGroupDescriptor(
-      "from" -> EnumGeneDescriptor("local"),
-      "name" -> EnumGeneDescriptor("state")
-    ))),
-    (6 * 0.8, makeInputLayer("MarketInput", List(1), MapGeneGroupDescriptor(
-      "from" -> EnumGeneDescriptor("local"),
-      "name" -> EnumGeneDescriptor("market.close", "market.open", "market.high", "market.low", "market.volumefrom", "market.volumeto")
-    ))),
-    (1 * 0.8 * 4, makeInputLayer("CombinedMarketInput", List(6), MapGeneGroupDescriptor(
-      "from" -> EnumGeneDescriptor("local"),
-      "name" -> EnumGeneDescriptor("market.all")
-    )))
-  )
+
+  val InputLayers = repositories.view.flatMap(repository => {
+    repository._2.asInstanceOf[Map[Any, Any]].flatMap(source => {
+      val source_config = source._2.asInstanceOf[Map[Any, Any]]
+      val shape = source_config("shape").asInstanceOf[Vector[Int]].toList
+      var result = List(
+        (1 * 0.8, makeInputLayer(source._1 + "Input", shape, MapGeneGroupDescriptor(
+          "from" -> EnumGeneDescriptor(List(repository._1.toString)),
+          "name" -> EnumGeneDescriptor(List(source._1.toString))
+        )))
+      )
+      if (source_config.contains("components")) {
+        result = result ++ List(
+          (1 * 0.8, makeInputLayer(source._1 + "Input", shape.tail, MapGeneGroupDescriptor(
+            "from" -> EnumGeneDescriptor(List(repository._1.toString)),
+            "name" -> EnumGeneDescriptor(List(source._1.toString)),
+            "component" -> EnumGeneDescriptor(source_config("components").asInstanceOf[Vector[Any]])
+          )))
+        )
+      }
+      result
+    })
+  }).toList
+
+
 
 
   /// Common Layers
@@ -143,7 +158,7 @@ object Descriptors {
   val ConvBase = Seq(
     "filters" -> LongGeneDescriptor(1, 250),
     "kernel_size" -> LongGeneDescriptor(1, 30), // NOTE: crashy
-    "padding" -> EnumGeneDescriptor("valid", "same"),
+    "padding" -> EnumGeneDescriptor("valid"), // "same" // whatever...
     // "strides" -> LongGeneDescriptor(0, 3),
     "use_bias" -> BooleanDescriptor,
     "activity_regularizer" -> RegularizerDescriptor
@@ -250,11 +265,11 @@ object Descriptors {
   val MergeOpLayer = makeLayer("Merge", List("Add", "Subtract", "Multiply", "Average", "Maximum"), 2, Seq())
 
   val ConcatenateLayer = makeLayer("Concatenate", 2, Seq(
-    "axis" -> LongGeneDescriptor(1, 3)
+    "axis" -> LongGeneDescriptor(1, 2)
   ))
 
   val DotLayer = makeLayer("Dot", 2, Seq(
-    "axes" -> LongGeneDescriptor(1, 3)
+    "axes" -> LongGeneDescriptor(1, 2)
   ))
 
   val MergeLayers = List(
@@ -319,7 +334,7 @@ object Descriptors {
     (8.0, DenseLayer),
     (1.0, DropoutLayer),
     (0.6, GaussianNoiseLayer),
-    (1.0, FlattenLayer),
+    (0.8, FlattenLayer),
     (0.5, ActivityRegularizationLayer),
     (0.5, Conv1DLayer),
     (0.5, Conv2DLayer),
@@ -342,35 +357,4 @@ object Descriptors {
     List()
 
   val Layers = NonInputLayers ++ InputLayers
-
-  object AnyJsonProtocol {
-    implicit val AnyFormat = new JsonFormat[Any] {
-      def write(thing: Any): JsValue = thing match {
-        case d: Double => JsNumber(d)
-        case l: Long => JsNumber(l)
-        case i: Int => JsNumber(i)
-        case s: String => JsString(s)
-        case b: Boolean => JsBoolean(b)
-        case o: Some[_] => write(o.get)
-        case null => JsNull
-        case None => JsNull
-        case m: Map[_, _] => JsObject(m.map(x => (x._1.toString, write(x._2))))
-        case a: Seq[_] => JsArray(a.view.map(write(_)).toVector)
-        case _ => JsObject()
-      }
-
-      def read(value: JsValue): Any = value match {
-        case JsNumber(n) => {
-          if (n.isValidInt) n.toInt
-          else if (n.isValidLong) n.toLong
-          else n.toDouble
-        }
-        case JsString(s) => s
-        case JsBoolean(b) => b
-        case JsNull => null
-        case JsArray(a) => a.map(read(_)).toVector
-        case JsObject(o) => o.map(x => (x._1, read(x._2))).toMap
-      }
-    }
-  }
 }
