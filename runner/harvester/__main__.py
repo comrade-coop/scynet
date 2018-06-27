@@ -7,7 +7,7 @@ repositories = parse_repositories(os.path.join(os.path.dirname(__file__), '../..
 threads = []
 for source_name, source in repositories.items():
     for reader_name, reader in source.items():
-        thread = threading.Thread(None, lambda reader: reader.force_cached(), '%s/%s' % (source_name, reader_name), (reader,))
+        thread = threading.Thread(None, lambda reader: reader.create_cache(), '%s/%s' % (source_name, reader_name), (reader,))
         print('Starting thread for %s' % thread.name)
         thread.start()
         threads.append(thread)
