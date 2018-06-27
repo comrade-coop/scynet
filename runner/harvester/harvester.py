@@ -1,9 +1,10 @@
 import json
 import argparse
-import pandas as pd
+import time
 
 from .data_server_signal_reader import DataServerSignalReader
 from .cryptocompare_signal_reader import CryptocompareSignalReader
+
 
 class_map = {
     'dataserver': DataServerSignalReader,
@@ -16,8 +17,8 @@ def load_json(filename):
         return json.load(f)
 
 
-def parse_repository(reader_type, name, config):
-    reader_class = class_map[reader_type]
+def parse_repository(name, config):
+    reader_class = class_map[config['type']]
 
     if reader_class is None:
         raise Exception("Invalid reader class name %s." % name)
@@ -33,16 +34,14 @@ def parse_repositories(filename):
         signals_map[data_source] = {}
         for prop in item:
             if prop not in signals_map:
-                signal_class = parse_repository(item[prop]['type'], prop, item[prop]['config'])
+                signal_class = parse_repository(prop, item[prop])
                 signals_map[data_source][prop] = signal_class
 
     return signals_map
 
 
 def print_tick_tuple(tick):
-    dt = pd.to_datetime(tick[0], unit='s')
-    tuple = (dt, tick[1])
-    print(tuple)
+    print(time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(tick[0])), tick[1])
 
 
 def test_iterate(readers):

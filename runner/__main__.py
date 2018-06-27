@@ -12,6 +12,7 @@ from keras.utils import plot_model
 from keras.layers import Dense, Reshape, Concatenate
 from .environment import StatelessEnv
 from .parser import build_model as parser_model_build
+from .harvester import parse_repositories
 from .rl_patches import TrainEpisodeLogger, DQNAgent
 
 from rl.policy import BoltzmannQPolicy
@@ -74,7 +75,7 @@ def init():
 def build_model(config):
     (internal_model, inputs) = parser_model_build(config)
 
-    env = StatelessEnv(inputs, "runner/signals/", "-v" in sys.argv)
+    env = StatelessEnv(inputs, parse_repositories("repositories.json"), "-v" in sys.argv)
     actions_count = len(env.action_space)
 
     reshaped_outputs = [Reshape((-1,))(output) for output in internal_model.outputs]

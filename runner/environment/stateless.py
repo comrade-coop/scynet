@@ -1,11 +1,14 @@
-from os import path
-import itertools
 import math
-import pandas
+import time
 
 from .spaces import TupleSpace, BoxSpace, SetSpace
-from .signal_reader import SignalReader
+from .signal_combiner import SignalCombiner
 from ..preprocessor import RawPreprocessor
+
+
+hour = 60 * 60
+day = hour * 24
+year = day * 365
 
 
 def collapse_single_item(li):
@@ -47,9 +50,9 @@ class Portfolio():  # TODO: Commisions?
 
 
 class StatelessEnv():
-    def __init__(self, inputs, signals_base_path, interactive, trades_output=None, *args, **kwargs):
-        self.inputs = inputs
+    def __init__(self, inputs, repositories, interactive, trades_output=None, *args, **kwargs):
         self.trades_output = trades_output
+        self.interactive = interactive
 
         self.action_space = SetSpace([0, 1])
         self.observation_space = None
@@ -60,8 +63,7 @@ class StatelessEnv():
         self.mode = None
         self.modes = {}
 
-        self.signals = None
-        self.signals_iterator = None
+        self.combined_signal = None
         self.next_item = None
 
         self.start_price = None
@@ -70,15 +72,15 @@ class StatelessEnv():
         self.observed_min_before_max = False
         self.last_action = 0
         self.same_action_ticks = 0
-        self.interactive = interactive
         self.starting_currency = 1000.0
         self.portfolio = None
 
         self.debug_i = 0
-        self.collect_data(signals_base_path, [
+
+        self.collect_data(repositories, inputs, [
             ('learning', None),
-            ('validation', '180 d'),
-            ('test', '180 d'),
+            ('validation', year // 2),
+            ('test', year // 2),
         ])
         self.set_mode('learning')
 
@@ -86,66 +88,52 @@ class StatelessEnv():
     #     while True:
     #         yield (pandas.Timestamp.now(), self.same_action_ticks / 100, self.last_action)
 
-    # modes is list of tuple(name, timespan); timespan might be string/timedelta (absolute) or int/float/None (relative to left data)
-    def collect_data(self, signal_base_dir, modes):
-        self.signals = []
-        self.preprocessors = [RawPreprocessor()] + [preprocessor for preprocessor, source in self.inputs]
+    def collect_data(self, repositories, inputs, modes):
+        signals = []
 
-        filename = path.join(signal_base_dir, 'cryptocompare_price_data.json')
+        signals.append((repositories['cryptocompare']['market'], 'close', RawPreprocessor()))  # 'close'
 
-        self.signals.append(SignalReader(filename, ['close']))
-
-        for preprocessor, source in self.inputs:
-            result = None  # repositories[source["from"]][source["name"]]
-            if source['from'] == 'local':
-                name = source['name'].split('.')
-                if name[0] == 'market':
-                    if name[1] == 'all':
-                        result = SignalReader(filename, ['close', 'high', 'low', 'open', 'volumefrom', 'volumeto'])
-                    else:
-                        result = SignalReader(filename, [name[1]])
-                # if name[0] == 'state':
-                #    result = self.state_generator
-
-            if result is None:
+        for preprocessor, source in inputs:
+            if source["from"] in repositories and source["name"] in repositories[source["from"]]:
+                signals.append((
+                    repositories[source["from"]][source["name"]],
+                    source.get("component", None),
+                    preprocessor))
+            else:
                 raise NotImplementedError('Unsupported source config: ' + str(source))
 
-            self.signals.append(result)
-
-        from_date = max(signals.from_date for signals in self.signals)
-        to_date = min(signals.to_date for signals in self.signals)
-        granularity = min(signals.granularity for signals in self.signals)
+        self.combined_signal = SignalCombiner(signals)
 
         auto_timespan_count = 0
-        timespan_relative = to_date - from_date
+        auto_timespan = self.combined_signal.available_to - self.combined_signal.available_from
         for mode, timespan in modes:
-            if isinstance(timespan, (str, pandas.Timedelta)):
-                timespan_relative -= pandas.Timedelta(timespan)
+            if timespan is None:
+                auto_timespan_count += 1
             else:
-                auto_timespan_count += timespan or 1
+                auto_timespan -= timespan
 
-        date_reached = from_date
+        date_reached = self.combined_signal.available_from
         for mode, timespan in modes:
-            if isinstance(timespan, (str, pandas.Timedelta)):
-                timespan = pandas.Timedelta(timespan)
-            else:
-                timespan = timespan_relative / auto_timespan_count * (timespan or 1)
+            if timespan is None:
+                timespan = auto_timespan // auto_timespan_count
 
-            self.modes[mode] = StatelessMode(mode, date_reached, date_reached + timespan, timespan / granularity)
+            self.modes[mode] = StatelessMode(mode, date_reached, date_reached + timespan, timespan / self.combined_signal.granularity)
             date_reached += timespan
 
         spaces = []
-        for preprocessor, signal in zip(self.preprocessors, self.signals):
-            if preprocessor.output_single_rows:
-                spaces.append(BoxSpace(-100, 100, signal.shape))
-            else:
-                spaces.append(BoxSpace(-100, 100, (preprocessor.output_window_length,) + signal.shape))
+        for signal, component, preprocessor in signals:
+            shape = signal.shape
+            if component is not None:
+                shape = shape[1:]
+            if not preprocessor.output_single_rows:
+                shape = (preprocessor.output_window_length,) + shape
+            spaces.append(BoxSpace(-100, 100, shape))
 
         self.observation_space = TupleSpace(spaces)
 
         print('Loaded Data:', ', '.join('{days} {name} days'.format(
             name=mode.name,
-            days=(mode.to_date - mode.from_date) // '1d'
+            days=(mode.to_date - mode.from_date) // day
         ) for mode in self.modes.values()))
 
     def set_mode(self, mode):
@@ -159,9 +147,8 @@ class StatelessEnv():
                 print('No data provided')
                 raise
 
-        observation = [preprocessor.append_and_preprocess(input_row[1:]) for preprocessor, input_row in zip(self.preprocessors, self.next_item)]
-
-        date = self.next_item[0][0]
+        observation = self.next_item[1]
+        date = self.next_item[0]
 
         try:
             self.next_item = self.signals_iterator.__next__()
@@ -171,7 +158,7 @@ class StatelessEnv():
         return (observation, date, False)
 
     def reset(self):
-        self.signals_iterator = zip(*[iter(signal.get_iterator(self.mode.from_date, self.mode.to_date)) for signal in self.signals])
+        self.signals_iterator = iter(self.combined_signal.iterate(self.mode.from_date, self.mode.to_date))
         self.debug_i = 0
         self.last_action = 0
         self.next_item = None
@@ -181,23 +168,19 @@ class StatelessEnv():
         self.same_action_ticks = 0
         self.portfolio = Portfolio(self.starting_currency)
 
-        for preprocessor, signal in zip(self.preprocessors, self.signals):
-            preprocessor.reset_state()
-            preprocessor.init((thing[1:] for thing in signal.get_iterator(self.mode.from_date, self.mode.from_date + signal.granularity * preprocessor.prefetch_tick_count)))
-
         print('Started {mode.name} episode ({mode.from_date})'.format(mode=self.mode))
         if self.trades_output and self.mode.name != 'learning':
             print('', file=self.trades_output)
             print('{mode}\t{from_date}\t{to_date}'.format(
                 mode=self.mode.name,
-                from_date=pandas.to_datetime(self.mode.from_date).strftime('%Y-%m-%dT%H:%MZ'),
-                to_date=pandas.to_datetime(self.mode.to_date).strftime('%Y-%m-%dT%H:%MZ')
+                from_date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(self.mode.from_date)),
+                to_date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(self.mode.to_date))
             ), file=self.trades_output)
             print('action\tdate\tprice\tbalance', file=self.trades_output)
 
         observation, date, is_final = self._get_next_observation()
 
-        self.start_price = observation[0][0]
+        self.start_price = observation[0]
 
         return collapse_single_item(observation[1:])
 
@@ -205,12 +188,12 @@ class StatelessEnv():
         self.debug_i += 1
 
         observation, date, is_final = self._get_next_observation()
-        price = observation[0][0]
+        price = observation[0]
 
         if self.debug_i % 25 == 0 and self.interactive:
             print(' Step {step: =6} ({date}) ${balance: >7.2f} {state}     \r'.format(
                 step=self.debug_i,
-                date=date,
+                date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
                 balance=self.portfolio.get_total_balance(price),
                 state='bougth' if action == 1 else 'sold  '  # Spaces are important, both need to be same length
             ), end='')
@@ -227,7 +210,7 @@ class StatelessEnv():
         if action != self.last_action:
             if self.trades_output and self.mode.name != 'learning':
                 print('{action}\t{date}\t{price}\t{balance}'.format(
-                    date=pandas.to_datetime(date).strftime('%Y-%m-%dT%H:%MZ'),
+                    date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
                     price=price,
                     action='Buy' if action == 1 else 'Sell',
                     balance=self.portfolio.get_total_balance(price),

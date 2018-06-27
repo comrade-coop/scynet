@@ -1,0 +1,35 @@
+{
+  "cryptocompare": {
+    "market": {
+      "shape": [6],
+      "components": [
+        "close",
+        "high",
+        "low",
+        "open",
+        "volumefrom",
+        "volumeto"
+      ],
+      "granularity": 3600,
+      "available_from": 1438959600,
+      "available_to": 1525438800,
+      "type": "cryptocompare",
+      "config": {
+        "limit": 1000
+      }
+    }
+  },
+  "blockchain": {
+    "closePrice": {
+      "shape": [1],
+      "granularity": 3600,
+      "available_from": 1,
+      "available_to": 999999999999999,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    }
+  }
+}

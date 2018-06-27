@@ -2,22 +2,22 @@
     "layers": [
         {
             "type": "Input",
-            "config": {"shape": [1], "preprocessor": {"type": "RawPreprocessor", "config": {"preprocess_window_length": 0}}, "source": {"from": "local", "name": "market_close"}},
+            "config": {"shape": [], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 50}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
             "inputs": []
         },
         {
             "type": "Dense",
-            "config": {"units": 8, "activation": "relu"},
+            "config": {"units": 6, "activation": "relu"},
             "inputs": [0]
         },
-        {
-            "type": "Input",
-            "config": {"shape": [2], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 100}}, "source": {"from": "local", "name": "state"}},
-            "inputs": []
-        },
+          {
+              "type": "Input",
+              "config": {"shape": [], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 30}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
+              "inputs": []
+          },
         {
             "type": "Dense",
-            "config": {"units": 8, "activation": "relu"},
+            "config": {"units": 6, "activation": "relu"},
             "inputs": [2]
         },
         {

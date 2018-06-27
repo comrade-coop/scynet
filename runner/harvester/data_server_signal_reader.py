@@ -6,17 +6,16 @@ import time
 
 
 class DataServerSignalReader(SignalReader):
-    def __init__(self, name, shape, granularity, available_from, available_to, server_url):
-        self.server_url = server_url
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.date_index = None
         self.price_index = None
-        super().__init__(name, shape, granularity, available_from, available_to)
 
     def _iterate(self, from_time, to_time):
-        uri = self.server_url + '/?method=read&provider=blockchain&id=' + self.name + '&form=csv'
+        uri = self.config['server_url'] + '/?method=read&provider=blockchain&id=' + self.name + '&form=csv'
 
         current_from_time = from_time
-        next_to_time = current_from_time + self.limit * self.granularity
+        next_to_time = current_from_time + self.config['limit'] * self.granularity
         current_to_time = next_to_time if (next_to_time < to_time) else to_time
 
         while current_to_time <= to_time:
@@ -47,7 +46,7 @@ class DataServerSignalReader(SignalReader):
                 # current_to_time should be next_to_time also when it is equal to to_time
                 # in order to be able to break the while
                 current_from_time = self._time_to_seconds(ticks[len(ticks) - 1][self.date_index]) + self.granularity
-                next_to_time = current_from_time + self.limit * self.granularity
+                next_to_time = current_from_time + self.config['limit'] * self.granularity
                 current_to_time = next_to_time if (current_to_time == to_time or next_to_time < to_time) else to_time
 
     def _time_to_seconds(self, time_to_convert):
