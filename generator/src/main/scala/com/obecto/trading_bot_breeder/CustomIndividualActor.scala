@@ -6,6 +6,7 @@ import com.obecto.gattakka.messages.individual.{Initialize}
 import java.io.{IOException, File, PrintWriter}
 import java.security.{MessageDigest}
 import spray.json._
+import Math.{abs}
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   // import context.dispatcher
@@ -33,7 +34,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     super.dispatchFitness(fitness)
     if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
-      printToFile(new File(f"../results/${displayScore}%04.1f-${shortHash}.txt")) { p =>
+      val sign = if (displayScore > 0) 1 else 0
+      printToFile(new File(f"../results/$sign${abs(displayScore)}%010.2f-${shortHash}/${abs(displayScore)}%06.2f-${shortHash}.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
         p.println(s"iterations = $iterations")

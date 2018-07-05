@@ -24,28 +24,41 @@ def main():
     real_stdout = sys.stdout
     sys.stdout = sys.stderr  # Trick debug prints to output to stderr
 
-    json_conf, weights_file, model_image_file, trades_file = init()
+    json_conf, short_hash = init()
     agent, environment = build_model(json_conf)
+
+    temp_trades_file = 'results/trades-%s.csv' % short_hash
+
     if '-d' in sys.argv:  # debug mode
-        environment.trades_output = open(trades_file, 'w')
+        environment.trades_output = open(temp_trades_file, 'w')
 
-    plot_model(agent.model, to_file=model_image_file.format(pid=os.getpid()))
+    temp_model_image_file = 'results/model-%s.png' % short_hash
+    plot_model(agent.model, to_file=temp_model_image_file.format(pid=os.getpid()))
 
-    if os.path.isfile(weights_file):
-        agent.load_weights(weights_file)
-    else:
-        iterations = train(environment, agent)
-        print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
+    iterations = train(environment, agent)
+    print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
 
-    environment.trades_output = environment.trades_output or open(trades_file, 'w')
+    environment.trades_output = environment.trades_output or open(temp_trades_file, 'w')
 
     validation_score = validate(environment, agent)
     test_score = test(environment, agent)
+
+    sign = '1' if test_score > 0 else '0'
+    folder_name = sign + "{:010.2f}".format(abs(test_score)) + "-" + short_hash
+
+    if not os.path.exists('results/' + folder_name):
+        os.makedirs('results/' + folder_name)
+
+    weights_file = 'results/' + folder_name + '/weights-%s.h5f' % short_hash
+    model_image_file = 'results/' + folder_name + '/model-%s.png' % short_hash
+    trades_file = 'results/' + folder_name + '/trades-%s.csv' % short_hash
 
     print('score = {result}'.format(result=validation_score), file=real_stdout)
     print('display_score = {result}'.format(result=test_score), file=real_stdout)
 
     agent.save_weights(weights_file, overwrite=True)
+    os.rename(temp_model_image_file, model_image_file)
+    os.rename(temp_trades_file, trades_file)
 
     environment.trades_output.close()
     environment.close()
@@ -59,17 +72,13 @@ def init():
     short_hash = md5(config_line.encode('utf-8')).hexdigest()[0:10]
     # numpy_seed(config.get('seed', adler32(config_line.encode('utf-8'), 1337)))
 
-    weights_file = 'results/weights-%s.h5f' % short_hash
-    model_image_file = 'results/model-%s.png' % short_hash
-    trades_file = 'results/trades-%s.csv' % short_hash
-
     tensorflow_config = tensorflow.ConfigProto()
     tensorflow_config.gpu_options.allow_growth = True
     tensorflow_config.gpu_options.visible_device_list = "%d" % random.randint(0, 3)
     tensorflow_session = tensorflow.Session(config=tensorflow_config)
     K.set_session(tensorflow_session)
 
-    return config, weights_file, model_image_file, trades_file
+    return config, short_hash
 
 
 def build_model(config):
