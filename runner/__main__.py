@@ -27,12 +27,12 @@ def main():
     json_conf, short_hash = init()
     agent, environment = build_model(json_conf)
 
-    temp_trades_file = 'results/trades-%s.csv' % short_hash
+    temp_trades_file = 'results/%s-trades.csv' % short_hash
 
     if '-d' in sys.argv:  # debug mode
         environment.trades_output = open(temp_trades_file, 'w')
 
-    temp_model_image_file = 'results/model-%s.png' % short_hash
+    temp_model_image_file = 'results/%s-model.png' % short_hash
     plot_model(agent.model, to_file=temp_model_image_file.format(pid=os.getpid()))
 
     iterations = train(environment, agent)
@@ -49,9 +49,9 @@ def main():
     if not os.path.exists('results/' + folder_name):
         os.makedirs('results/' + folder_name)
 
-    weights_file = 'results/' + folder_name + '/weights-%s.h5f' % short_hash
-    model_image_file = 'results/' + folder_name + '/model-%s.png' % short_hash
-    trades_file = 'results/' + folder_name + '/trades-%s.csv' % short_hash
+    weights_file = 'results/' + folder_name + '/%s-weights.h5f' % short_hash
+    model_image_file = 'results/' + folder_name + '/%s-model.png' % short_hash
+    trades_file = 'results/' + folder_name + '/%s-trades.csv' % short_hash
 
     print('score = {result}'.format(result=validation_score), file=real_stdout)
     print('display_score = {result}'.format(result=test_score), file=real_stdout)

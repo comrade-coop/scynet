@@ -88,7 +88,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
           if (errorText == "") {
             shouldPrintError = true
           } else {
-            printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
+            printToFile(new File(f"../results/${shortHash}-error.txt")) { p =>
               p.println(s"chromosome = $strategy")
               p.println(errorText)
             }
@@ -98,7 +98,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
       err => {
         errorText = scala.io.Source.fromInputStream(err).mkString // The child usually dies if we don't wait for it to finish working
         if (shouldPrintError) {
-          printToFile(new File(f"../results/error-${shortHash}.txt")) { p =>
+          printToFile(new File(f"../results/${shortHash}-error.txt")) { p =>
             p.println(s"chromosome = $strategy")
             p.println(errorText)
           }
