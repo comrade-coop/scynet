@@ -35,18 +35,25 @@ class Portfolio():  # TODO: Commisions?
 
     def sell(self, price):
         if self.asset != 0:
-            self.balance = self.balance + price * self.asset
+            new_balance = self.balance + price * self.asset
+            commission = self.calculate_commission(new_balance)
+            self.balance = new_balance - commission
             self.asset = 0
             self.last_operation_price = price
 
     def buy(self, price):
         if self.balance != 0:
-            self.asset = self.asset + self.balance / price
+            new_asset = self.asset + self.balance / price
+            commission = self.calculate_commission(new_asset)
+            self.asset = new_asset - commission
             self.balance = 0
             self.last_operation_price = price
 
     def get_total_balance(self, price=None):
         return self.balance + self.asset * (price or self.last_operation_price)
+
+    def calculate_commission(self, price):
+        return price * 0.002
 
 
 class StatelessEnv():
@@ -223,7 +230,9 @@ class StatelessEnv():
                 self.portfolio.buy(price)
 
             elif action == 0:
-                feedback += price - self.portfolio.last_operation_price
+                feedback += price - self.portfolio.last_operation_price \
+                            - self.portfolio.calculate_commission(price) \
+                            - self.portfolio.calculate_commission(self.portfolio.last_operation_price)
                 self.portfolio.sell(price)
         else:
             self.same_action_ticks += 1
