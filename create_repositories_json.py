@@ -1,7 +1,7 @@
 import requests
 import json
 import time
-
+import calendar
 
 def main():
     blockchain_properties = get_blockchain_properties()
@@ -70,7 +70,7 @@ def get_cryptocompare_properties():
 
 def _time_to_seconds(time_to_convert):
     dt = time.strptime(time_to_convert, '%Y-%m-%d %H:%M:%S')
-    sec = int(time.mktime(dt) - time.timezone)
+    sec = calendar.timegm(dt)
     return sec
 
 

@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import random
+import time
+import logging
 from zlib import adler32
 from hashlib import md5
 
@@ -18,49 +20,73 @@ from .rl_patches import TrainEpisodeLogger, DQNAgent
 from rl.policy import BoltzmannQPolicy
 from rl.memory import SequentialMemory
 from rl.processors import MultiInputProcessor
+from time import gmtime, strftime
+import datetime
 
 
 def main():
-    real_stdout = sys.stdout
-    sys.stdout = sys.stderr  # Trick debug prints to output to stderr
+    start_time = str(datetime.datetime.now())
 
     json_conf, short_hash = init()
-    agent, environment = build_model(json_conf)
 
-    temp_trades_file = 'results/%s-trades.csv' % short_hash
+    agent_folder = 'results/running-%s' % short_hash
+    if not os.path.exists(agent_folder):
+        os.makedirs(agent_folder)
+    
+    logging.basicConfig(filename=agent_folder + "/log.log", level=logging.INFO)
+
+    trades_file = agent_folder + "/trades.csv"
+    model_image_file = agent_folder + "/model.png"
+    weights_file = agent_folder + "weights.h5f"
+    
+    logging.info("start time: " + start_time + "\n")
+    logging.info(json_conf)
+
+    try:
+        logging.info("\n\n build model started: " + short_hash + " start time: " + str(datetime.datetime.now()))
+        agent, environment = build_model(json_conf)
+        logging.info("build model finished: " + short_hash + " finish time: " + str(datetime.datetime.now()))
+    except Exception as e:
+        print('\n\n  Exception during model build. \n\n ', file=sys.stderr)
+        raise e
 
     if '-d' in sys.argv:  # debug mode
         environment.trades_output = open(temp_trades_file, 'w')
 
-    temp_model_image_file = 'results/%s-model.png' % short_hash
-    plot_model(agent.model, to_file=temp_model_image_file.format(pid=os.getpid()))
+    plot_model(agent.model, to_file=model_image_file.format(pid=os.getpid()))
 
-    iterations = train(environment, agent)
-    print('iterations = {iterations}'.format(iterations=iterations), file=real_stdout)
+    try:
+        logging.info("\n\n training started: " + short_hash + " start time: " + str(datetime.datetime.now()))
+        iterations = train(environment, agent)
+        logging.info("training finished: " + short_hash + " finish time: " + str(datetime.datetime.now()))
+        logging.info('iterations = {iterations}'.format(iterations=iterations))
+    except Exception as e:
+        print('\n\n  Exception during training. \n\n ', file=sys.stderr)
+        raise e
 
     environment.trades_output = environment.trades_output or open(temp_trades_file, 'w')
 
-    validation_score = validate(environment, agent)
-    test_score = test(environment, agent)
+    try:
+        logging.info("\n\n validation started: " + short_hash + " start time: " + str(datetime.datetime.now()))
+        validation_score = validate(environment, agent)
+        logging.info("validation finished: " + short_hash + " finish time: " + str(datetime.datetime.now()))
+    except Exception as e:
+        print('\n\n  Exception during validation. \n\n ', file=sys.stderr)
+        raise e
+    
+    try:
+        logging.info("\n\n testing started: " + short_hash + " start time: " + str(datetime.datetime.now()))
+        test_score = test(environment, agent)
+        logging.info("testing finished: " + short_hash + " finish time: " + str(datetime.datetime.now()))
+    except Exception as e:
+        print('\n\n  Exception during test. \n\n ', file=sys.stderr)
+        raise e
 
-    sign = '1' if test_score > 0 else '0'
-    folder_name = sign + "{:010.2f}".format(abs(test_score)) + "-" + short_hash
-
-    if not os.path.exists('results/' + folder_name):
-        os.makedirs('results/' + folder_name)
-
-    weights_file = 'results/' + folder_name + '/%s-weights.h5f' % short_hash
-    model_image_file = 'results/' + folder_name + '/%s-model.png' % short_hash
-    trades_file = 'results/' + folder_name + '/%s-trades.csv' % short_hash
-
-    print('score = {result}'.format(result=validation_score), file=real_stdout)
-    print('display_score = {result}'.format(result=test_score), file=real_stdout)
-
+    print('score = {result}'.format(result=validation_score))
+    print('display_score = {result}'.format(result=test_score))
     agent.save_weights(weights_file, overwrite=True)
-    os.rename(temp_model_image_file, model_image_file)
-    os.rename(temp_trades_file, trades_file)
-
     environment.trades_output.close()
+    
     environment.close()
     K.get_session().close()
 
@@ -138,7 +164,7 @@ def learn(env, agent, learning_episodes):
 
 def train(env, agent):
     # Steps
-    max_iterations = 200
+    max_iterations = 15
     iteration_learning_episodes = 2
 
     # Policy (exploration versus exploitation of actions)
@@ -159,6 +185,7 @@ def train(env, agent):
     policy_tau_change = final_tau ** (1 / max_iterations)
 
     for i in range(max_iterations):
+        logging.info("time: " + str(datetime.datetime.now()) + " iteration: " + str(i))
         iterations += 1
         agent.policy.tau *= policy_tau_change
 

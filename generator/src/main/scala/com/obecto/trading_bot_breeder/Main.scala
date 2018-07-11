@@ -41,14 +41,7 @@ object Main extends App {
     val generateRandomInput = generateRandomChromosome(Descriptors.InputLayers)
     val generateRandomNonInputLayer = generateRandomChromosome(Descriptors.NonInputLayers)
 
-    val initialChromosomes = inputGenomes.toList ++ (1 to 20 - inputGenomes.size).map((i: Int) => {
-      new Genome(List(
-        Descriptors.AdamConfig.createChromosome(),
-        generateRandomInput()
-      ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomNonInputLayer()))
-      // ) ++ (1 to Random.nextInt(2)).map(x => generateRandomChromosome(Descriptors.Layers)))
-    }).toList
-
+    val initialChromosomes = inputGenomes.toList
 
     val pipelineOperators: List[PipelineOperator] = List(
       // new PipelineOperator {
@@ -108,7 +101,7 @@ object Main extends App {
         val mutationChance = 0.1
       },
       new DeduplicationOperator {},
-      new LimitSizeOperator {
+      new DiversitySelectionOperator {
         val targetPopulationSize = 20
       }
     )

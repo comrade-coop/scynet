@@ -4,7 +4,9 @@ import com.obecto.gattakka.{Individual}
 import com.obecto.gattakka.genetics.{Genome}
 import com.obecto.gattakka.messages.individual.{Initialize}
 import java.io.{IOException, File, PrintWriter}
+import java.nio.file._
 import java.security.{MessageDigest}
+import scala.sys.process._
 import spray.json._
 import Math.{abs}
 
@@ -35,7 +37,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
       val sign = if (displayScore > 0) 1 else 0
-      printToFile(new File(f"../results/$sign${abs(displayScore)}%010.2f-${shortHash}/${abs(displayScore)}%06.2f-${shortHash}.txt")) { p =>
+      printToFile(new File(f"../results/running-${shortHash}/genome.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
         p.println(s"iterations = $iterations")
@@ -52,9 +54,6 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   private def startProcess(): Unit = {
-    import scala.sys.process._
-    var errorText = ""
-    var shouldPrintError = false
     println(f"Started $shortHash")
     startTime = System.currentTimeMillis / 1000
 
@@ -76,34 +75,43 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         }).flatten.toMap
         out.close()
 
-        println(f"Finished $shortHash")
-
         if (resultMap.contains("score")) {
           val score = resultMap.getOrElse("score", "0").toDouble
           val displayScore = resultMap.getOrElse("display_score", "0").toDouble
           val iterations = resultMap.getOrElse("iterations", "-1").toInt
           dispatchFitness(score, displayScore, iterations)
+
+          val sign = if (displayScore > 0) 1 else 0
+          val scoreStr = f"$sign${abs(displayScore)%07.2f}"
+          val oldPath: Path = Paths.get(s"../results/running-$shortHash")
+          val newPath: Path = Paths.get(s"../results/$scoreStr-$shortHash")
+          Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
+
+          val endTime = System.currentTimeMillis / 1000
+          val duration = endTime - startTime
+          println(f"Finished $shortHash for $duration seconds")
+
         } else if (!stopping) {
           dispatchFitness(Double.NaN, Double.NaN, -1)
-          if (errorText == "") {
-            shouldPrintError = true
-          } else {
-            printToFile(new File(f"../results/${shortHash}-error.txt")) { p =>
-              p.println(s"chromosome = $strategy")
-              p.println(errorText)
-            }
-          }
         }
       },
       err => {
-        errorText = scala.io.Source.fromInputStream(err).mkString // The child usually dies if we don't wait for it to finish working
-        if (shouldPrintError) {
-          printToFile(new File(f"../results/${shortHash}-error.txt")) { p =>
-            p.println(s"chromosome = $strategy")
-            p.println(errorText)
-          }
-        }
+        val errorText = scala.io.Source.fromInputStream(err).mkString
         err.close()
+
+        val oldPath: Path = Paths.get(s"../results/running-$shortHash")
+        val newPath: Path = Paths.get(s"../results/error-$shortHash")
+        Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
+
+        printToFile(new File(f"$newPath/error.txt")) { p =>
+          p.println(s"chromosome = $strategy")
+          p.println(errorText)
+        }
+
+        val endTime = System.currentTimeMillis / 1000
+        val duration = endTime - startTime
+        println(f"Errored $shortHash for $duration seconds")
+        
       })
 
     process = Process(Main.commandToRun, new File("../")) run io
