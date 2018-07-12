@@ -56,6 +56,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   private def startProcess(): Unit = {
     println(f"Started $shortHash")
     startTime = System.currentTimeMillis / 1000
+    var errorText = ""
+    var shouldPrintError = false
 
     val io = new ProcessIO(
       in => {
@@ -93,28 +95,40 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
         } else if (!stopping) {
           dispatchFitness(Double.NaN, Double.NaN, -1)
+          if (errorText == "") {
+            shouldPrintError = true
+          } else {
+            printError(strategy, errorText, shortHash)
+          }
         }
       },
       err => {
         val errorText = scala.io.Source.fromInputStream(err).mkString
         err.close()
+        println(errorText)
 
-        val oldPath: Path = Paths.get(s"../results/running-$shortHash")
-        val newPath: Path = Paths.get(s"../results/error-$shortHash")
-        Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
-
-        printToFile(new File(f"$newPath/error.txt")) { p =>
-          p.println(s"chromosome = $strategy")
-          p.println(errorText)
+        if(shouldPrintError) {
+          printError(strategy, errorText, shortHash)
         }
-
-        val endTime = System.currentTimeMillis / 1000
-        val duration = endTime - startTime
-        println(f"Errored $shortHash for $duration seconds")
         
       })
 
     process = Process(Main.commandToRun, new File("../")) run io
+  }
+
+  private def printError(strategy: String, errorText: String, shortHash: String): Unit = {
+    val oldPath: Path = Paths.get(s"../results/running-$shortHash")
+    val newPath: Path = Paths.get(s"../results/error-$shortHash")
+    Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
+
+    printToFile(new File(f"$newPath/error.txt")) { p =>
+      p.println(s"chromosome = $strategy")
+      p.println(errorText)
+    }
+
+    val endTime = System.currentTimeMillis / 1000
+    val duration = endTime - startTime
+    println(f"Errored $shortHash for $duration seconds")
   }
 
   private def mapGenomeToStringStrategy(): String = {
