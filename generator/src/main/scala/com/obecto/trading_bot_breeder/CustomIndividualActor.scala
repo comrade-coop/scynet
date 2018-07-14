@@ -54,10 +54,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   private def startProcess(): Unit = {
-    println(f"Started $shortHash")
     startTime = System.currentTimeMillis / 1000
-    var errorText = ""
-    var shouldPrintError = false
 
     val io = new ProcessIO(
       in => {
@@ -84,33 +81,23 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
           dispatchFitness(score, displayScore, iterations)
 
           val sign = if (displayScore > 0) 1 else 0
-          val scoreStr = f"$sign${abs(displayScore)%07.2f}"
+          val scoreStr = f"$sign${abs(displayScore)}%07.2f"
           val oldPath: Path = Paths.get(s"../results/running-$shortHash")
           val newPath: Path = Paths.get(s"../results/$scoreStr-$shortHash")
           Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
 
           val endTime = System.currentTimeMillis / 1000
           val duration = endTime - startTime
-          println(f"Finished $shortHash for $duration seconds")
-
-        } else if (!stopping) {
-          dispatchFitness(Double.NaN, Double.NaN, -1)
-          if (errorText == "") {
-            shouldPrintError = true
-          } else {
-            printError(strategy, errorText, shortHash)
-          }
+          println(s"Finished $shortHash for $duration seconds. Score: $scoreStr")
         }
       },
       err => {
         val errorText = scala.io.Source.fromInputStream(err).mkString
         err.close()
-        println(errorText)
 
-        if(shouldPrintError) {
+        if(errorText contains "Traceback") {
           printError(strategy, errorText, shortHash)
         }
-        
       })
 
     process = Process(Main.commandToRun, new File("../")) run io

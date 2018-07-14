@@ -2,7 +2,7 @@
     "layers": [
         {
             "type": "Input",
-            "config": {"shape": [], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 50}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
+            "config": {"shape": [6], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 50}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
             "inputs": []
         },
         {
@@ -12,7 +12,7 @@
         },
           {
               "type": "Input",
-              "config": {"shape": [], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 30}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
+              "config": {"shape": [6], "preprocessor": {"type": "MeanStdevPreprocessor", "config": {"preprocess_window_length": 30}}, "source": {"from": "cryptocompare", "name": "market", "component": "close"}},
               "inputs": []
           },
         {
