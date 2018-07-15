@@ -32,13 +32,13 @@ def main():
     agent_folder = 'results/running-%s' % short_hash
     if not os.path.exists(agent_folder):
         os.makedirs(agent_folder)
-    
+
     logging.basicConfig(filename=agent_folder + "/log.log", level=logging.INFO)
 
     trades_file = agent_folder + "/trades.csv"
     model_image_file = agent_folder + "/model.png"
-    weights_file = agent_folder + "weights.h5f"
-    
+    weights_file = agent_folder + "/weights.h5f"
+
     logging.info("start time: " + start_time + "\n")
     logging.info(json_conf)
 
@@ -51,7 +51,7 @@ def main():
         raise e
 
     if '-d' in sys.argv:  # debug mode
-        environment.trades_output = open(temp_trades_file, 'w')
+        environment.trades_output = open(trades_file, 'w')
 
     plot_model(agent.model, to_file=model_image_file.format(pid=os.getpid()))
 
@@ -64,7 +64,7 @@ def main():
         print('\n\n  Exception during training. \n\n ', file=sys.stderr)
         raise e
 
-    environment.trades_output = environment.trades_output or open(temp_trades_file, 'w')
+    environment.trades_output = environment.trades_output or open(trades_file, 'w')
 
     try:
         logging.info("\n\n validation started: " + short_hash + " start time: " + str(datetime.datetime.now()))
@@ -73,7 +73,7 @@ def main():
     except Exception as e:
         print('\n\n  Exception during validation. \n\n ', file=sys.stderr)
         raise e
-    
+
     try:
         logging.info("\n\n testing started: " + short_hash + " start time: " + str(datetime.datetime.now()))
         test_score = test(environment, agent)
@@ -86,7 +86,7 @@ def main():
     print('display_score = {result}'.format(result=test_score))
     agent.save_weights(weights_file, overwrite=True)
     environment.trades_output.close()
-    
+
     environment.close()
     K.get_session().close()
 
@@ -164,7 +164,7 @@ def learn(env, agent, learning_episodes):
 
 def train(env, agent):
     # Steps
-    max_iterations = 15
+    max_iterations = 1
     iteration_learning_episodes = 2
 
     # Policy (exploration versus exploitation of actions)

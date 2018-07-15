@@ -54,6 +54,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   private def startProcess(): Unit = {
+    println(s"Started $shortHash")
     startTime = System.currentTimeMillis / 1000
 
     val io = new ProcessIO(
@@ -89,6 +90,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
           val endTime = System.currentTimeMillis / 1000
           val duration = endTime - startTime
           println(s"Finished $shortHash for $duration seconds. Score: $scoreStr")
+        } else {
+          dispatchFitness(Double.NaN, Double.NaN, -1)
         }
       },
       err => {

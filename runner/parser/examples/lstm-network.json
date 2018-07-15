@@ -13,8 +13,8 @@
           }
         },
         "source": {
-          "from": "local",
-          "name": "market.all"
+          "from": "cryptocompare",
+          "name": "market"
         }
       },
       "inputs": []
