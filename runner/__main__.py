@@ -41,6 +41,7 @@ def main():
 
     logging.info("start time: " + start_time + "\n")
     logging.info(json_conf)
+    time.sleep(15)
 
     try:
         logging.info("\n\n build model started: " + short_hash + " start time: " + str(datetime.datetime.now()))
@@ -84,6 +85,7 @@ def main():
 
     print('score = {result}'.format(result=validation_score))
     print('display_score = {result}'.format(result=test_score))
+    print('iterations = {iterations}'.format(iterations=iterations))
     agent.save_weights(weights_file, overwrite=True)
     environment.trades_output.close()
 
@@ -164,7 +166,7 @@ def learn(env, agent, learning_episodes):
 
 def train(env, agent):
     # Steps
-    max_iterations = 1
+    max_iterations = 10
     iteration_learning_episodes = 2
 
     # Policy (exploration versus exploitation of actions)

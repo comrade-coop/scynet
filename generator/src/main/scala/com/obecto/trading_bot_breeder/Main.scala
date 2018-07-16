@@ -53,8 +53,8 @@ object Main extends App {
         val elitePercentage = 0.2
       },
       new UniformCrossoverReplicationOperator {
-        val replicationChance = 0.1
-        override val keepFirstChildOnly = true
+        val replicationChance = 0.7
+        override val keepFirstChildOnly = false
         val parentSelectionStrategy = new TournamentSelectionStrategy(8)
       },
       new BinaryMutationOperator {

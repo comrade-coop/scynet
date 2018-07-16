@@ -75,6 +75,9 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         }).flatten.toMap
         out.close()
 
+        val endTime = System.currentTimeMillis / 1000
+        val duration = endTime - startTime
+
         if (resultMap.contains("score")) {
           val score = resultMap.getOrElse("score", "0").toDouble
           val displayScore = resultMap.getOrElse("display_score", "0").toDouble
@@ -85,13 +88,12 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
           val scoreStr = f"$sign${abs(displayScore)}%07.2f"
           val oldPath: Path = Paths.get(s"../results/running-$shortHash")
           val newPath: Path = Paths.get(s"../results/$scoreStr-$shortHash")
-          Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
+          movePath(oldPath, newPath, endTime)
 
-          val endTime = System.currentTimeMillis / 1000
-          val duration = endTime - startTime
           println(s"Finished $shortHash for $duration seconds. Score: $scoreStr")
         } else {
           dispatchFitness(Double.NaN, Double.NaN, -1)
+          println(s"Finished $shortHash. Score: NaN")
         }
       },
       err => {
@@ -107,16 +109,16 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   private def printError(strategy: String, errorText: String, shortHash: String): Unit = {
+    val endTime = System.currentTimeMillis / 1000
     val oldPath: Path = Paths.get(s"../results/running-$shortHash")
     val newPath: Path = Paths.get(s"../results/error-$shortHash")
-    Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING)
+    movePath(oldPath, newPath, endTime)
 
     printToFile(new File(f"$newPath/error.txt")) { p =>
       p.println(s"chromosome = $strategy")
       p.println(errorText)
     }
 
-    val endTime = System.currentTimeMillis / 1000
     val duration = endTime - startTime
     println(f"Errored $shortHash for $duration seconds")
   }
@@ -126,5 +128,14 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     import Converter.AnyJsonProtocol._
 
     Converter.serialize(genome).toJson.compactPrint
+  }
+
+  private def movePath(oldPath: Path, newPath: Path, endTime: Long): Unit = {
+    if(Files.exists(newPath)) {
+      val newPath2: Path = Paths.get(s"${newPath.getFileName().toString()}-$endTime")
+      Files.move(oldPath, newPath2)
+    } else {
+      Files.move(oldPath, newPath)
+    }
   }
 }

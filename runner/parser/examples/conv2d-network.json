@@ -11,8 +11,8 @@
 					}
 				},
 				"source": {
-					"from": "local",
-					"name": "market.close"
+					"from": "cryptocompare",
+					"name": "market"
 				}
 			},
             "inputs": []
@@ -151,12 +151,11 @@
 		}
 	],
 	"optimizer": {
-        "type": "RMSprop",
-        "config": {
-			"lr": 0.0001,
-			"decay": 1e-6
+		"type": "Adam",
+		"config": {
+		  "lr": 0.0001
 		}
-	},
+	  },
 	"window_length": 24,
     "batch_size": 1,
     "loss": "mean_squared_error"
