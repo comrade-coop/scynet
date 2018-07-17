@@ -100,31 +100,16 @@ object Descriptors {
 
 
   val InputLayers = repositories.view.flatMap(repository => {
-    repository._2.asInstanceOf[Map[Any, Any]].flatMap(source => {
+    repository._2.asInstanceOf[Map[Any, Any]].toList.map(source => {
       val source_config = source._2.asInstanceOf[Map[Any, Any]]
       val shape = source_config("shape").asInstanceOf[Vector[Int]].toList
-      var result = List(
-        (0.8, makeInputLayer(source._1 + "Input", shape, MapGeneGroupDescriptor(
+      val result = (0.8, makeInputLayer(source._1 + "Input", shape, MapGeneGroupDescriptor(
           "from" -> EnumGeneDescriptor(List(repository._1.toString)),
           "name" -> EnumGeneDescriptor(List(source._1.toString))
         )))
-      )
-      // if (source_config.contains("components")) {
-      //   val components = source_config("components").asInstanceOf[Vector[Any]]
-      //   result = result ++ List(
-      //     (0.8 / components.size, makeInputLayer(source._1 + "Input", shape.tail, MapGeneGroupDescriptor(
-      //       "from" -> EnumGeneDescriptor(List(repository._1.toString)),
-      //       "name" -> EnumGeneDescriptor(List(source._1.toString)),
-      //       "component" -> EnumGeneDescriptor(source_config("components").asInstanceOf[Vector[Any]])
-      //     )))
-      //   )
-      // }
       result
     })
   }).toList
-
-
-
 
   /// Common Layers
 

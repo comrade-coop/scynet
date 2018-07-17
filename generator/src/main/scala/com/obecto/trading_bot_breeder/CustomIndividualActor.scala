@@ -34,9 +34,8 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   def dispatchFitness(fitness: Double, displayScore: Double, iterations: Int): Unit = {
     super.dispatchFitness(fitness)
-    if (!fitness.isNaN && fitness != 0.0) {
+    if (!fitness.isNaN) {
       val endTime = System.currentTimeMillis / 1000
-      val sign = if (displayScore > 0) 1 else 0
       printToFile(new File(f"../results/running-${shortHash}/genome.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
