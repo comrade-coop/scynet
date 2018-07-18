@@ -57,7 +57,17 @@ This is the source code for the hive project.
     cd ../
     ```
 
-5. Run the project:
+5. Create repositories.json
+    ```bash
+        python3 create_repositories_json.py
+    ```
+
+6. Download cache
+    ```bash
+        pipenv run python -m runner.harvester
+    ```
+
+7. Run the project:
     * Generator:
         ```bash
         cd generator/
@@ -76,7 +86,7 @@ This is the source code for the hive project.
         pipenv run python -m runner.parser.keras_parser runner/parser/examples/merge.json
         ```
 
-6. In case you need TensorFlow with GPU support, follow the instructions on their site.
+8. In case you need TensorFlow with GPU support, follow the instructions on their site.
     * Refer to [tf_gpu_install_steps.txt](./tf_gpu_install_steps.txt) for information regarding CUDA installation.
     * Make sure to specify `/usr/bin/python3.6` as the python version.
     * When installing the wheel package, use pipenv (inside the cloned repo):
