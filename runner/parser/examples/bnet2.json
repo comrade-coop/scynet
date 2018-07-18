@@ -1,0 +1,368 @@
+{
+    "layers": [
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "avgGasUsed"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "avgValFromRecent"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "activeAccountsShare"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "shareTracesFromRecent"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "volumeEnteringTopX"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "blockDifficulty"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "stickPrice"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "gasLimit"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "transactionCount"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "activeAccounts"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "tracesFromRecent"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "traceBl"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "avgVal"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "avgBalOfRecent"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    1
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "recentAccounts"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Concatenate",
+            "config": {},
+            "inputs": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14
+            ]
+        },
+        {
+            "type": "LSTM",
+            "config": {
+                "units": 128,
+                "return_sequences": true,
+                "stateful": false
+            },
+            "inputs": [
+                16
+            ]
+        },
+        {
+            "type": "Dropout",
+            "config": {
+                "rate": 0.1
+            },
+            "inputs": [
+                17
+            ]
+        },
+        {
+            "type": "LSTM",
+            "config": {
+                "units": 256,
+                "return_sequences": false,
+                "stateful": false
+            },
+            "inputs": [
+                18
+            ]
+        },
+        {
+            "type": "Dense",
+            "config": {
+                "units": 1
+            },
+            "inputs": [
+                19
+            ]
+        },
+        {
+            "type": "Activation",
+            "config": {
+                "activation": "linear"
+            },
+            "inputs": [
+                20
+            ]
+        }
+    ],
+    "optimizer": {
+        "type": "Adam",
+        "config": {
+            "lr": 0.0001
+        }
+    },
+    "window_length": 24,
+    "batch_size": 1,
+    "loss": "mean_squared_error"
+}

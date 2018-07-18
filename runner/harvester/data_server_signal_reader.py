@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import csv
 import time
+import calendar
 
 
 class DataServerSignalReader(SignalReader):
@@ -41,7 +42,7 @@ class DataServerSignalReader(SignalReader):
                     # oldest to newest
                     for i in range(1, len(ticks)):
                         row = ticks[i]
-                        yield (self._time_to_seconds(row[self.date_index]), row[self.price_index])
+                        yield (self._time_to_seconds(row[self.date_index]), [float(row[self.price_index])])
 
                 # current_to_time should be next_to_time also when it is equal to to_time
                 # in order to be able to break the while
@@ -51,5 +52,5 @@ class DataServerSignalReader(SignalReader):
 
     def _time_to_seconds(self, time_to_convert):
         dt = time.strptime(time_to_convert, '%Y-%m-%d %H:%M:%S')
-        sec = int(time.mktime(dt) - time.timezone)
+        sec = calendar.timegm(dt)
         return sec
