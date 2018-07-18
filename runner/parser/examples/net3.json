@@ -1,0 +1,107 @@
+{
+    "layers": [
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    88,
+                    92
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "contractBalanceLastSeenDistribution_log1_2_v2"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Input",
+            "config": {
+                "shape": [
+                    88,
+                    92
+                ],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 1
+                    }
+                },
+                "source": {
+                    "from": "blockchain",
+                    "name": "balanceLastSeenDistribution_log1_2"
+                }
+            },
+            "inputs": []
+        },
+        {
+            "type": "Concatenate",
+            "config": {},
+            "inputs": [0, 1]
+        },
+        {
+            "type": "LSTM",
+            "config": {
+                "units": 128,
+                "return_sequences": true,
+                "stateful": false
+            },
+            "inputs": [
+                3
+            ]
+        },
+        {
+            "type": "Dropout",
+            "config": {
+                "rate": 0.1
+            },
+            "inputs": [
+                4
+            ]
+        },
+        {
+            "type": "LSTM",
+            "config": {
+                "units": 256,
+                "return_sequences": false,
+                "stateful": false
+            },
+            "inputs": [
+                5
+            ]
+        },
+        {
+            "type": "Dense",
+            "config": {
+                "units": 1
+            },
+            "inputs": [
+                6
+            ]
+        },
+        {
+            "type": "Activation",
+            "config": {
+                "activation": "linear"
+            },
+            "inputs": [
+                7
+            ]
+        }
+    ],
+    "optimizer": {
+        "type": "Adam",
+        "config": {
+            "lr": 0.0001
+        }
+    },
+    "window_length": 24,
+    "batch_size": 1,
+    "loss": "mean_squared_error"
+}
