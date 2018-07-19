@@ -27,33 +27,37 @@ class StatelessMode():
         self.last_result = None
 
 
-class Portfolio():  # TODO: Commisions?
+class Portfolio():
     def __init__(self, starting_balance, starting_asset=0.0):
         self.balance = starting_balance
         self.asset = starting_asset
         self.last_operation_price = 0
+        self.commission_amount = 0.002
+        self.limit = 1000.0
 
     def sell(self, price):
-        if self.asset != 0:
-            new_balance = self.balance + price * self.asset
-            commission = self.calculate_commission(new_balance)
-            self.balance = new_balance - commission
+        if self.asset > 0:
+            trade_amount = price * self.asset
+            commission = self.calculate_commission(trade_amount)
+            self.balance = self.balance + trade_amount - commission
             self.asset = 0
             self.last_operation_price = price
 
     def buy(self, price):
-        if self.balance != 0:
-            new_asset = self.asset + self.balance / price
-            commission = self.calculate_commission(new_asset)
-            self.asset = new_asset - commission
-            self.balance = 0
+        if self.balance > 0:
+            available_money = self.limit if self.balance > self.limit else self.balance
+            money_for_asset = available_money / (self.commission_amount + 1)
+            commission = self.calculate_commission(money_for_asset)
+            trade_amount = money_for_asset / price
+            self.asset = self.asset + trade_amount
+            self.balance = self.balance - money_for_asset - commission
             self.last_operation_price = price
 
     def get_total_balance(self, price=None):
         return self.balance + self.asset * (price or self.last_operation_price)
 
     def calculate_commission(self, price):
-        return price * 0.002
+        return price * self.commission_amount
 
 
 class StatelessEnv():
@@ -230,9 +234,7 @@ class StatelessEnv():
                 self.portfolio.buy(price)
 
             elif action == 0:
-                feedback += price - self.portfolio.last_operation_price \
-                            - self.portfolio.calculate_commission(price) \
-                            - self.portfolio.calculate_commission(self.portfolio.last_operation_price)
+                feedback += price - self.portfolio.last_operation_price
                 self.portfolio.sell(price)
         else:
             self.same_action_ticks += 1
