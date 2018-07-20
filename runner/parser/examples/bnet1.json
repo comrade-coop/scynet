@@ -268,67 +268,67 @@
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [0, 1]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [2, 3]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [4, 5]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [6, 7]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [8, 9]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [10, 11]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [12, 13]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [14, 15]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [16, 17]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [18, 19]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [20, 21]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [22, 23]
       },
       {
         "type": "Concatenate",
-        "config": {},
+        "config": {"axis": 2},
         "inputs": [24, 25]
       },
       {
