@@ -64,7 +64,7 @@ object Converter {
             }
           } else {
             val modifiedLayer = layer ++ Map("inputs" -> modifiedInputs)
-            stack = stack :+ result.size
+            stack = result.size +: stack
             result = result :+ modifiedLayer
           }
 

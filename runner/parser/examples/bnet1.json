@@ -269,7 +269,67 @@
       {
         "type": "Concatenate",
         "config": {},
-        "inputs": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        "inputs": [0, 1]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [2, 3]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [4, 5]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [6, 7]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [8, 9]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [10, 11]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [12, 13]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [14, 15]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [16, 17]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [18, 19]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [20, 21]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [22, 23]
+      },
+      {
+        "type": "Concatenate",
+        "config": {},
+        "inputs": [24, 25]
       },
       {
         "type": "LSTM",
@@ -279,7 +339,7 @@
           "stateful": false
         },
         "inputs": [
-          15
+          26
         ]
       },
       {
@@ -288,7 +348,7 @@
           "rate": 0.1
         },
         "inputs": [
-          16
+          27
         ]
       },
       {
@@ -299,7 +359,7 @@
           "stateful": false
         },
         "inputs": [
-          17
+          28
         ]
       },
       {
@@ -308,7 +368,7 @@
           "units": 1
         },
         "inputs": [
-          18
+          29
         ]
       },
       {
@@ -317,7 +377,7 @@
           "activation": "linear"
         },
         "inputs": [
-          19
+          30
         ]
       }
     ],
@@ -331,4 +391,3 @@
     "batch_size": 1,
     "loss": "mean_squared_error"
   }
-  
