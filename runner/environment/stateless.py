@@ -27,37 +27,50 @@ class StatelessMode():
         self.last_result = None
 
 
-class Portfolio():
+class Portfolio:
     def __init__(self, starting_balance, starting_asset=0.0):
         self.balance = starting_balance
-        self.asset = starting_asset
+        self.assets = starting_asset
         self.last_operation_price = 0
+
         self.commission_amount = 0.002
-        self.limit = 1000.0
+        self.buy_sell_amount = 1000
+        self.last_operation = None
 
     def sell(self, price):
-        if self.asset > 0:
-            trade_amount = price * self.asset
+        feedback = 0
+        if self.last_operation == 1:
+            trade_amount = price * self.buy_sell_amount
             commission = self.calculate_commission(trade_amount)
-            self.balance = self.balance + trade_amount - commission
-            self.asset = 0
+            self.assets = 0
+
+            new_balance = self.balance + trade_amount - commission
+            feedback = new_balance - self.balance
+            self.balance = new_balance
             self.last_operation_price = price
+            self.last_operation = 0
+
+        return feedback
 
     def buy(self, price):
-        if self.balance > 0:
-            available_money = self.limit if self.balance > self.limit else self.balance
-            money_for_asset = available_money / (self.commission_amount + 1)
-            commission = self.calculate_commission(money_for_asset)
-            trade_amount = money_for_asset / price
-            self.asset = self.asset + trade_amount
-            self.balance = self.balance - money_for_asset - commission
-            self.last_operation_price = price
+        if self.last_operation != 1:
+            trade_amount = price * self.buy_sell_amount
+            commission = self.calculate_commission(trade_amount)
+            self.assets = self.buy_sell_amount
 
-    def get_total_balance(self, price=None):
+            self.balance = self.balance - trade_amount - commission
+            self.last_operation_price = price
+            self.last_operation = 1
+
+    # used for checking how many points will the agent have it it sells immeadiately
+    def get_total_balance(self, price):
         return self.balance + self.asset * (price or self.last_operation_price)
 
-    def calculate_commission(self, price):
-        return price * self.commission_amount
+    def get_score(self):
+        return self.balance
+
+    def calculate_commission(self, amount):
+        return amount * self.commission_amount
 
 
 class StatelessEnv():
@@ -83,7 +96,7 @@ class StatelessEnv():
         self.observed_min_before_max = False
         self.last_action = 0
         self.same_action_ticks = 0
-        self.starting_currency = 1000.0
+        self.starting_currency = 0.0
         self.portfolio = None
 
         self.debug_i = 0
@@ -234,8 +247,7 @@ class StatelessEnv():
                 self.portfolio.buy(price)
 
             elif action == 0:
-                feedback += price - self.portfolio.last_operation_price
-                self.portfolio.sell(price)
+                feedback += self.portfolio.sell(price)
         else:
             self.same_action_ticks += 1
             if self.same_action_ticks > self.same_action_ticks_limit:
@@ -255,10 +267,10 @@ class StatelessEnv():
         self.signals_iterator = None
 
         baseline_portfolio = Portfolio(self.starting_currency)
-        if False:  # Just buy/sell at the ends, not a good comparision as the rest
-            baseline_portfolio.buy(self.start_price)
-            baseline_portfolio.sell(end_price)
-        elif self.observed_min_before_max:
+        #if False:  # Just buy/sell at the ends, not a good comparision as the rest
+            #baseline_portfolio.buy(self.start_price)
+            #baseline_portfolio.sell(end_price)
+        if self.observed_min_before_max:
             baseline_portfolio.buy(self.observed_min_price)
             baseline_portfolio.sell(self.observed_max_price)
         else:
@@ -267,8 +279,8 @@ class StatelessEnv():
             baseline_portfolio.buy(self.observed_min_price)
             baseline_portfolio.sell(end_price)
 
-        baseline_result = baseline_portfolio.get_total_balance(end_price) - self.starting_currency
-        agent_result = self.portfolio.get_total_balance(end_price) - self.starting_currency
+        baseline_result = baseline_portfolio.get_score()
+        agent_result = self.portfolio.get_score()
         result = (agent_result / baseline_result) * 100
 
         self.mode.last_result = result

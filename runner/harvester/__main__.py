@@ -2,7 +2,7 @@ import os
 import threading
 from . import parse_repositories
 
-repositories = parse_repositories(os.path.join(os.path.dirname(__file__), '../../repositories3.json'))
+repositories = parse_repositories(os.path.join(os.path.dirname(__file__), '../../repositories.json'))
 
 for source_name, source in repositories.items():
     for reader_name, reader in source.items():
