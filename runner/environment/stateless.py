@@ -64,7 +64,9 @@ class Portfolio:
 
     # used for checking how many points will the agent have it it sells immeadiately
     def get_total_balance(self, price):
-        return self.balance + self.asset * (price or self.last_operation_price)
+        amount = self.assets * (price or self.last_operation_price)
+        commission = self.calculate_commission(amount)
+        return self.balance + amount + commission
 
     def get_score(self):
         return self.balance
@@ -214,14 +216,6 @@ class StatelessEnv():
         observation, date, is_final = self._get_next_observation()
         price = observation[0]
 
-        if self.debug_i % 25 == 0 and self.interactive:
-            print(' Step {step: =6} ({date}) ${balance: >7.2f} {state}     \r'.format(
-                step=self.debug_i,
-                date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
-                balance=self.portfolio.get_total_balance(price),
-                state='bougth' if action == 1 else 'sold  '  # Spaces are important, both need to be same length
-            ), end='')
-
         if self.observed_min_price is None or self.observed_min_price > price:
             self.observed_min_price = price
             self.observed_min_before_max = False
@@ -232,14 +226,6 @@ class StatelessEnv():
         feedback = 0.0
 
         if action != self.last_action:
-            if self.trades_output and self.mode.name != 'learning':
-                print('{action}\t{date}\t{price}\t{balance}'.format(
-                    date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
-                    price=price,
-                    action='Buy' if action == 1 else 'Sell',
-                    balance=self.portfolio.get_total_balance(price),
-                ), file=self.trades_output)
-
             self.last_action = action
             self.same_action_ticks = 0
 
@@ -248,6 +234,14 @@ class StatelessEnv():
 
             elif action == 0:
                 feedback += self.portfolio.sell(price)
+
+            if self.trades_output and self.mode.name != 'learning':
+                print('{action}\t{date}\t{price}\t{balance}'.format(
+                    date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
+                    price=price,
+                    action='Buy' if action == 1 else 'Sell',
+                    balance=self.portfolio.get_score(),
+                ), file=self.trades_output)
         else:
             self.same_action_ticks += 1
             if self.same_action_ticks > self.same_action_ticks_limit:
@@ -257,6 +251,14 @@ class StatelessEnv():
 
         if is_final:
             self.finish_episode(price)
+
+        if self.debug_i % 25 == 0 and self.interactive:
+            print(' Step {step: =6} ({date}) ${balance: >7.2f} {state}     \r'.format(
+                step=self.debug_i,
+                date=time.strftime('%Y-%m-%dT%H:%MZ', time.gmtime(date)),
+                balance=self.portfolio.get_score(),
+                state='bougth' if action == 1 else 'sold  '  # Spaces are important, both need to be same length
+            ), end='')
 
         return (collapse_single_item(observation[1:]), feedback, is_final, {})
 
