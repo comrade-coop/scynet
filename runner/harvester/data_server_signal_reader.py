@@ -4,6 +4,7 @@ import pandas as pd
 import csv
 import time
 import calendar
+import ast
 
 
 class DataServerSignalReader(SignalReader):
@@ -42,7 +43,12 @@ class DataServerSignalReader(SignalReader):
                     # oldest to newest
                     for i in range(1, len(ticks)):
                         row = ticks[i]
-                        yield (self._time_to_seconds(row[self.date_index]), [float(row[self.price_index])])
+                        try:
+                            data_val = [float(row[self.price_index])]
+                        except ValueError:
+                            data_val = ast.literal_eval(row[self.price_index])
+
+                        yield (self._time_to_seconds(row[self.date_index]), data_val)
 
                 # current_to_time should be next_to_time also when it is equal to to_time
                 # in order to be able to break the while
