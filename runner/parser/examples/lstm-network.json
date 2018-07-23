@@ -22,7 +22,7 @@
     {
       "type": "LSTM",
       "config": {
-        "units": 128,
+        "units": 32,
         "return_sequences": true,
         "stateful": false
       },
@@ -42,7 +42,7 @@
     {
       "type": "LSTM",
       "config": {
-        "units": 256,
+        "units": 64,
         "return_sequences": false,
         "stateful": false
       },
