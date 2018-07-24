@@ -42,7 +42,8 @@ object Main extends App {
       () => {
         var left = Random.nextDouble * totalWeigth
         descriptors.find(x => {
-          left -= x._1; left <= 0.0
+          left -= x._1;
+          left <= 0.0
         }).get._2.createChromosome()
       }
     }
@@ -142,7 +143,14 @@ object Main extends App {
           for (genome <- result) {
             val genomeStr = Utils.mapGenomeToStringStrategy(genome)
             val genomeHash = Utils.generateGenomeHash(genome)
-            Utils.printToFile(new File(f"../recovery/genome-$genomeHash.txt")) { p =>
+            
+            val dirName = "../recovery"
+            val dir = new File(dirName)
+            if (!dir.exists) {
+              dir.mkdir()
+            }
+
+            Utils.printToFile(new File(f"$dirName/genome-$genomeHash.txt")) { p =>
               p.println(s"$genomeStr")
             }
           }
