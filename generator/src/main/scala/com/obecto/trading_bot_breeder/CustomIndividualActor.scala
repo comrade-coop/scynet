@@ -11,13 +11,10 @@ import spray.json._
 import Math.{abs}
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
-  // import context.dispatcher
-
   var process: scala.sys.process.Process = null
   var stopping = false
-  val strategy = mapGenomeToStringStrategy()
-  // val shortHash = BigInt(strategy.hashCode()).abs.toString(16).padTo(6, '0').substring(0, 6)
-  val shortHash = MessageDigest.getInstance("MD5").digest(strategy.getBytes()).map("%02x".format(_)).mkString.substring(0, 10)
+  val strategy = Utils.mapGenomeToStringStrategy(genome)
+  val shortHash = Utils.generateGenomeHash(genome)
   var startTime = 0l
 
   override def customReceive = {
@@ -27,6 +24,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   override def postStop(): Unit = {
     if (process != null) {
+      println(s"stopping: $shortHash")
       stopping = true
       process.destroy()
     }
@@ -36,7 +34,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     super.dispatchFitness(fitness)
     if (!fitness.isNaN) {
       val endTime = System.currentTimeMillis / 1000
-      printToFile(new File(f"../results/running-${shortHash}/genome.txt")) { p =>
+      Utils.printToFile(new File(f"../results/running-${shortHash}/genome.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
         p.println(s"iterations = $iterations")
@@ -45,11 +43,6 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         p.println(s"chromosome = $strategy")
       }
     }
-  }
-
-  private def printToFile(f: File)(op: PrintWriter => Unit): Unit = {
-    val p = new PrintWriter(f)
-    try { op(p) } finally { p.close() }
   }
 
   private def startProcess(): Unit = {
@@ -113,20 +106,13 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     val newPath: Path = Paths.get(s"../results/error-$shortHash")
     movePath(oldPath, newPath, endTime)
 
-    printToFile(new File(f"$newPath/error.txt")) { p =>
+    Utils.printToFile(new File(f"$newPath/error.txt")) { p =>
       p.println(s"chromosome = $strategy")
       p.println(errorText)
     }
 
     val duration = endTime - startTime
     println(f"Errored $shortHash for $duration seconds")
-  }
-
-  private def mapGenomeToStringStrategy(): String = {
-    import DefaultJsonProtocol._
-    import Converter.AnyJsonProtocol._
-
-    Converter.serialize(genome).toJson.compactPrint
   }
 
   private def movePath(oldPath: Path, newPath: Path, endTime: Long): Unit = {
