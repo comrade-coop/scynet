@@ -54,8 +54,7 @@
 		{
 			"type": "MaxPooling2D",
 			"config": {
-				"pool_size": [2,2],
-				"data_format": "channels_first"
+				"pool_size": [2,2]
 			},
 			"inputs": [4]
 		},
@@ -100,8 +99,7 @@
 		{
 			"type": "MaxPooling2D",
 			"config": {
-				"pool_size": [2,2],
-				"data_format": "channels_first"
+				"pool_size": [2,2]
 			},
 			"inputs": [10]
 		},
