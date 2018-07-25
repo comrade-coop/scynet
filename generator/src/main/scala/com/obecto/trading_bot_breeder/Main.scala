@@ -10,21 +10,35 @@ import com.obecto.gattakka.genetics.descriptors.{GeneDescriptor}
 import com.obecto.gattakka.genetics.{Chromosome, Genome}
 import com.obecto.gattakka.{Pipeline, PipelineOperator, Population}
 import scala.io.Source
-import scala.concurrent.{Await, Future}
 import com.obecto.gattakka.messages.population._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 import java.io.{File}
 
 object Main extends App {
+
+  val doRecovery = args contains "recovery"
+
   val argParts = args.splitAt(args indexOf "--")
-  val filesToRead = argParts._1
   val commandToRun = argParts._2.tail
+  val filesToRead = if (!doRecovery) argParts._1 else getRecoveryFiles()
+
+  def getRecoveryFiles(): Array[String] = {
+    val recoveryDir = new File("../recovery")
+    if (recoveryDir.exists() && recoveryDir.isDirectory) {
+      val recoveryFiles = recoveryDir.listFiles().map(_.getPath)
+      recoveryFiles
+    } else {
+      new Array[String](0)
+    }
+  }
 
   if (commandToRun.length < 1) {
     println("Please give a command to run")
     println("Something like `sbt \"run -- myexec myparams\"`")
     println("The parameters JSON will then be passed over stdin to your executable")
+  } else if (filesToRead.length < 1) {
+    println("No initial genome files specified")
   } else {
     val inputGenomes = for (file <- filesToRead) yield {
       import spray.json._
@@ -38,9 +52,9 @@ object Main extends App {
     implicit val system = ActorSystem("gattakka")
 
     def generateRandomChromosome(descriptors: Traversable[(Double, GeneDescriptor)]): () => Chromosome = {
-      val totalWeigth = descriptors.view.map(_._1).sum
+      val totalWeight = descriptors.view.map(_._1).sum
       () => {
-        var left = Random.nextDouble * totalWeigth
+        var left = Random.nextDouble * totalWeight
         descriptors.find(x => {
           left -= x._1;
           left <= 0.0
@@ -143,7 +157,7 @@ object Main extends App {
           for (genome <- result) {
             val genomeStr = Utils.mapGenomeToStringStrategy(genome)
             val genomeHash = Utils.generateGenomeHash(genome)
-            
+
             val dirName = "../recovery"
             val dir = new File(dirName)
             if (!dir.exists) {
