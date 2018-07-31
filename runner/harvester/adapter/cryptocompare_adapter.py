@@ -1,8 +1,8 @@
-from .signal_reader import SignalReader
+from .signal_adapter import SignalAdapter
 import requests
 
 
-class CryptocompareSignalReader(SignalReader):
+class CryptocompareSignalAdapter(SignalAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

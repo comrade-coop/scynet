@@ -2,14 +2,12 @@ import argparse
 import json
 import traceback
 
-import keras
 from keras.layers import *  # we need all layers in the global namespace
 from keras.optimizers import *
 from keras.regularizers import *
 from keras.models import Model
 from keras.utils import plot_model
 from .structure_exception import StructureException
-from ..preprocessor import *
 
 
 def load_json(filename):
@@ -20,7 +18,6 @@ def load_json(filename):
 def search_namespace(name):
     # TODO: Don't rely on Keras's class naming.
     # Have a dictionary from our names to keras's
-    # TODO: What to do in a collision?
     return_class = globals().get(name)
 
     if return_class is None:
@@ -44,17 +41,16 @@ def keras_object(class_name, config):
 def process_input_layer(layer, idx, window_length):
     config = layer['config']
 
-    preprocessor_obj = namespace_object_from_dict(config['preprocessor'])
     source_cfg = config['source']
 
     config = {
         'shape': (window_length,) + tuple(config['shape']),
-        'name': source_cfg['name'].replace(',', '_') + '-' + str(idx)
+        'name': source_cfg['config']['name'].replace(',', '_') + '-' + str(idx)
     }
 
     layer_obj = keras_object(layer['type'], config)
 
-    return layer_obj, (preprocessor_obj, source_cfg)
+    return layer_obj, source_cfg
 
 
 def process_non_input_layer(layer, idx, outputs):

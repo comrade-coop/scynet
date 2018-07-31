@@ -1,4 +1,4 @@
-from .signal_reader import SignalReader
+from .signal_adapter import SignalAdapter
 import requests
 import pandas as pd
 import csv
@@ -6,7 +6,7 @@ import time
 import calendar
 
 
-class DataServerSignalReader(SignalReader):
+class DataServerSignalAdapter(SignalAdapter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.date_index = None
