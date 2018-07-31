@@ -1,66 +1,71 @@
 {
-    "layers": [
-        {
-            "type": "Input",
-            "inputs": [],
+  "layers": [
+    {
+      "type": "Input",
+      "inputs": [],
+      "config": {
+        "shape": [
+          6
+        ],
+        "source": {
+          "type": "SignalReader",
+          "config": {
+            "source": "cryptocompare",
+            "name": "market"
+          },
+          "preprocessor": {
+            "type": "MeanStdevPreprocessor",
             "config": {
-                "shape": [],
-                "preprocessor": {
-                    "type": "RawPreprocessor",
-                    "config": {
-                        "preprocess_window_length": 176,
-                        "normalization_constant": 0.7781250000000001
-                    }
-                },
-                "source": {
-                    "from": "cryptocompare",
-                    "name": "market"
-                }
+              "preprocess_window_length": 176,
+              "normalization_constant": 0.7781250000000001
             }
-        },
-        {
-            "type": "Dense",
-            "inputs": [
-                0
-            ],
-            "config": {
-                "use_bias": false,
-                "kernel_constraint": "unit_norm",
-                "kernel_initializer": "lecun_uniform",
-                "bias_regularizer": {
-                    "type": "l1_l2",
-                    "config": {
-                        "l1": 0.06875,
-                        "l2": 0.0765625
-                    }
-                },
-                "activity_regularizer": {
-                    "type": "l1_l2",
-                    "config": {
-                        "l1": 0.1171875,
-                        "l2": 0.16328125000000002
-                    }
-                },
-                "kernel_regularizer": {
-                    "type": "l1_l2",
-                    "config": {
-                        "l1": 0.078125,
-                        "l2": 0.07109375
-                    }
-                },
-                "bias_constraint": null,
-                "units": 204,
-                "bias_initializer": "zero"
-            }
+          }
         }
-    ],
-    "optimizer": {
-        "type": "Adam",
-        "config": {
-            "lr": 0.4609375
-        }
+      }
     },
-    "loss": "mean_squared_error",
-    "window_length": 2,
-    "batch_size": 1
+    {
+      "type": "Dense",
+      "inputs": [
+        0
+      ],
+      "config": {
+        "use_bias": false,
+        "kernel_constraint": "unit_norm",
+        "kernel_initializer": "lecun_uniform",
+        "bias_regularizer": {
+          "type": "l1_l2",
+          "config": {
+            "l1": 0.06875,
+            "l2": 0.0765625
+          }
+        },
+        "activity_regularizer": {
+          "type": "l1_l2",
+          "config": {
+            "l1": 0.1171875,
+            "l2": 0.16328125000000002
+          }
+        },
+        "kernel_regularizer": {
+          "type": "l1_l2",
+          "config": {
+            "l1": 0.078125,
+            "l2": 0.07109375
+          }
+        },
+        "bias_constraint": null,
+        "units": 204,
+        "bias_initializer": "zero"
+      }
+    }
+  ],
+  "optimizer": {
+    "type": "Adam",
+    "config": {
+      "lr": 0.4609375
+    }
+  },
+  "loss": "mean_squared_error",
+  "window_length": 2,
+  "batch_size": 1
 }

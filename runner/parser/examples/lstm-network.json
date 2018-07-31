@@ -6,15 +6,18 @@
         "shape": [
           6
         ],
-        "preprocessor": {
-          "type": "RawPreprocessor",
-          "config": {
-            "preprocess_window_length": 1
-          }
-        },
         "source": {
-          "from": "cryptocompare",
-          "name": "market"
+          "type": "SignalReader",
+          "config": {
+            "source": "cryptocompare",
+            "name": "market"
+          },
+          "preprocessor": {
+            "type": "RawPreprocessor",
+            "config": {
+              "preprocess_window_length": 1
+            }
+          }
         }
       },
       "inputs": []
