@@ -17,11 +17,14 @@ object Descriptors {
   private def makeLayer(_type: String, inputs: Int, config: Seq[MapGeneGroupDescriptor.GroupField]): MapGeneGroupDescriptor = {
     makeLayer(_type, List(_type), inputs, config)
   }
-  private def makeInputLayer(name: String, shape: List[Int], source: GeneDescriptor): MapGeneGroupDescriptor = {
+  private def makeInputLayer(name: String, shape: List[Int], signalType: String, config: GeneDescriptor): MapGeneGroupDescriptor = {
     makeLayer(name, List("Input"), 0, Seq(
       "shape" -> EnumGeneDescriptor(List(shape)),
-      "preprocessor" -> PreprocessorDescriptor,
-      "source" -> source
+      "source" -> MapGeneGroupDescriptor(
+        "type" -> EnumGeneDescriptor(List(signalType)),
+        "config" -> config,
+        "preprocessor" -> PreprocessorDescriptor
+      )
     ))
   }
   private def makeInitializerRegularizerConstraint(property: String): Seq[MapGeneGroupDescriptor.GroupField] = {
@@ -103,8 +106,8 @@ object Descriptors {
     repository._2.asInstanceOf[Map[Any, Any]].toList.map(source => {
       val source_config = source._2.asInstanceOf[Map[Any, Any]]
       val shape = source_config("shape").asInstanceOf[Vector[Int]].toList
-      val result = (0.8, makeInputLayer(source._1 + "Input", shape, MapGeneGroupDescriptor(
-          "from" -> EnumGeneDescriptor(List(repository._1.toString)),
+      val result = (0.8, makeInputLayer(source._1 + "Input", shape, "SignalReader", MapGeneGroupDescriptor(
+          "source" -> EnumGeneDescriptor(List(repository._1.toString)),
           "name" -> EnumGeneDescriptor(List(source._1.toString))
         )))
       result

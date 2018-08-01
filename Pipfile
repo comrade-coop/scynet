@@ -16,6 +16,7 @@ keras-rl = "*"
 "h5py" = "*"
 requests = "*"
 portalocker = "*"
+ta-lib = "*"
 
 
 [dev-packages]
