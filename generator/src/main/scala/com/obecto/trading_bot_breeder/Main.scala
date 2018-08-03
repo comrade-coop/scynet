@@ -41,7 +41,14 @@ object Main extends App {
     val generateRandomInput = generateRandomChromosome(Descriptors.InputLayers)
     val generateRandomNonInputLayer = generateRandomChromosome(Descriptors.NonInputLayers)
 
-    val initialChromosomes = inputGenomes.toList
+    val initialChromosomes = if (filesToRead.size > 0) {
+      inputGenomes.toList
+    } else {
+      (0 to 10).view.map(i => Genome(
+        List(Descriptors.AdamConfig.createChromosome(), generateRandomInput())
+        ++ (1 to Random.nextInt(3)).map(i => generateRandomNonInputLayer())
+      )).toList
+    }
 
     val pipelineOperators: List[PipelineOperator] = List(
       // new PipelineOperator {

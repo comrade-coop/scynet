@@ -1,5 +1,5 @@
 class Portfolio:
-    def __init__(self, starting_balance, starting_asset=0.0, commission=0.002):
+    def __init__(self, starting_balance, starting_asset=0.0, commission=0.0008):
         self.balance = starting_balance
         self.assets = starting_asset
         self.commission = commission

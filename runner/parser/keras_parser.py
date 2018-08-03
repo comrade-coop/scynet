@@ -45,7 +45,7 @@ def process_input_layer(layer, idx, window_length):
 
     config = {
         'shape': (window_length,) + tuple(config['shape']),
-        'name': source_cfg['config']['name'].replace(',', '_') + '-' + str(idx)
+        'name': (source_cfg['config']['name'] if 'name' in source_cfg['config'] else 'market').replace(',', '_') + '-' + str(idx)
     }
 
     layer_obj = keras_object(layer['type'], config)

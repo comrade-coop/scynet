@@ -92,6 +92,9 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
           println(s"Finished $shortHash for $duration seconds. Score: $scoreStr")
         } else {
           dispatchFitness(Double.NaN, Double.NaN, -1)
+          val oldPath: Path = Paths.get(s"../results/running-$shortHash")
+          val newPath: Path = Paths.get(s"../results/error-$shortHash")
+          movePath(oldPath, newPath, endTime)
           println(s"Finished $shortHash. Score: NaN")
         }
       },
@@ -109,9 +112,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   private def printError(strategy: String, errorText: String, shortHash: String): Unit = {
     val endTime = System.currentTimeMillis / 1000
-    val oldPath: Path = Paths.get(s"../results/running-$shortHash")
     val newPath: Path = Paths.get(s"../results/error-$shortHash")
-    movePath(oldPath, newPath, endTime)
 
     printToFile(new File(f"$newPath/error.txt")) { p =>
       p.println(s"chromosome = $strategy")
@@ -131,7 +132,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   private def movePath(oldPath: Path, newPath: Path, endTime: Long): Unit = {
     if(Files.exists(newPath)) {
-      val newPath2: Path = Paths.get(s"${newPath.getFileName().toString()}-$endTime")
+      val newPath2: Path = Paths.get(s"${newPath.toString()}-$endTime")
       Files.move(oldPath, newPath2)
     } else {
       Files.move(oldPath, newPath)

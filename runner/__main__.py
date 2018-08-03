@@ -33,6 +33,7 @@ def main():
 
         if os.path.isfile(files['weights']):
             currently_doing = 'loading saved weights'
+            logging.info('Found saved weights, loading...')
             model.load_weights(files['weights'])
         else:
             currently_doing = 'training'
@@ -80,9 +81,11 @@ def init(agent_folder, files):
         os.makedirs(agent_folder)
 
     logging.basicConfig(
-        format='%(asctime)s [%(levelname)s] %(message)s',
+        format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',
         datefmt='%Y-%m-%dT%H:%M:%S%z',
-        level=logging.INFO
+        level=logging.INFO,
+        filename=files['log'],
+        filemode='w'
     )
     logging._defaultFormatter.converter = time.gmtime
 
@@ -106,8 +109,6 @@ def build_model(json_conf, model_image_file):
 
     logging.info('Plotting model...')
     model.plot(model_image_file)
-
-    logging.info('Done!')
 
     return model, trainer
 

@@ -1,0 +1,90 @@
+{
+  "layers": [
+    {
+      "type": "Input",
+      "inputs": [],
+      "config": {
+        "shape": [
+          1
+        ],
+        "source": {
+          "type": "TalibSignalReader",
+          "config": {
+            "talib_function": "RSI",
+            "preprocess_window_length": 100
+          }
+        }
+      }
+    },
+    {
+      "type": "Input",
+      "inputs": [],
+      "config": {
+        "shape": [
+          3
+        ],
+        "source": {
+          "type": "TalibSignalReader",
+          "config": {
+            "talib_function": "BBANDS",
+            "preprocess_window_length": 100
+          }
+        }
+      }
+    },
+    {
+      "type": "Input",
+      "inputs": [],
+      "config": {
+        "shape": [
+          1
+        ],
+        "source": {
+          "type": "TalibSignalReader",
+          "config": {
+            "talib_function": "BETA",
+            "preprocess_window_length": 70
+          }
+        }
+      }
+    },
+    {
+      "type": "Concatenate",
+      "inputs": [
+        0,
+        1
+      ],
+      "config": {
+        "axis": 2
+      }
+    },
+    {
+      "type": "Concatenate",
+      "inputs": [
+        2,
+        3
+      ],
+      "config": {
+        "axis": 2
+      }
+    },
+    {
+      "type": "Dense",
+      "inputs": [
+        4
+      ],
+      "config": {
+        "units": 72
+      }
+    }
+  ],
+  "optimizer": {
+    "type": "Adam",
+    "config": {
+      "lr": 0.953125
+    }
+  },
+  "loss": "mean_squared_error",
+  "window_length": 2,
+  "batch_size": 1
+}
