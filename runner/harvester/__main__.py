@@ -46,7 +46,7 @@ def test_iterate_component(readers, component):
 
 def init():
     parser = argparse.ArgumentParser(description="harvester")
-    parser.add_argument('input', required=False, help='The JSON file input.')
+    parser.add_argument('--input', help='The JSON file input.')
     parser.add_argument('--test', help='Run tests.')
     args, _ = parser.parse_known_args()
 
@@ -56,6 +56,10 @@ def init():
         test_iterate(repositories)
         # test_iterate_component(repositories, 'high')
     else:
+        try:
+            os.mkdir(os.path.join(os.path.dirname(__file__), '../signals'))
+        except FileExistsError:
+            pass
         for source_name, source in repositories.items():
             for reader_name, reader in source.items():
                 print('Starting reader %s' % reader_name)

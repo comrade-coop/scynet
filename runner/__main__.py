@@ -4,6 +4,7 @@ import json
 import random
 import time
 import logging
+import importlib
 # from zlib import adler32
 from hashlib import md5
 
@@ -11,7 +12,6 @@ import tensorflow
 from keras import backend as K
 # from numpy.random import seed as numpy_seed
 from .trainer import Trainer
-from .rl import RLModel
 from .harvester import parse_repositories
 
 
@@ -102,7 +102,9 @@ def init(agent_folder, files):
 
 def build_model(json_conf, model_image_file):
     logging.info('Building model...')
-    model = RLModel(json_conf)
+    model_name = json_conf['type']
+    model_package = importlib.import_module('.%s' % model_name, package=__package__)
+    model = model_package.Model(json_conf)
 
     logging.info('Creating trainer...')
     trainer = Trainer(model.needed_signal_descriptors)

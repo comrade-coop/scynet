@@ -13,8 +13,10 @@ class TrainingSession:
         self.next_item = self.iterator.__next__()
         self.last_feedback = 0.0
         self.give_feedback_on = 'sell'
+        self.give_feedback_on_new_action = True
         self.last_feedback_total = 0.0
         self.last_price = 0.0
+        self.last_action = 'none'
         self.portfolio = FixedTransactionPortfolio(100.0)
         self.trades_output = trades_output
         self.trainer = trainer
@@ -44,14 +46,15 @@ class TrainingSession:
             self.portfolio.sell(self.get_price())
 
         self.last_feedback = 0.0
-        if action == self.give_feedback_on:
-            feedback_total = self.portfolio.get_total_balance(None)
+        if self.last_action != action or not self.give_feedback_on_new_action:
+            if action == self.give_feedback_on or self.give_feedback_on == 'any':
+                feedback_total = self.portfolio.get_total_balance(self.get_price())
 
-            if self.last_feedback_total != 0.0:
-                self.last_feedback = feedback_total / self.last_feedback_total
+                if self.last_feedback_total != 0.0:
+                    self.last_feedback = feedback_total - self.last_feedback_total
 
-            self.last_feedback_total = feedback_total
-
+                self.last_feedback_total = feedback_total
+        self.last_action = action
         self.last_price = self.get_price()
         self.current_item = self.next_item
         try:

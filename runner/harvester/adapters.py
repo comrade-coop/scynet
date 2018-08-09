@@ -5,8 +5,8 @@ from .adapter.data_server_adapter import DataServerSignalAdapter
 
 
 class_map = {
-    'dataserver': CryptocompareSignalAdapter,
-    'cryptocompare': DataServerSignalAdapter,
+    'dataserver': DataServerSignalAdapter,
+    'cryptocompare': CryptocompareSignalAdapter,
 }
 adapters = collections.defaultdict(lambda: {})
 

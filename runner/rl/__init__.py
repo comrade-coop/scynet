@@ -1,3 +1,3 @@
-from .model import RLModel
+from .model import RLModel as Model
 
-__all__ = ['RLModel']
+__all__ = ['Model']

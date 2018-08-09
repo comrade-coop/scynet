@@ -11,7 +11,7 @@ def collapse_single_item(li):
 
 
 class RLEnvironment():
-    action_space = SetSpace([0, 1])
+    action_space = SetSpace([0, 1, 2])
 
     def __init__(self, trainer):
         self.trainer = trainer
@@ -43,7 +43,7 @@ class RLEnvironment():
         return collapse_single_item(observation)
 
     def step(self, action):
-        self.training_session.give_action(['sell', 'buy'][action])
+        self.training_session.give_action(['sell', 'buy', 'none'][action])
         (date, observation) = self.training_session.get_observation()
 
         feedback = self.training_session.get_feedback()

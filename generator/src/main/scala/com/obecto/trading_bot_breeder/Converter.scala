@@ -92,7 +92,8 @@ object Converter {
 
 
     config = config ++ Map(
-      "layers" -> fixLayers(genome.chromosomes.filterNot(_ == configOpt.get).map(_.value.asInstanceOf[Map[Any, Any]]))
+      "layers" -> fixLayers(genome.chromosomes.filterNot(_ == configOpt.get).map(_.value.asInstanceOf[Map[Any, Any]])),
+      "type" -> "rl"
     )
 
     config
