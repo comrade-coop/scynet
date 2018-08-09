@@ -89,7 +89,7 @@ object Descriptors {
   //   "orthogonal"
   // ))
   val BooleanDescriptor = EnumGeneDescriptor(true, false)
-  val UnitsDescriptor = LongGeneDescriptor(8)
+  val UnitsDescriptor = LongGeneDescriptor(1, 600)
   // val ImageDataFormatDescriptor = EnumGeneDescriptor("channels_first", "channels_last")
   val ImageDataFormatDescriptor = EnumGeneDescriptor(List("channels_last"))
 
@@ -290,8 +290,7 @@ object Descriptors {
 
   val ConvBase = Seq(
     "filters" -> LongGeneDescriptor(1, 250),
-    "kernel_size" -> LongGeneDescriptor(1, 30), // NOTE: crashy
-    "padding" -> EnumGeneDescriptor("valid"), // "same" // whatever...
+    "padding" -> EnumGeneDescriptor("valid", "same"), // "same" // whatever...
     // "strides" -> LongGeneDescriptor(0, 3),
     "use_bias" -> BooleanDescriptor,
     "activity_regularizer" -> RegularizerDescriptor
@@ -300,30 +299,37 @@ object Descriptors {
     makeInitializerRegularizerConstraint("bias")
 
   val Conv1DLayer = makeLayer("Conv1D", 1, ConvBase ++ Seq(
-    "dilation_rate" -> LongGeneDescriptor(0, 10)
+    "dilation_rate" -> LongGeneDescriptor(1, 4),
+    "kernel_size" -> tupleify(1, LongGeneDescriptor(1, 30))
   ))
 
   val Conv2DLayer = makeLayer("Conv2D", List("Conv2D", "Conv2DTranspose"), 1, ConvBase ++ Seq(
-    "dilation_rate" -> LongGeneDescriptor(0, 10),
-    "data_format" -> ImageDataFormatDescriptor
+    "dilation_rate" -> LongGeneDescriptor(1, 4),
+    "data_format" -> ImageDataFormatDescriptor,
+    "kernel_size" -> tupleify(2, LongGeneDescriptor(1, 30))
   ))
 
   val SeparableConv2DLayer = makeLayer("SeparableConv2D", 1, ConvBase ++ Seq(
-    "dilation_rate" -> LongGeneDescriptor(0, 10),
-    "data_format" -> ImageDataFormatDescriptor
+    "dilation_rate" -> LongGeneDescriptor(1, 4),
+    "data_format" -> ImageDataFormatDescriptor,
+    "kernel_size" -> tupleify(2, LongGeneDescriptor(1, 30))
   ) ++
     makeInitializerRegularizerConstraint("depthwise") ++
     makeInitializerRegularizerConstraint("pointwise"))
 
   val Conv3DLayer = makeLayer("Conv3D", 1, ConvBase ++ Seq(
-    "dilation_rate" -> LongGeneDescriptor(0, 10),
-    "data_format" -> ImageDataFormatDescriptor
+    "dilation_rate" -> LongGeneDescriptor(1, 4),
+    "data_format" -> ImageDataFormatDescriptor,
+    "kernel_size" -> tupleify(3, LongGeneDescriptor(1, 30))
   ))
 
-  val LocallyConnected1DLayer = makeLayer("LocallyConnected1D", 1, ConvBase ++ Seq())
+  val LocallyConnected1DLayer = makeLayer("LocallyConnected1D", 1, ConvBase ++ Seq(
+    "kernel_size" -> tupleify(1, LongGeneDescriptor(1, 30))
+  ))
 
   val LocallyConnected2DLayer = makeLayer("LocallyConnected2D", 1, ConvBase ++ Seq(
-    "data_format" -> ImageDataFormatDescriptor
+    "data_format" -> ImageDataFormatDescriptor,
+    "kernel_size" -> tupleify(2, LongGeneDescriptor(1, 30))
   ))
 
   val CroppingLayers = Range.inclusive(1, 3).toList.map(dims => (0.3, makeLayer(s"Cropping${dims}D", 1, Seq(
@@ -447,7 +453,7 @@ object Descriptors {
     ),
     "batch_size" -> EnumGeneDescriptor(List(1)),
     "loss" -> EnumGeneDescriptor(List("mean_squared_error")),
-    "window_length" -> LongGeneDescriptor(1, 5)
+    "window_length" -> LongGeneDescriptor(1, 100)
   )
 
   /// Configs

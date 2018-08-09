@@ -71,7 +71,10 @@ This is the source code for the hive project.
     * Generator:
         ```bash
         cd generator/
-        sbt "run -- pipenv run python -m runner"
+        sbt "run <specify files to run separated with spaces> -- pipenv run python -m runner"
+
+        recovery: reads files from the recovery folder in the root direcotry
+        sbt "run recovery -- pipenv run python -m runner"
         # (Linux) At this point, you can press Ctrl-Z to pause the process
         # Then run `bg` to make it run in the background
         # And finally `disown` to get it separated from the shell

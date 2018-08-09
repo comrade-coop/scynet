@@ -5,14 +5,14 @@
       "type": "Input",
       "config": {
         "shape": [
-          80,
-          80
+          88,
+          92
         ],
         "source": {
           "type": "SignalReader",
           "config": {
-            "source": "cryptocompare",
-            "name": "market"
+            "source": "blockchain",
+            "name": "contractBalanceLastSeenDistribution_log1_2_v2"
           },
           "preprocessor": {
             "type": "RawPreprocessor",

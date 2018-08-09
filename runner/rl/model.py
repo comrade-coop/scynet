@@ -12,7 +12,7 @@ from rl.processors import MultiInputProcessor
 
 class RLModel(Model):
     # Steps
-    max_iterations = 10
+    max_iterations = 200
     iteration_learning_episodes = 2
 
     # Policy (exploration versus exploitation of actions)
