@@ -3,11 +3,9 @@ package com.obecto.trading_bot_breeder
 import com.obecto.gattakka.{Individual}
 import com.obecto.gattakka.genetics.{Genome}
 import com.obecto.gattakka.messages.individual.{Initialize}
-import java.io.{IOException, File, PrintWriter}
+import java.io.{IOException, File}
 import java.nio.file._
-import java.security.{MessageDigest}
 import scala.sys.process._
-import spray.json._
 import Math.{abs}
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
@@ -30,14 +28,13 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     }
   }
 
-  def dispatchFitness(fitness: Double, displayScore: Double, iterations: Int): Unit = {
+  def dispatchFitness(fitness: Double, displayScore: Double): Unit = {
     super.dispatchFitness(fitness)
     if (!fitness.isNaN) {
       val endTime = System.currentTimeMillis / 1000
       Utils.printToFile(new File(f"../results/running-${shortHash}/genome.txt")) { p =>
         p.println(s"fitness = $fitness")
         p.println(s"score = $displayScore")
-        p.println(s"iterations = $iterations")
         p.println(s"time = ${endTime - startTime}s")
         p.println(s"hash = $shortHash")
         p.println(s"chromosome = $strategy")
@@ -73,8 +70,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
         if (resultMap.contains("score")) {
           val score = resultMap.getOrElse("score", "0").toDouble
           val displayScore = resultMap.getOrElse("display_score", "0").toDouble
-          val iterations = resultMap.getOrElse("iterations", "-1").toInt
-          dispatchFitness(score, displayScore, iterations)
+          dispatchFitness(score, displayScore)
 
           val sign = if (displayScore > 0) 1 else 0
           val scoreStr = f"$sign${abs(displayScore)}%07.2f"
@@ -84,36 +80,21 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
           println(s"Finished $shortHash for $duration seconds. Score: $scoreStr")
         } else {
-          dispatchFitness(Double.NaN, Double.NaN, -1)
-          val oldPath: Path = Paths.get(s"../results/running-$shortHash")
-          val newPath: Path = Paths.get(s"../results/error-$shortHash")
-          movePath(oldPath, newPath, endTime)
-          println(s"Finished $shortHash. Score: NaN")
+          if (!stopping) {
+            dispatchFitness(Double.NaN, Double.NaN)
+            val oldPath: Path = Paths.get(s"../results/running-$shortHash")
+            val newPath: Path = Paths.get(s"../results/error-$shortHash")
+            movePath(oldPath, newPath, endTime)
+            println(s"Finished $shortHash. Score: NaN")
+          }
         }
       },
       err => {
-        val errorText = scala.io.Source.fromInputStream(err).mkString
+        while (err.read() != -1) {}
         err.close()
-
-        if(errorText contains "Traceback") {
-          printError(strategy, errorText, shortHash)
-        }
       })
 
     process = Process(Main.commandToRun, new File("../")) run io
-  }
-
-  private def printError(strategy: String, errorText: String, shortHash: String): Unit = {
-    val endTime = System.currentTimeMillis / 1000
-    val newPath: Path = Paths.get(s"../results/error-$shortHash")
-
-    Utils.printToFile(new File(f"$newPath/error.txt")) { p =>
-      p.println(s"chromosome = $strategy")
-      p.println(errorText)
-    }
-
-    val duration = endTime - startTime
-    println(f"Errored $shortHash for $duration seconds")
   }
 
   private def movePath(oldPath: Path, newPath: Path, endTime: Long): Unit = {

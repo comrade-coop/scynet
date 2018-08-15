@@ -2,6 +2,7 @@
 parser/examples/*
 !parser/examples/merge.json
 results/*
+recovery/
 !results/.gitkeep
 __pycache__
 model.png

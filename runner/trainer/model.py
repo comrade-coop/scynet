@@ -5,14 +5,17 @@ class Model:
     def plot(self, file_basename):
         pass
 
+    def is_trained(self):
+        return True
+
     def train(self, trainer):
         raise NotImplementedError()
 
     def test(self, training_session):
         raise NotImplementedError()
 
-    def save_weights(self, weights):
+    def save_state(self, file_basename):
         raise NotImplementedError()
 
-    def load_weights(self, weights):
+    def load_state(self, file_basename):
         raise NotImplementedError()

@@ -5,6 +5,7 @@ import random
 import time
 import logging
 import importlib
+import signal
 # from zlib import adler32
 from hashlib import md5
 
@@ -13,6 +14,9 @@ from keras import backend as K
 # from numpy.random import seed as numpy_seed
 from .trainer import Trainer
 from .harvester import parse_repositories
+
+
+logger = logging.getLogger('main')
 
 
 def main():
@@ -25,17 +29,28 @@ def main():
         currently_doing = 'initializing'
         init(agent_folder, files)
 
-        logging.info('Started agent')
-        logging.info('Chromosome: %s\n%s\n', short_hash, json.dumps(json_conf, indent=4))
+        logger.info('Started agent')
+        logger.info('Chromosome: %s\n%s\n', short_hash, json.dumps(json_conf, indent=4))
 
         currently_doing = 'building model'
         model, trainer = build_model(json_conf, files['model_preview'])
 
-        if os.path.isfile(files['weights']):
-            currently_doing = 'loading saved weights'
-            logging.info('Found saved weights, loading...')
-            model.load_weights(files['weights'])
-        else:
+        def finish_up(signum, stack):
+            logger.info('Received interrupt signal while %s, saving state', currently_doing)
+            model.save_state(files['state'])
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, finish_up)
+        signal.signal(signal.SIGTERM, finish_up)
+
+        try:
+            model.load_state(files['state'])
+            logger.info('Loaded saves state')
+        except OSError as exception:
+            logger.info('Found no saved state')
+            logger.debug('Got this exception while trying to read it:', exc_info=exception)
+
+        while not model.is_trained():
             currently_doing = 'training'
             train(model, trainer)
 
@@ -45,7 +60,7 @@ def main():
 
         currently_doing = 'saving results'
 
-        model.save_weights(files['weights'])
+        model.save_state(files['state'])
 
         print('score = {result}'.format(result=validation_score))
         print('display_score = {result}'.format(result=test_score))
@@ -53,7 +68,8 @@ def main():
 
         K.get_session().close()
     except BaseException as exception:
-        logging.error('Got exception while %s!', currently_doing, exc_info=exception)
+        if not isinstance(exception, SystemExit):
+            logger.error('Got exception while %s!', currently_doing, exc_info=exception)
         return
 
 
@@ -68,9 +84,13 @@ def get_inputs():
 
 def get_files_location(short_hash):
     agent_folder = 'results/running-%s' % short_hash
+    for filename in os.listdir('results'):
+        if short_hash in filename:
+            agent_folder = 'results/%s' % filename
+            break
     return (agent_folder, {
         'trades': agent_folder + '/trades.csv',
-        'weights': agent_folder + '/weights.h5f',
+        'state': agent_folder + '/state',
         'log': agent_folder + '/log.log',
         'model_preview': agent_folder + '/model',
     })
@@ -80,14 +100,18 @@ def init(agent_folder, files):
     if not os.path.exists(agent_folder):
         os.makedirs(agent_folder)
 
-    logging.basicConfig(
-        format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',
-        datefmt='%Y-%m-%dT%H:%M:%S%z',
-        level=logging.INFO,
-        filename=files['log'],
-        filemode='w'
-    )
-    logging._defaultFormatter.converter = time.gmtime
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] [%(name)s] %(message)s', '%Y-%m-%dT%H:%M:%S%z')
+    formatter.converter = time.gmtime
+
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setFormatter(formatter)
+
+    file_handler = logging.FileHandler(files['log'], mode='a')
+    file_handler.setFormatter(formatter)
+
+    logging.getLogger().addHandler(stderr_handler)
+    logging.getLogger().addHandler(file_handler)
+    logging.getLogger().setLevel(logging.INFO)
 
     parse_repositories('repositories.json')
 
@@ -101,28 +125,28 @@ def init(agent_folder, files):
 
 
 def build_model(json_conf, model_image_file):
-    logging.info('Building model...')
+    logger.info('Building model...')
     model_name = json_conf['type']
     model_package = importlib.import_module('.%s' % model_name, package=__package__)
     model = model_package.Model(json_conf)
 
-    logging.info('Creating trainer...')
+    logger.info('Creating trainer...')
     trainer = Trainer(model.needed_signal_descriptors)
 
-    logging.info('Plotting model...')
+    logger.info('Plotting model...')
     model.plot(model_image_file)
 
     return model, trainer
 
 
 def train(model, trainer):
-    logging.info('Starting training...')
+    logger.info('Model is not trained yet, training...')
     model.train(trainer)
-    logging.info('Training finished!')
+    logger.info('Training finished!')
 
 
 def test(model, trainer, episode, trades_output_file):
-    logging.info('Starting %s...', episode)
+    logger.info('Starting %s...', episode)
 
     trades_output = open(trades_output_file, 'a')
 
@@ -130,7 +154,7 @@ def test(model, trainer, episode, trades_output_file):
     model.test(session)
     score = session.get_result()
 
-    logging.info('%s finished! Score: %f', episode.capitalize(), score)
+    logger.info('%s finished! Score: %f', episode.capitalize(), score)
 
     return score
 

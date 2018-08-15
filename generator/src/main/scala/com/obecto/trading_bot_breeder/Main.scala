@@ -35,10 +35,8 @@ object Main extends App {
 
   if (commandToRun.length < 1) {
     println("Please give a command to run")
-    println("Something like `sbt \"run -- myexec myparams\"`")
+    println("Something like `sbt \"run input files -- myexec myparams\"`")
     println("The parameters JSON will then be passed over stdin to your executable")
-  } else if (filesToRead.length < 1) {
-    println("No initial genome files specified")
   } else {
     val inputGenomes = for (file <- filesToRead) yield {
       import spray.json._
