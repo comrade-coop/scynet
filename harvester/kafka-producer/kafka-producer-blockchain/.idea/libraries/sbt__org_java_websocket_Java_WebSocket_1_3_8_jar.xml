@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: org.java-websocket:Java-WebSocket:1.3.8:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.java-websocket/Java-WebSocket/jars/Java-WebSocket-1.3.8.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.java-websocket/Java-WebSocket/srcs/Java-WebSocket-1.3.8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

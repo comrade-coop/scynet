@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.github.jnr:jnr-enxio:0.14:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.jnr/jnr-enxio/jars/jnr-enxio-0.14.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.github.jnr/jnr-enxio/srcs/jnr-enxio-0.14-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

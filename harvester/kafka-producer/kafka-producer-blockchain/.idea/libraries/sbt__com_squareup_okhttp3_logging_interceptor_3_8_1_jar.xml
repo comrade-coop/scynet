@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: com.squareup.okhttp3:logging-interceptor:3.8.1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.squareup.okhttp3/logging-interceptor/jars/logging-interceptor-3.8.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.squareup.okhttp3/logging-interceptor/srcs/logging-interceptor-3.8.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

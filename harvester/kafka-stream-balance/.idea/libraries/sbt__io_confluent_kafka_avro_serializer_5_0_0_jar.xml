@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="sbt: io.confluent:kafka-avro-serializer:5.0.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/io.confluent/kafka-avro-serializer/jars/kafka-avro-serializer-5.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
