@@ -1,6 +1,6 @@
 package Actors
 
-import Actors.EggRegistry.{Egg, EggData, GetEgg}
+import Actors.EggRegistry.{EggData, GetEgg}
 import Actors.HatcheryController._
 import Actors.HyrdaliskProxy.{AllowConnection, DenyConnection}
 import Actors.ScynetConnector.Auth
@@ -21,18 +21,22 @@ class HatcheryController() extends Actor {
 
   val scynet = context.actorSelection("/user/scynet")
   val hydralisk = context.actorSelection("/user/hydralisk")
-  val queen = context.actorSelection("/user/hydralisk")
+  val queen = context.actorSelection("/user/queen")
+  val registry = context.actorSelection("/user/registry")
   val cluster = context.actorSelection("/user/cluster")
-  // TODO: 1 st, make a producer that publishes eggs on kafka.
-  // TODO: 2 nd, make it possible run eggs without consuming any data at the moment, just to have a protocol of agent execution
+  // TODO: [External] 1 st, make a producer that publishes eggs on kafka.
+  // TODO: [External] 2 nd, make it possible run eggs without consuming any data at the moment, just to have a protocol of agent execution
 
   override def receive = {
     case Run => {
 
     }
+    case EggProduced(egg: String, performance: Double) => {
+
+    }
     case RunEgg(egg, performance) => {
       val result = Promise[EggData]
-      queen ! GetEgg("", result)
+      registry ! GetEgg("", result)
       for(egg <- result.future){
         println(s"Execute: $egg")
       }

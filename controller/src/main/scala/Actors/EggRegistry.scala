@@ -1,11 +1,12 @@
 package Actors
 
-import Actors.EggRegistry.{CommitEgg, Egg, EggData, GetEgg}
+import Actors.EggRegistry._
 import akka.actor.Actor
 
 import scala.collection.mutable
 import scala.concurrent.Promise
 
+// TODO: Implement publish strategies, shouldn't we just publish all the eggs ???
 
 object EggRegistry {
   case class CommitEgg(egg: String, performance: Double)
