@@ -3,6 +3,7 @@ package Actors
 import Actors.EggRegistry.{EggData, GetEgg}
 import Actors.HatcheryController._
 import Actors.HyrdaliskProxy.{AllowConnection, DenyConnection}
+import Actors.QueenProxy.{EggProduced}
 import Actors.ScynetConnector.Auth
 import akka.actor.Actor
 import akka.util.Timeout
