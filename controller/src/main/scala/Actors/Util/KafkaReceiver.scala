@@ -7,7 +7,7 @@ import com.typesafe.config.Config
 import main.scala.Actors.Util.KafkaReceiver.{Record, SubscribeTopic}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-
+//
 import scala.collection.mutable
 
 
@@ -44,6 +44,7 @@ class KafkaReceiver(config: Config) extends Actor {
     case extractor(records) => {
       consumer ! Confirm(records.offsets, commit = true)
       for (record <- records.recordsList) {
+        println(s"Record: $record")
         table(record.topic()) ! Record(record.topic(), Option(record.key()), record.value())
       }
     }

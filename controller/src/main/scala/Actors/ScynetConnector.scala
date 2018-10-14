@@ -1,20 +1,20 @@
 package Actors
 
-import Actors.ScynetConnector._
+import Actors.ScynetConnector.Auth
 import akka.actor.Actor
-
 import scala.concurrent.Promise
 
 object ScynetConnector {
-  case class Auth(token: String, result: Promise[Boolean])
+  case class Auth(token: String)
 }
 class ScynetConnector extends Actor {
   override def receive = {
-    case Auth(token, promise) => {
+    case Auth(token) => {
       if(token == "obecto"){
-        promise.success(true)
+        sender() ! true
       }else {
-        promise.success(false)
+        sender() ! false
+
       }
     }
   }

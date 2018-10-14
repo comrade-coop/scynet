@@ -3,12 +3,15 @@ package Actors
 import Actors.EggRegistry.{EggData, GetEgg}
 import Actors.HatcheryController._
 import Actors.HyrdaliskProxy.{AllowConnection, DenyConnection}
-import Actors.QueenProxy.{EggProduced}
+import Actors.QueenProxy.{EggProduced, Start}
 import Actors.ScynetConnector.Auth
 import akka.actor.Actor
+import akka.pattern.ask
 import akka.util.Timeout
 
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future, Promise}
+import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 object HatcheryController {
@@ -19,6 +22,7 @@ object HatcheryController {
 }
 class HatcheryController() extends Actor {
   import context.dispatcher
+  implicit val timeout = Timeout(120 seconds)
 
   val scynet = context.actorSelection("/user/scynet")
   val hydralisk = context.actorSelection("/user/hydralisk")
@@ -36,18 +40,17 @@ class HatcheryController() extends Actor {
 
     }
     case RunEgg(egg, performance) => {
-      val result = Promise[EggData]
-      registry ! GetEgg("", result)
-      for(egg <- result.future){
+      for(egg <- registry ? GetEgg("")){
         println(s"Execute: $egg")
       }
+
+      queen ! Start("")
     }
     case NewConnection() => {
       println("new connection")
-      val result = Promise[Boolean]
-      scynet ! Auth("obecto", result) // TODO: Should come from connection
-      result.future.onComplete {
-        case Success(value) => {
+      val result = scynet ? Auth("obecto")
+      result.onComplete {
+        case Success(value: Boolean) => {
           if(value) {
             hydralisk ! AllowConnection()
           }else{
@@ -55,6 +58,9 @@ class HatcheryController() extends Actor {
           }
         }
         case Failure(ex) => {
+          hydralisk ! DenyConnection("error")
+        }
+        case _ => {
           hydralisk ! DenyConnection("error")
         }
       }
