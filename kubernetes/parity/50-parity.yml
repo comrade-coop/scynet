@@ -1,0 +1,44 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: parity
+  namespace: parity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parity
+  serviceName: parity
+  template:
+    metadata:
+      labels:
+        app: parity
+    spec:
+      containers:
+      - name: parity
+        image: parity/parity:v2.1.3
+        ports:
+        - containerPort: 5001
+        - containerPort: 8080
+        - containerPort: 8082
+        - containerPort: 8083
+        - containerPort: 8545
+        - containerPort: 8546
+        - containerPort: 8180
+        - containerPort: 30303
+          hostPort: 30303
+        - containerPort: 30303
+          hostPort: 30303
+          protocol: UDP
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/kafka/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: parity
+      resources:
+        requests:
+          storage: 150Gi
