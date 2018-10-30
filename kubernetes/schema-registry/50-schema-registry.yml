@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: schema-registry
+  namespace: schema-registry
+spec:
+  selector:
+    matchLabels:
+      app: schema-registry
+  serviceName: schema-registry
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: schema-registry
+      annotations:
+    spec:
+      containers:
+      - name: broker
+        image: confluentinc/cp-schema-registry:4.0.1
+        env:
+        - name: SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL
+          value: zookeeper.kafka
+        - name: SCHEMA_REGISTRY_HOST_NAME
+          value: schema-registry
+        - name: SCHEMA_REGISTRY_LISTENERS
+          value: http://0.0.0.0:8081
+        ports:
+        - containerPort: 8081

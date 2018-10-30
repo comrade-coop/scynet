@@ -2,13 +2,18 @@
 set -o errexit -o pipefail -o noclobber -o nounset
 
 # Via https://stackoverflow.com/a/14203146/4168713 (M2)
-opts=$(getopt -l 'telepresence' -o 't' -n "$0" -- "$@")
+opts=$(getopt -l 'telepresence,update' -o 'tu' -n "$0" -- "$@")
 telepresence_enabled=no
+force_update=no
 eval set -- "$opts"
 while true; do
   case "$1" in
     -t|--telepresence)
       telepresence_enabled=yes
+      shift
+      ;;
+    -u|--update)
+      force_update=yes
       shift
       ;;
     --)
@@ -33,6 +38,7 @@ function main {
   start_cluster
   start_kafka
   start_parity
+  start_schema_registry
   echo_ok "finished starting the development environment"
   if [ $telepresence_enabled != no ]; then
     run_telepresence
@@ -67,7 +73,7 @@ function start_cluster {
 
 function start_kafka {
   set_process "starting kafka"; echo
-  if kubectl get statefulset kafka --namespace=kafka >/dev/null 2>/dev/null; then
+  if kubectl get statefulset kafka --namespace=kafka >/dev/null 2>/dev/null && [ $force_update == no ]; then
     echo_ok "kafka already configured"
   else
     config_folder="`dirname $0`/kubernetes-kafka"
@@ -88,7 +94,7 @@ function start_kafka {
 
 function start_parity {
   set_process "starting parity"; echo
-  if kubectl get statefulset parity --namespace=parity >/dev/null 2>/dev/null; then
+  if kubectl get statefulset parity --namespace=parity >/dev/null 2>/dev/null && [ $force_update == no ]; then
     echo_ok "parity already configured"
   else
     config_folder="`dirname $0`/parity"
@@ -98,6 +104,18 @@ function start_parity {
     set_process "creating everything else"
     kubectl apply -f $config_folder/
     echo_ok "parity started"
+  fi
+}
+
+function start_schema_registry {
+  set_process "starting schema registry"; echo
+  if kubectl get statefulset schema-registry --namespace=schema-registry >/dev/null 2>/dev/null && [ $force_update == no ]; then
+    echo_ok "schema registry already configured"
+  else
+    config_folder="`dirname $0`/schema-registry"
+    set_process "creating schema registry"
+    kubectl apply -f $config_folder/
+    echo_ok "schema registry started"
   fi
 }
 
