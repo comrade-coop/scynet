@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+autokeras = "*"
+pandas = "*"
+confluent-kafka = {version = "*", extras = ["avro"]}
+keras = "*"
+flask = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
