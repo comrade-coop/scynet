@@ -1,29 +1,26 @@
 package ai.scynet
 
-import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.util.Properties
 
 import collection.JavaConverters._
 import org.apache.kafka.clients.producer._
-import com.sksamuel.avro4s._
 import org.apache.avro.generic.GenericRecord
-import org.web3j.protocol.ipc.UnixIpcService
 import org.web3j.protocol.parity.Parity
 import ai.scynet.implicits._
 import ai.scynet.messages._
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.response.EthBlock
-import org.web3j.protocol.core.methods.response.EthBlock.{TransactionObject, TransactionResult}
+import org.web3j.protocol.http.HttpService
 import org.web3j.protocol.parity.methods.response.Trace
 import org.web3j.protocol.parity.methods.response.Trace.{CallAction, CreateAction, RewardAction, SuicideAction}
 
+
+// TODO: move these in a different file, presumably kept as avro files that can be reused for other projects.
+// TODO: Check which field are nullable and make all of them Optional (it is possible to assume that all fields are nullable, but let's not do that. )
 object messages {
-  case class Block(hash: String, number: BigInteger, timeStamp: BigInteger, transactions: List[String])
-  case class Transaction(block: TransactionBlock, receipt: Receipt, chainId: Long, creates: Option[String], from: String, gas: BigInteger, gasPrice: BigInteger,
-                         hash: String, input: String, nonce: BigInteger, publicKey: String, to: Option[String], index: BigInteger, indexRaw: String, value: BigInteger, srv: SRV /* , traces: List[Trace] */)
-  case class TransactionBlock(hash: String, number: BigInteger)
+  case class Block(hash: String, number: BigInteger, timeStamp: BigInteger, transactions: List[Transaction], traces: List[Trace])
+  case class Transaction(receipt: Receipt, chainId: Long, creates: Option[String], from: String, gas: BigInteger, gasPrice: BigInteger,
+                         hash: String, input: String, nonce: BigInteger, publicKey: String, to: Option[String], index: BigInteger, indexRaw: String, value: BigInteger, srv: SRV , traces: List[Trace])
 
 
   case class SRV(S: String, R: String, V: Long)
@@ -32,7 +29,7 @@ object messages {
   case class Log()
 
   sealed trait Action
-  case class Trace(action: Action, result: Option[Result], block: TransactionBlock, error: Option[String], subtracesCount: BigInteger, traceAdress: List[BigInteger], transactionHash: Option[String], transactionPosition: Option[BigInteger], `type`: String)
+  case class Trace(action: Action, result: Option[Result], error: Option[String], subtracesCount: BigInteger, traceAdress: List[BigInteger], transactionHash: Option[String], transactionPosition: Option[BigInteger], `type`: String)
 
   case class Result(address: Option[String], code: Option[String], gasUsed: BigInteger, output: Option[String])
 
@@ -40,8 +37,6 @@ object messages {
   case class Reward(author: String, value: BigInteger, rewardType: String) extends Action
   case class Create(from: String, gas: BigInteger, init: String, value: BigInteger) extends Action
   case class Suicide(address: String, balance: BigInteger, refundAddress: String) extends Action
-  case class User(from: String) extends Action
-
 }
 
 object Main {
@@ -58,48 +53,42 @@ object Main {
     val result = Option(trace.getResult)
       .map(traceRsult => Result( Option(traceRsult.getAddress),  Option(traceRsult.getCode), traceRsult.getGasUsed, Option(traceRsult.getOutput)))
 
-    val block = TransactionBlock(trace.getBlockHash, trace.getBlockNumber)
-
-    val value = messages.Trace(action, result, block, Option(trace.getError), trace.getSubtraces, trace.getTraceAddress.asScala.toList, Option(trace.getTransactionHash), Option(trace.getTransactionPosition), trace.getType)
+    val value = messages.Trace(action, result, Option(trace.getError), trace.getSubtraces, trace.getTraceAddress.asScala.toList, Option(trace.getTransactionHash), Option(trace.getTransactionPosition), trace.getType)
 //    println(value)
     value
   }
 
   def main(args: Array[String]): Unit = {
+
     val properties = new Properties()
-    properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.188:9092")
-    //    properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
-    //    properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ser.getClass.getName)
+    properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sys.env.getOrElse("BROKER", "127.0.0.1:9092") )
     properties.put("acks", "1")
     properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     properties.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer")
-    properties.put("schema.registry.url", "http://192.168.1.188:8081")
+    properties.put("schema.registry.url", sys.env.getOrElse("SCHEMA_REGISTRY", "http://127.0.0.1:8081") )
 
     val producer = new KafkaProducer[String, GenericRecord](properties)
 
-    val web3j = Parity.build(new UnixIpcService("/run/media/alex4o/cbdd8c04-ebe5-4763-84e7-af1b584f79fd/eth_chain/jsonrpc.ipc"))
+    // TODO: Use websockets it will be better/faster
+    val web3j = Parity.build(new HttpService(sys.env.getOrElse("PARITY", "http://127.0.0.1:8545") ))
+    web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).map(blockResult => blockResult.getBlock).subscribe((block : EthBlock.Block) => {
 
-    web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).subscribe(blockResult => {
-      val block = blockResult.getBlock
       println(s"Getting transactions for block: ${block.getNumber}")
 
+      // TODO: It is slow to query the traces 2 times, find a way to do it only once. (HashMaps for the win?)
+      lazy val blockTraces = web3j.traceBlock(block.getNumber).send().getTraces.asScala.filter(trace => trace.getTransactionHash == null).map(transformTrace).toList
 
-      web3j.traceBlock(block.getNumber).send().getTraces.asScala.filter(trace => trace.getTransactionHash == null).map(transformTrace(_)).foreach(trace => {
-        producer.send(new ProducerRecord[String, GenericRecord]("traces", trace.block.number.toString, trace))
-      })
-
-      block.getTransactions.forEach(r => {
+      lazy val transactions = block.getTransactions.asScala.map(r => {
         val t : EthBlock.TransactionObject = r.asInstanceOf[EthBlock.TransactionObject]
-        val block = TransactionBlock(t.getBlockHash, t.getBlockNumber)
 
         println(s"transaction from: ${t.getFrom}")
 
         // TODO: Save Logs, because they are needed for the ERC20 tokens, and the FUTURE
 
         val receipt = web3j.ethGetTransactionReceipt(t.getHash).sendAsync().get().getTransactionReceipt.get()
+        val traces = web3j.traceTransaction(t.getHash).send().getTraces.asScala.map(transformTrace).toList
 
-        val transaction = Transaction(
-          TransactionBlock(t.getBlockHash, t.getBlockNumber),
+        Transaction(
           Receipt(receipt.getGasUsed, Option(receipt.getStatus)),
           t.getChainId,
           Option(t.getCreates),
@@ -114,70 +103,27 @@ object Main {
           t.getTransactionIndex,
           t.getTransactionIndexRaw,
           t.getValue,
-          SRV(t.getS, t.getR, t.getV))
+          SRV(t.getS, t.getR, t.getV),
+          traces)
+      }).toList
 
-        // TODO: Store both gas price and gas used
-        val transactionTrace = messages.Trace(User(transaction.from), Option(Result(None, None, receipt.getGasUsed.multiply(t.getGasPrice), None)), block, None, 0, List(), Option(t.getHash), Option(t.getTransactionIndex), "Transaction" )
+      val result = Block(block.getHash, block.getNumber, block.getTimestamp, transactions, blockTraces)
+      val record = new ProducerRecord[String, GenericRecord]("etherium_blocks", block.getNumber.toString, result)
 
-        // TODO: Make sending records look better
-        producer.send(new ProducerRecord[String, GenericRecord]("traces", transactionTrace.block.number.toString, transactionTrace)).get()
-        println("produced")
-        val traces = web3j.traceTransaction(t.getHash).send().getTraces.asScala.map(transformTrace).foreach(trace => {
-          producer.send(new ProducerRecord[String, GenericRecord]("traces", trace.block.number.toString, trace))
-        })
-
-//        println(transaction)
-        val record = new ProducerRecord[String, GenericRecord]("transactions", transaction.hash, transaction)
-
-        producer.send(record, (metadata: RecordMetadata, exception: Exception) => {
-          if(exception != null){
-            println(s"error: ${exception}")
-          }
-          println(s"Finished transaction for block: ${block.number}")
-        })
+      producer.send(record, (metadata: RecordMetadata, exception: Exception) => {
+        if(exception != null){
+          println(s"error: ${exception}")
+        }else{
+          println(s"Finished producing block: ${block.getNumber}")
+        }
       })
-
-      val transactionHashes = block.getTransactions.asScala.map(transaction => transaction.asInstanceOf[TransactionObject].get()).map(transaction => transaction.getHash).toList
-      producer.send(new ProducerRecord[String, GenericRecord]("blocks", block.getNumber.toString, Block(block.getHash, block.getNumber, block.getTimestamp, transactionHashes)))
 
     })
 
     sys.addShutdownHook({
       producer.flush()
       producer.close()
-
       println("Cleaned up")
     })
-
-//    web3j.catchUpToLatestAndSubscribeToNewTransactionsObservable(0).subscribe(t => {
-//
-////      transaction.get
-//      println(t.getTransactionIndexRaw)
-//
-//      val transaction = Transaction(
-//         Block(t.getBlockHash, t.getBlockNumber),
-//         t.getChainId,
-//         t.getCreates,
-//         t.getFrom,
-//         t.getGas,
-//         t.getGasPrice,
-//         t.getHash,
-//         t.getInput,
-//         t.getNonce,
-//         t.getPublicKey,
-//         t.getTo,
-//         t.getTransactionIndex,
-//         t.getTransactionIndexRaw,
-//         t.getValue)
-//
-//
-//        producer.send(new ProducerRecord[String, GenericRecord]("transactions", transaction.indexRaw, transaction))
-//    })
-
-
-
-//      producer.send(new ProducerRecord[String, GenericRecord]("words", lineNumber.toString , Text( Coproduct[Data]( Line(12, line)) ) ))
-//      producer.send(new ProducerRecord[String, GenericRecord]("words", lineNumber.toString , Text( Coproduct[Data]( Words(line.split(" "))) ) ))
-
   }
 }

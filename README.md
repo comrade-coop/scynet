@@ -1,4 +1,4 @@
-# Hive
+# Scynet 
 
 This is the source code for the Scynet project.
 

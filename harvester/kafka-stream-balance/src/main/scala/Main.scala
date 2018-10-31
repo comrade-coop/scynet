@@ -62,13 +62,15 @@ object Main {
     materializedSS.withCachingDisabled()
 //    materialized.withLoggingEnabled(config.asScala.asJava)
 
-    val traceStream = builder.stream[Array[Byte], GenericRecord]("traces")
-    val format = RecordFormat[Trace]
+    val stream = builder.stream[String, GenericRecord]("etherium_blocks")
 
-    val result = traceStream.flatMap((key, value) => {
-      val trace = format.from(value)
-      println(trace)
-      trace.action match {
+    val format = RecordFormat[Block]
+
+    val result = stream.flatMap((key, value) => {
+      val block = format.from(value)
+
+      block.transactions.foldLeft( block.traces.toIterator )(_ ++ _.traces.iterator)
+        .map(_.action).flatMap {
         case call: Call => {
           Array((call.from, call.value.negate()), (call.to, call.value))
         }
@@ -82,10 +84,7 @@ object Main {
         case suicide: Suicide => {
           Array[(String, BigInteger)]()
         }
-        case user: User => {
-          Array((user.from, trace.result.get.gasUsed.negate()))
-        }
-       }
+       }.toList
     }).mapValues(transfer => transfer.toByteArray)
       .groupByKey
       .aggregate({ BigInt(0).toString() })(( key, value, previous ) => {
