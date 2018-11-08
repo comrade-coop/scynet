@@ -1,0 +1,26 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: producer-blockchain
+  namespace: harvester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer-blockchain
+  serviceName: producer-blockchain
+  template:
+    metadata:
+      labels:
+        app: producer-blockchain
+    spec:
+      containers:
+      - name: producer-blockchain
+        image: scynet/kafka-producer-blockchain:0.1
+        env:
+        - name: BROKER
+          value: broker.kafka:9092
+        - name: SCHEMA_REGISTRY
+          value: http://schemaregistry.schema-registry:8081
+        - name: PARITY
+          value: http://parity.parity:8545

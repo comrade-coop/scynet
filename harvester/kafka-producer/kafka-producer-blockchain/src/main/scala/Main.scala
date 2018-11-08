@@ -71,7 +71,7 @@ object Main {
 
     // TODO: Use websockets it will be better/faster
     val web3j = Parity.build(new HttpService(sys.env.getOrElse("PARITY", "http://127.0.0.1:8545") ))
-    web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).map(blockResult => blockResult.getBlock).subscribe((block : EthBlock.Block) => {
+    web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).map[EthBlock.Block](blockResult => blockResult.getBlock).subscribe(block => {
 
       println(s"Getting transactions for block: ${block.getNumber}")
 

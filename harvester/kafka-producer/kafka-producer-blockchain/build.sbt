@@ -1,11 +1,12 @@
 name := "kafka-producer-blockchain"
-
+organization := "scynet"
 version := "0.1"
 
 scalaVersion := "2.12.6"
 
 
 resolvers += "micronautics/scala on bintray" at "http://dl.bintray.com/micronautics/scala"
+resolvers += "confluent" at "http://packages.confluent.io/maven/"
 
 //libraryDependencies += "com.micronautics" %% "web3j-scala" % "0.3.1" withSources()
 
