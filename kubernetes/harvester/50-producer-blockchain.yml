@@ -21,6 +21,6 @@ spec:
         - name: BROKER
           value: broker.kafka:9092
         - name: SCHEMA_REGISTRY
-          value: http://schemaregistry.schema-registry:8081
+          value: http://schema-registry.schema-registry:8081
         - name: PARITY
           value: http://parity.parity:8545

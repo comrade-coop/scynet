@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-rest
+  namespace: kafka-add
+spec:
+  ports:
+  - port: 8082
+  selector:
+    app: kafka-rest

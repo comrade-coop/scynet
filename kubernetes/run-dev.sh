@@ -4,14 +4,35 @@ set -o errexit -o pipefail -o noclobber -o nounset
 logfile=run-dev.log
 
 # Via https://stackoverflow.com/a/14203146/4168713 (M2)
-opts=$(getopt -l 'telepresence' -o 't' -n "$0" -- "$@")
+opts=$(getopt -l 'verbose,dry-run,telepresence,help' -o 'vzth' -n "$0" -- "$@")
 telepresence_enabled=no
+verbose=no
+dry_run=no
 eval set -- "$opts"
 while true; do
   case "$1" in
+    -v|--verbose)
+      verbose=yes
+      shift
+      ;;
+    -z|--dry-run)
+      dry_run=yes
+      shift
+      ;;
     -t|--telepresence)
       telepresence_enabled=yes
       shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 [OPTION]..."
+      echo "Starts a Scynet cluster using minikube, and optionally connects to it via telepresence."
+      echo ""
+      echo "Options:"
+      echo "  -t, --telepresence         start telepresence after configuring the cluster"
+      echo "  -v, --verbose              show commands being run and their output"
+      echo "  -z, --dry-run              only check if all dependencies are present, do nothing else"
+      echo "  -h, --help                 show this help page"
+      exit 0
       ;;
     --)
       shift
@@ -32,15 +53,19 @@ function main {
     needed+="telepresence "
   fi
   ensure_intalled $needed
-  start_cluster
-  start_kafka
-  start_parity
-  start_schema_registry
-  build_harvester
-  start_harvester
-  echo_ok "finished starting the development environment"
-  if [ $telepresence_enabled != no ]; then
-    run_telepresence
+  if [ $dry_run != no ]; then
+    echo_ok "finished checking dependencies"
+  else
+    start_cluster
+    start_kafka
+    start_kafka_additions
+    start_parity
+    build_harvester
+    start_harvester
+    echo_ok "finished starting the development environment"
+    if [ $telepresence_enabled != no ]; then
+      run_telepresence
+    fi
   fi
 }
 
@@ -98,18 +123,18 @@ function start_parity {
   echo_ok "configured parity"
 }
 
-function start_schema_registry {
-  config_folder="`dirname $0`/schema-registry"
-  set_process "configuring schema registry"; echo
+function start_kafka_additions {
+  config_folder="`dirname $0`/kafka-additions"
+  set_process "configuring addtional services for kafka"; echo
   run kubectl apply -f $config_folder/
-  echo_ok "configured schema registry"
+  echo_ok "configured addtional services for kafka"
 }
 
 function build_harvester {
   set_process "building harvester components"; echo
   run eval `minikube docker-env`
   set_process "building kafka-producer-blockchain"
-  (run cd ../harvester/kafka-producer/kafka-producer-blockchain; run sbt docker)
+  (run cd ../harvester/kafka-producer/kafka-producer-blockchain; run sbt -no-colors docker)
   echo_ok "built kafka-producer-blockchain"
 }
 
@@ -135,18 +160,23 @@ function run_telepresence {
   echo "Will now run your current shell inside telepresence."
   echo "You may be prompted for sudo access, as it needs it to set things up."
   echo "You can stop it at any time by ^D (Ctrl-D) or typing exit"
-  run_noredirect telepresence --namespace telepresence --also-proxy=172.17.0.0/16 --run $user_shell
-  echo_ok "Telepresence session finished"
+  echo_ok "running telepresence"
+  run_noredirect telepresence --namespace telepresence --also-proxy=172.17.0.0/16 --run $user_shell || :
+  echo_ok "telepresence session finished"
 }
 
 function run {
   echo "[ RUN] $@" >> run-dev.log
-  "$@" >> run-dev.log 2>> run-dev.log
+  if [ $verbose != no ]; then
+    echo "  \$ $@"
+    "$@" 2>&1 > >(tee -a run-dev.log | indent)
+  else
+    "$@" 2>&1 >> run-dev.log
+  fi
 }
 
 function run_noredirect {
   echo "[ RUN] $@" >> run-dev.log
-  echo "(output not redirected)" >> run-dev.log
   "$@"
 }
 
@@ -158,26 +188,30 @@ function print_process {
 
 function set_process {
   current_process="$@"
-  echo "[PART] ${current_process^}..." >> run-dev.log
+  echo "[....] ${current_process^}..." >> run-dev.log
   print_process
 }
 
 function handle_exit {
   echo_fail "An error occured while $current_process"
   echo -e "Here is a snip of the last 10 lines of \e[0;31m$logfile\e[0m:"
-  head -n-1 $logfile | tail -n10
+  head -n-1 $logfile | tail -n10 | indent
 }
 
 function echo_ok {
   echo "[ OK ] ${@^}!" >> run-dev.log
-  echo -e "\e[2K[\e[0;32m OK \e[0m] ${@^}!"
+  echo -e "\r\e[2K[\e[0;32m OK \e[0m] ${@^}!"
   print_process
 }
 
 function echo_fail {
   echo "[FAIL] ${@^}!" >> run-dev.log
-  echo -e "\e[2K[\e[0;31mFAIL\e[0m] ${@^}!"
+  echo -e "\r\e[2K[\e[0;31mFAIL\e[0m] ${@^}!"
   print_process
+}
+
+function indent {
+  sed 's/^/  /'
 }
 
 trap handle_exit EXIT

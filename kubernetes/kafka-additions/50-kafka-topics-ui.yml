@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-topics-ui
+  namespace: kafka-add
+spec:
+  selector:
+    matchLabels:
+      app: kafka-topics-ui
+  serviceName: kafka-topics-ui
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: kafka-topics-ui
+      annotations:
+    spec:
+      containers:
+      - name: broker
+        image: landoop/kafka-topics-ui:0.9.4
+        env:
+        - name: KAFKA_REST_PROXY_URL
+          value: kafka-rest.kafka-add
+        - name: PROXY
+          value: "true"
+        ports:
+        - containerPort: 8000

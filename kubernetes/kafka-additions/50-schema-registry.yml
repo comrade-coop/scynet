@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: schema-registry
-  namespace: schema-registry
+  namespace: kafka-add
 spec:
   selector:
     matchLabels:
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: broker
-        image: confluentinc/cp-schema-registry:4.0.1
+        image: confluentinc/cp-schema-registry:5.0.1
         env:
         - name: SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL
           value: zookeeper.kafka
@@ -29,3 +29,5 @@ spec:
           value: http://0.0.0.0:8081
         ports:
         - containerPort: 8081
+        # HACK: Since schema registry uses SCHEMA_REGISTRY_PORT for configuration, we have to unset the one from kubernetes
+        command: ["bash", "-c", "unset SCHEMA_REGISTRY_PORT; /etc/confluent/docker/run"]
