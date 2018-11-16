@@ -1,21 +1,17 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: kafka-rest
   namespace: kafka-add
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: kafka-rest
-  serviceName: kafka-rest
-  replicas: 1
-  updateStrategy:
-    type: OnDelete
   template:
     metadata:
       labels:
         app: kafka-rest
-      annotations:
     spec:
       containers:
       - name: broker
@@ -24,7 +20,7 @@ spec:
         - name: KAFKA_REST_ZOOKEEPER_CONNECT
           value: zookeeper.kafka
         - name: KAFKA_REST_SCHEMA_REGISTRY_URL
-          value: schema-registry.kafka-add:8081
+          value: http://schema-registry.kafka-add:80
         - name: KAFKA_REST_HOST_NAME
           value: kafka-rest
         - name: KAFKA_REST_LISTENERS

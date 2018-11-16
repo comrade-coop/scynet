@@ -1,21 +1,17 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: schema-registry
   namespace: kafka-add
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: schema-registry
-  serviceName: schema-registry
-  replicas: 1
-  updateStrategy:
-    type: OnDelete
   template:
     metadata:
       labels:
         app: schema-registry
-      annotations:
     spec:
       containers:
       - name: broker

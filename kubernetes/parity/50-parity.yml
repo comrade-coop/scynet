@@ -37,7 +37,6 @@ spec:
         - ./entrypoint.sh
         - --config=insecure
         - --tracing=on
-        - --min-peers=0
   volumeClaimTemplates:
   - metadata:
       name: data

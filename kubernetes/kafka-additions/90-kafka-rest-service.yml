@@ -5,6 +5,7 @@ metadata:
   namespace: kafka-add
 spec:
   ports:
-  - port: 8082
+  - port: 80
+    targetPort: 8082
   selector:
     app: kafka-rest
