@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Properties
 
 import org.apache.kafka.streams.state._
-import com.sksamuel.avro4s.{FromRecord, RecordFormat, ToRecord}
+import com.sksamuel.avro4s.{FromRecord, RecordFormat}
 import io.confluent.kafka.streams.serdes.avro.{GenericAvroSerde, SpecificAvroSerde}
 import org.apache.avro.generic.{GenericData, GenericDatumReader, GenericDatumWriter, GenericRecord}
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -13,7 +13,7 @@ import org.apache.kafka.common.serialization.{Deserializer, Serde, Serdes, Seria
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.apache.kafka.streams.kstream._
 import org.apache.kafka.streams.scala._
-
+import implicits._
 import collection.JavaConverters._
 
 object Main {
@@ -58,6 +58,7 @@ object Main {
     val df:SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
 
     val stream = builder.stream[String, GenericRecord]("etherium_blocks")
+
 
     val formatBlock = RecordFormat[Block]
 

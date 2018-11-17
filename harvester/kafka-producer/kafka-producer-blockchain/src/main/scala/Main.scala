@@ -63,62 +63,69 @@ object Main {
     val properties = new Properties()
     properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, sys.env.getOrElse("BROKER", "127.0.0.1:9092") )
     properties.put("acks", "1")
-    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    // properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    properties.put("key.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer")
     properties.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer")
     properties.put("schema.registry.url", sys.env.getOrElse("SCHEMA_REGISTRY", "http://127.0.0.1:8081") )
 
     val producer = new KafkaProducer[String, GenericRecord](properties)
 
+
     // TODO: Use websockets it will be better/faster
     val web3j = Parity.build(new HttpService(sys.env.getOrElse("PARITY", "http://127.0.0.1:8545") ))
-    web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).map[EthBlock.Block](blockResult => blockResult.getBlock).subscribe(block => {
+    try {
+      web3j.catchUpToLatestAndSubscribeToNewBlocksObservable(50785, true).subscribe((blockProxy) => {
+        val block = blockProxy.getBlock
+        println(s"Getting transactions for block: ${block.getNumber}")
 
-      println(s"Getting transactions for block: ${block.getNumber}")
+        // TODO: It is slow to query the traces 2 times, find a way to do it only once. (HashMaps for the win?)
+        lazy val blockTraces = web3j.traceBlock(block.getNumber).send().getTraces.asScala.filter(trace => trace.getTransactionHash == null).map(transformTrace).toList
 
-      // TODO: It is slow to query the traces 2 times, find a way to do it only once. (HashMaps for the win?)
-      lazy val blockTraces = web3j.traceBlock(block.getNumber).send().getTraces.asScala.filter(trace => trace.getTransactionHash == null).map(transformTrace).toList
+        lazy val transactions = block.getTransactions.asScala.map(r => {
+          val t: EthBlock.TransactionObject = r.asInstanceOf[EthBlock.TransactionObject]
 
-      lazy val transactions = block.getTransactions.asScala.map(r => {
-        val t : EthBlock.TransactionObject = r.asInstanceOf[EthBlock.TransactionObject]
+          println(s"transaction from: ${t.getFrom}")
 
-        println(s"transaction from: ${t.getFrom}")
+          // TODO: Save Logs, because they are needed for the ERC20 tokens, and the FUTURE
 
-        // TODO: Save Logs, because they are needed for the ERC20 tokens, and the FUTURE
+          val receipt = web3j.ethGetTransactionReceipt(t.getHash).sendAsync().get().getTransactionReceipt.get()
+          val traces = web3j.traceTransaction(t.getHash).send().getTraces.asScala.map(transformTrace).toList
 
-        val receipt = web3j.ethGetTransactionReceipt(t.getHash).sendAsync().get().getTransactionReceipt.get()
-        val traces = web3j.traceTransaction(t.getHash).send().getTraces.asScala.map(transformTrace).toList
+          Transaction(
+            Receipt(receipt.getGasUsed, Option(receipt.getStatus)),
+            t.getChainId,
+            Option(t.getCreates),
+            t.getFrom,
+            t.getGas,
+            t.getGasPrice,
+            t.getHash,
+            t.getInput,
+            t.getNonce,
+            t.getPublicKey,
+            Option(t.getTo),
+            t.getTransactionIndex,
+            t.getTransactionIndexRaw,
+            t.getValue,
+            SRV(t.getS, t.getR, t.getV),
+            traces)
+        }).toList
 
-        Transaction(
-          Receipt(receipt.getGasUsed, Option(receipt.getStatus)),
-          t.getChainId,
-          Option(t.getCreates),
-          t.getFrom,
-          t.getGas,
-          t.getGasPrice,
-          t.getHash,
-          t.getInput,
-          t.getNonce,
-          t.getPublicKey,
-          Option(t.getTo),
-          t.getTransactionIndex,
-          t.getTransactionIndexRaw,
-          t.getValue,
-          SRV(t.getS, t.getR, t.getV),
-          traces)
-      }).toList
+        val result = Block(block.getHash, block.getNumber, block.getTimestamp, transactions, blockTraces)
+        val record = new ProducerRecord[String, GenericRecord]("etherium_blocks", block.getNumber.toString, result)
 
-      val result = Block(block.getHash, block.getNumber, block.getTimestamp, transactions, blockTraces)
-      val record = new ProducerRecord[String, GenericRecord]("etherium_blocks", block.getNumber.toString, result)
+        producer.send(record, (metadata: RecordMetadata, exception: Exception) => {
+          if (exception != null) {
+            println(s"error: ${exception}")
+          } else {
+            println(s"Finished producing block: ${block.getNumber}")
+          }
+        })
 
-      producer.send(record, (metadata: RecordMetadata, exception: Exception) => {
-        if(exception != null){
-          println(s"error: ${exception}")
-        }else{
-          println(s"Finished producing block: ${block.getNumber}")
-        }
       })
+    }catch {
+      case _ => sys.exit(0)
 
-    })
+    }
 
     sys.addShutdownHook({
       producer.flush()

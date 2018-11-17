@@ -1,0 +1,20 @@
+{
+  "namespace": "ai.scynet",
+  "name": "DataFrame",
+  "type": "record",
+  "fields": [
+    {
+      "name": "dataframe",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items" : "double"
+          }
+        }
+      }
+    }
+  ]
+}

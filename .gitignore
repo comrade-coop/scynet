@@ -10,3 +10,6 @@ lib
 *.ipr
 *.iws
 .cache
+.vscode
+*.class
+out

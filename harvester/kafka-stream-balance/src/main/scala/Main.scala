@@ -37,7 +37,7 @@ object Main {
     val config: Properties = {
       val p = new Properties()
       p.put(StreamsConfig.APPLICATION_ID_CONFIG, "sample")
-      val bootstrapServers = if (args.length > 0) args(0) else "192.168.1.188:9092"
+      val bootstrapServers = sys.env.getOrElse("BROKER", "127.0.0.1:9092")
       p.put(StreamsConfig.consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG), "earliest")
       p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
       p.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass.getName)
@@ -45,14 +45,14 @@ object Main {
       p.put("cleanup.policy", TopicConfig.CLEANUP_POLICY_COMPACT)
       p.put("segment.ms", "0")
 
-      p.put("schema.registry.url", "http://192.168.1.188:8081")
+      p.put("schema.registry.url", sys.env.getOrElse("SCHEMA_REGISTRY", "http://127.0.0.1:8081"))
       p
     }
 
     val builder = new StreamsBuilder()
     genericAvro.configure(config.asScala.asJava, false)
 
-    implicit val consumed : Consumed[Array[Byte], GenericRecord] = Consumed.`with`(Serdes.ByteArray(), genericAvro)
+    implicit val consumed : Consumed[String, GenericRecord] = Consumed.`with`(Serdes.String(), genericAvro)
     implicit val serialized: Serialized[String, Array[Byte]] = Serialized.`with`(Serdes.String(), Serdes.ByteArray())
 //    implicit val materialized: Materialized[String, Array[Byte], ByteArrayKeyValueStore] = Materialized.as("balance_accounts")
     implicit val materializedSS: Materialized[String, String, ByteArrayKeyValueStore] = Materialized.as("balance_accounts_SS")

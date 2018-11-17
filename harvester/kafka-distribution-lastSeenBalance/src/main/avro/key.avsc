@@ -1,0 +1,12 @@
+{
+  "namespace": "ai.scynet",
+  "name": "Key",
+  "type": "record",
+  "fields": [
+    {
+      "name": "index",
+      "type": "int"
+    }
+
+  ]
+}
