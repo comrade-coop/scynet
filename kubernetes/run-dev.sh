@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o pipefail -o noclobber -o nounset
 
-logfile=run-dev.log
+logfile=$(pwd)/run-dev.log
 
 # Via https://stackoverflow.com/a/14203146/4168713 (M2)
 opts=$(getopt -l 'verbose,dry-run,telepresence,help' -o 'vzth' -n "$0" -- "$@")
@@ -53,6 +53,7 @@ function main {
     needed+="telepresence "
   fi
   ensure_intalled $needed
+  ensure_submodules
   if [ $dry_run != no ]; then
     echo_ok "finished checking dependencies"
   else
@@ -73,7 +74,7 @@ function ensure_intalled {
   set_process "checking dependencies"; echo
   should_exit=''
   for i in $@; do
-    if command -v $i >/dev/null 2>&1; then
+    if command -v $i &>/dev/null; then
       echo_ok "$i found"
     else
       echo_fail "$i is needed to run this script, but not installed"
@@ -85,12 +86,23 @@ function ensure_intalled {
   fi
 }
 
+function ensure_submodules {
+  set_process "checking submodules"; echo
+  if [ -n "$(git submodule status | grep -e '^-')" ]; then
+    echo_fail "submodules are not initialized correctly"
+    echo_fail "try running 'git submodule update --init --recursive'"
+    exit 1
+  else
+    echo_ok "all submodules are initialized"
+  fi
+}
+
 function start_cluster {
   set_process "starting cluster"
   if minikube status >/dev/null; then
     echo_ok "cluster already running"
   else
-    run minikube start --kubernetes-version=v1.11.0 --memory 3072 --disk-size 40g
+    run minikube start --kubernetes-version=v1.11.0 --memory 4096 --disk-size 40g
     echo_ok "started cluster"
   fi
 }
@@ -135,6 +147,10 @@ function build_harvester {
   run eval `minikube docker-env`
   set_process "building kafka-producer-blockchain"
   (run cd ../harvester/kafka-producer/kafka-producer-blockchain; run sbt -no-colors docker)
+  set_process "building kafka-stream-balance"
+  (run cd ../harvester/kafka-stream-balance; run sbt -no-colors docker)
+  set_process "building kafka-stream-lastSeen"
+  (run cd ../harvester/kafka-stream-lastSeen; run sbt -no-colors docker)
   echo_ok "built kafka-producer-blockchain"
 }
 
@@ -159,59 +175,65 @@ function run_telepresence {
   echo -n -e "\e[2K"
   echo "Will now run your current shell inside telepresence."
   echo "You may be prompted for sudo access, as it needs it to set things up."
-  echo "You can stop it at any time by ^D (Ctrl-D) or typing exit"
+  echo "You can stop it at any time by ^D (Ctrl-D) or by typing 'exit'"
   echo_ok "running telepresence"
   run_noredirect telepresence --namespace telepresence --also-proxy=172.17.0.0/16 --run $user_shell || :
   echo_ok "telepresence session finished"
 }
 
 function run {
-  echo "[ RUN] $@" >> run-dev.log
+  echo "[ RUN] $@" >> $logfile
   if [ $verbose != no ]; then
     echo "  \$ $@"
-    "$@" 2>&1 > >(tee -a run-dev.log | indent)
+    "$@" > >(tee -a $logfile | indent) 2>&1
   else
-    "$@" 2>&1 >> run-dev.log
+    "$@" >> $logfile 2>&1
   fi
 }
 
 function run_noredirect {
-  echo "[ RUN] $@" >> run-dev.log
+  echo "[ RUN] $@" >> $logfile
   "$@"
 }
 
 current_process='working'
 function print_process {
-  echo -n -e "\e[2K${current_process^}...\e[0m\r"
-  # echo -n -e "\e[2K[\e[0;30m....\e[0m] ${current_process^}\r"
+  echo -ne "$(tput el || true)$(echo $current_process | capitalize)...$(tput sgr0 || true)\r"
+  # echo -ne "\e[2K[\e[0;30m....\e[0m] $(echo $current_process | capitalize)\n"
 }
 
 function set_process {
   current_process="$@"
-  echo "[....] ${current_process^}..." >> run-dev.log
+  echo "[....] $(echo $current_process | capitalize)..." >> $logfile
   print_process
 }
 
 function handle_exit {
   echo_fail "An error occured while $current_process"
-  echo -e "Here is a snip of the last 10 lines of \e[0;31m$logfile\e[0m:"
+  echo "Here is a snip of the last 10 lines of $(tput setaf 3 || true)$logfile$(tput sgr0 || true):"
   head -n-1 $logfile | tail -n10 | indent
 }
 
 function echo_ok {
-  echo "[ OK ] ${@^}!" >> run-dev.log
-  echo -e "\r\e[2K[\e[0;32m OK \e[0m] ${@^}!"
+  echo "[ OK ] $(echo $@ | capitalize)!" >> $logfile
+  echo -e "\r[$(tput el || true)$(tput setaf 2 || true) OK $(tput sgr0 || true)] $(echo $@ | capitalize)!"
   print_process
 }
 
 function echo_fail {
-  echo "[FAIL] ${@^}!" >> run-dev.log
-  echo -e "\r\e[2K[\e[0;31mFAIL\e[0m] ${@^}!"
+  echo "[FAIL] $(echo $@ | capitalize)!" >> $logfile
+  echo -e "\r[$(tput el || true)$(tput setaf 1 || true)FAIL$(tput sgr0 || true)] $(echo $@ | capitalize)!"
   print_process
 }
 
 function indent {
   sed 's/^/  /'
+}
+
+function capitalize {
+  read -n1 first_letter
+  echo -n $first_letter | tr '[:lower:]' '[:upper:]'
+  cat
 }
 
 trap handle_exit EXIT

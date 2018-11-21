@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: stream-last-seen
+  namespace: harvester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stream-last-seen
+  template:
+    metadata:
+      labels:
+        app: stream-last-seen
+    spec:
+      containers:
+      - name: stream-last-seen
+        image: scynet/kafka-stream-last-seen:0.1
+        env:
+        - name: BROKER
+          value: broker.kafka:9092
+        - name: SCHEMA_REGISTRY
+          value: http://schema-registry.kafka-add:80

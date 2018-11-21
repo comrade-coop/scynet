@@ -1,5 +1,5 @@
-name := "ai.scynet"
-
+name := "kafka-stream-balance"
+organization := "scynet"
 version := "0.1"
 
 val repositories = Seq(

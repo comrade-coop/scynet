@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: stream-balance
+  namespace: harvester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stream-balance
+  template:
+    metadata:
+      labels:
+        app: stream-balance
+    spec:
+      containers:
+      - name: stream-balance
+        image: scynet/kafka-stream-balance:0.1
+        env:
+        - name: BROKER
+          value: broker.kafka:9092
+        - name: SCHEMA_REGISTRY
+          value: http://schema-registry.kafka-add:80
