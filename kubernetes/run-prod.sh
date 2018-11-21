@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 set -o errexit -o pipefail -o noclobber -o nounset
 
-logfile=$(pwd)/run-dev.log
+logfile=$(pwd)/run-prod.log
 
-run_env=DEV
+run_env=PROD
 
 # Via https://stackoverflow.com/a/14203146/4168713 (M2)
-opts=$(getopt -l 'verbose,dry-run,telepresence,help' -o 'vzth' -n "$0" -- "$@")
-telepresence_enabled=no
+opts=$(getopt -l 'verbose,dry-run,help' -o 'vzh' -n "$0" -- "$@")
 verbose=no
 dry_run=no
 eval set -- "$opts"
@@ -19,10 +18,6 @@ while true; do
       ;;
     -z|--dry-run)
       dry_run=yes
-      shift
-      ;;
-    -t|--telepresence)
-      telepresence_enabled=yes
       shift
       ;;
     -h|--help)
@@ -51,25 +46,18 @@ source run-common.sh
 
 function main {
   set_process "starting development environment"; echo
-  needed="minikube kubectl sbt docker "
-  if [ $telepresence_enabled != no ]; then
-    needed+="telepresence "
-  fi
+  needed="kubectl sbt docker "
   ensure_intalled $needed
   ensure_submodules
   if [ $dry_run != no ]; then
     echo_ok "finished checking dependencies"
   else
-    start_cluster
     start_kafka
     start_kafka_additions
     start_parity
     build_harvester
     start_harvester
-    echo_ok "finished starting the development environment"
-    if [ $telepresence_enabled != no ]; then
-      run_telepresence
-    fi
+    echo_ok "finished starting all services"
   fi
 }
 
