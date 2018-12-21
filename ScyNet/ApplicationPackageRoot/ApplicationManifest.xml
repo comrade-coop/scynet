@@ -6,7 +6,7 @@
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Parameters>
     <Parameter Name="TopicService_MinReplicaSetSize" DefaultValue="3" />
-    <Parameter Name="TopicService_PartitionCount" DefaultValue="1" />
+    <Parameter Name="TopicService_PartitionCount" DefaultValue="3" />
     <Parameter Name="TopicService_TargetReplicaSetSize" DefaultValue="3" />
   </Parameters>
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 

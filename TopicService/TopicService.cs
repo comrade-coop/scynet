@@ -11,6 +11,8 @@ using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting;
 using Common.Messaging;
 using Common.Messaging.Service;
+using Common.Topics.Service;
+using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
 
 namespace TopicService
 {
@@ -18,20 +20,7 @@ namespace TopicService
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
     /// 
-    interface ITopicWriterService
-    {
-        Task Write(long key, Byte[] data);
-    }
-
-    interface ITopicReaderService
-    {
-        Task<Byte[]> ReadKey();
-        Task<List<Byte[]>> ReadKeyRange(long start, long end);
-        Task<List<Byte[]>> ReadLatest();
-     
-    }
-
-    internal sealed class TopicService : StatefulService, IServiceMessenger, ITopicReaderService, ITopicWriterService
+    internal sealed class TopicService : StatefulService, ITopicReaderService, ITopicWriterService
     {
         private MessengerServiceImplementation messengerService;
         public TopicService(StatefulServiceContext context) : base(context)
@@ -40,44 +29,49 @@ namespace TopicService
         }
 
         #region ServiceMessenger
-        public Task AddSubscription(string channel, SubscriberReference subscriber)
+        public Task AddSubscription(string topic, SubscriberReference subscriber)
         {
-            return messengerService.AddSubscription(channel, subscriber);
+            return messengerService.AddSubscription(topic, subscriber);
         }
 
         public Task ReceiveMessage(SubscriptionMessage message)
         {
             return messengerService.ReceiveMessage(message);
-
         }
 
-        public Task RemoveSubscription(string channel, SubscriberReference subscriber)
+        public Task RemoveSubscription(string topic, SubscriberReference subscriber)
         {
-            return messengerService.RemoveSubscription(channel, subscriber);
-
+            return messengerService.RemoveSubscription(topic, subscriber);
         }
         #endregion
 
         #region TopicReader
-        public Task<byte[]> ReadKey()
+        public Task<byte[]> ReadKey(string topic, long key)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<byte[]>> ReadKeyRange(long start, long end)
+        public Task<List<byte[]>> ReadKeyRange(string topic, long start, long end)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<byte[]>> ReadLatest()
+        public Task<List<byte[]>> ReadLatest(string topic)
         {
             throw new NotImplementedException();
         }
+
+        public Task<long> GetLastReadKey(string topic)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region TopicWriter
-        public Task Write(long key, byte[] data)
+        public Task Write(string topic, long key, byte[] data)
         {
+            // TODO: Check that we are on the primry replica.
             throw new NotImplementedException();
         }
         #endregion
@@ -91,7 +85,14 @@ namespace TopicService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.CreateServiceRemotingReplicaListeners();
+            return new[] {
+                new ServiceReplicaListener(context =>
+                    new FabricTransportServiceRemotingListener(context, this),
+                        "Read", true),
+                new ServiceReplicaListener(context =>
+                    new FabricTransportServiceRemotingListener(context, this),
+                        "Write", false)
+            };
         }
     }
 }

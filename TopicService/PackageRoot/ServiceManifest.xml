@@ -30,6 +30,10 @@
            replicas of different partitions that are placed in your code. -->
       <Endpoint Name="ServiceEndpoint" />
 
+      
+      <Endpoint Name="Read" />
+      <Endpoint Name="Write" />
+      
       <!-- This endpoint is used by the replicator for replicating the state of your service.
            This endpoint is configured through a ReplicatorSettings config section in the Settings.xml
            file under the ConfigPackage. -->

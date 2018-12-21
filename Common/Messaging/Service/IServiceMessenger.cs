@@ -5,8 +5,8 @@ namespace Common.Messaging.Service
 {
     public interface IServiceMessenger : IService
     {
-        Task AddSubscription(string channel, SubscriberReference subscriber);
-        Task RemoveSubscription(string channel, SubscriberReference subscriber);
+        Task AddSubscription(string topic, SubscriberReference subscriber);
+        Task RemoveSubscription(string topic, SubscriberReference subscriber);
         Task ReceiveMessage(SubscriptionMessage message);
     }
 }
