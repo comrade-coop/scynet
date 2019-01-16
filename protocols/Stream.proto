@@ -1,0 +1,99 @@
+syntax = "proto3";
+import "Shared.proto";
+
+package Scynet;
+option csharp_namespace = "Scynet";
+
+// The publishing api that will be used exclusively by the agents.
+service PublisherApi {
+	//
+	rpc Publish(PublishRequest) returns (PublishResponse) {}
+}
+
+
+// The subscriber api is used both by agnets and other hatcheries.
+service SubscriberApi {
+
+	// Create a subscriber that we will use to listen to the messages produced by the agents.
+	rpc CreateSubscriber(Subscriber) returns (Subscriber) {}
+
+	// Delete
+	rpc DeleteSubscriber(Subscriber) returns (Void) {}
+
+	// Tell the subscriber that the message was saved or transformed, and we don't want it again.
+	rpc Acknowledge(AcknowledgeRequest) returns (Void) {}
+
+	// Get the newest messages.
+	rpc Pull(PullRequest) returns (PullResponse) {}
+
+	// 
+	rpc StreamingPull(stream StreamingPullRequest) returns (stream StreamingPullResponse) {}
+
+	//
+	rpc Seek(SeekRequest) returns (Void) {}
+}
+
+message AcknowledgeRequest {
+	string subscriber = 1;
+	string acknowledgeMessage = 2;
+}
+
+message SeekRequest {
+	string subscriber = 1;
+	oneof target {
+		string index = 2;
+		uint64 timestamp = 3;
+	}
+}
+
+
+message PullRequest {
+	string subscriber = 1;
+	bool returnImmediately = 2;
+	uint32 maxMessages = 3;
+}
+
+message PullResponse {
+	repeated DataMessage messages = 1;
+}
+
+message Subscriber {
+	string id = 1; // Can be the id of an agent, but also the id of onother hatchery.
+
+	oneof agent {
+		string agentType = 2; // The type of agent we want to subscribe to. Used when subscriing to remote agents that 
+		string agetnId = 3; // The agent's output that we will subscribe to.
+	}
+
+	bool strongOrdering = 4; // Used to determine if we want the order of the messages to be absoulte.
+
+	uint64 timeout = 5; // The subscriber will be deleted after inactivity.
+
+	uint32 bufferSize = 6; // The subscriber will have a buffer to help with backbressure and/or not to overload the client.
+}
+
+message DataMessage {
+	bytes data = 1;
+	string topic = 2;
+	string index = 3; // the thing needed to ack the message.
+	string key = 4;
+	uint64 timestamp = 6;
+}
+
+message PublishRequest {
+	string agentId = 1;
+	repeated DataMessage message = 2;
+}
+
+message PublishResponse {
+	repeated string indexes = 1;
+}
+
+message StreamingPullRequest {
+	string subscriber = 1;
+	string messagesAck = 2;
+}
+
+message StreamingPullResponse {
+	repeated DataMessage messages = 1;
+}

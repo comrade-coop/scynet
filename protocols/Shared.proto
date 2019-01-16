@@ -3,42 +3,28 @@ syntax = "proto3";
 package Scynet;
 option csharp_namespace = "Scynet";
 
-// Indicates if agents pull(Out) or push(In) data to the stream.
-enum StreamDirection {
-	In = 0; // pull 
-	Out = 1; // push
-	Both = 2; // both
+message Component {
+	string uuid = 1; // The universal id of the component.
+	repeated string runnerType = 2; // The types of eggs this component can run as agents.
 }
 
-// The stream representation for an agent.
-message Stream {
-	StreamDirection direction = 1; // The direction of the data.
-	Topic topic = 2; // The topic used to facilitate the data transfer.
-}
-
-message Topic {
-	string name = 1; // The name of the topic.
-	string type = 2; // The type of messages that can be send to that topic.
-}
-
-// The state in which an agent is.
-enum AgentCondition {
-	NonExistent = 0;
-	Stoped = 1;
-	Running = 2;
-}
-
-// 
 message Agent {
 	string uuid = 1;
 	string type = 2; // the type
-	AgentCondition status = 3;
-	repeated Stream streams = 4;
+	string componentId = 3;
+	bool running = 5;
 }
 
 // All the data that defines an agent and is needed for executing it.
 message Egg {
-	bytes data = 1;
-	string component = 2;
-	repeated Stream streams = 3;
+	string uuid = 1;
+	bytes data = 2;
+	string type = 3;
+	string componentId = 4;
+	string outputType = 5;
+	repeated string inputsTypes = 6;
+}
+
+message Void {
+
 }
