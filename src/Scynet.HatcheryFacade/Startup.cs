@@ -28,7 +28,6 @@ namespace Scynet.HatcheryFacade
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,30 +45,6 @@ namespace Scynet.HatcheryFacade
 
             // app.UseHttpsRedirection();
             app.UseMvc();
-        }
-
-        private async Task<IClusterClient> ConnectClient()
-        {
-            Console.WriteLine("Configuring connection to local silo...");
-
-            var builder = new ClientBuilder()
-                .UseLocalhostClustering()
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "dev";
-                    options.ServiceId = "Scynet";
-                })
-                .ConfigureLogging(logging => logging.AddConsole());
-
-            IClusterClient client = builder.Build();
-
-            Console.WriteLine("Connecting...");
-
-            await client.Connect();
-
-            Console.WriteLine("Client successfully connected to silo host");
-
-            return client;
         }
     }
 }
