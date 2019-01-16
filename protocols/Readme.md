@@ -6,42 +6,56 @@
 - [Component.proto](#Component.proto)
     - [AgentQuery](#Scynet.AgentQuery)
     - [AgentRequest](#Scynet.AgentRequest)
-    - [AgentResponse](#Scynet.AgentResponse)
+    - [AgentStartRequest](#Scynet.AgentStartRequest)
+    - [AgentStatusResponse](#Scynet.AgentStatusResponse)
     - [ListOfAgents](#Scynet.ListOfAgents)
   
   
   
-    - [Component](#Scynet.Component)
+    - [ComponentApi](#Scynet.ComponentApi)
   
 
 - [Hatchery.proto](#Hatchery.proto)
     - [AgentSubscriptionRequest](#Scynet.AgentSubscriptionRequest)
-    - [AgentSubscriptionResponse](#Scynet.AgentSubscriptionResponse)
+    - [AgnentQueryRequest](#Scynet.AgnentQueryRequest)
+    - [ComponentQueryRequest](#Scynet.ComponentQueryRequest)
     - [ComponentRegisterRequest](#Scynet.ComponentRegisterRequest)
     - [ComponentRegisterResponse](#Scynet.ComponentRegisterResponse)
+    - [EggQueryRequest](#Scynet.EggQueryRequest)
     - [EggRegisterRequest](#Scynet.EggRegisterRequest)
     - [EggRegisterResponse](#Scynet.EggRegisterResponse)
-    - [StreamReqest](#Scynet.StreamReqest)
-    - [StreamRespose](#Scynet.StreamRespose)
-    - [TopicRegisterRequest](#Scynet.TopicRegisterRequest)
-    - [TopicRegisterRequest.ConfigEntry](#Scynet.TopicRegisterRequest.ConfigEntry)
-    - [TopicRegisterRespnse](#Scynet.TopicRegisterRespnse)
   
   
   
-    - [Hatchery](#Scynet.Hatchery)
+    - [HatcheryApi](#Scynet.HatcheryApi)
   
 
 - [Shared.proto](#Shared.proto)
     - [Agent](#Scynet.Agent)
+    - [Component](#Scynet.Component)
     - [Egg](#Scynet.Egg)
-    - [Stream](#Scynet.Stream)
-    - [Topic](#Scynet.Topic)
-  
-    - [AgentCondition](#Scynet.AgentCondition)
-    - [StreamDirection](#Scynet.StreamDirection)
+    - [Void](#Scynet.Void)
   
   
+  
+  
+
+- [Stream.proto](#Stream.proto)
+    - [AcknowledgeRequest](#Scynet.AcknowledgeRequest)
+    - [DataMessage](#Scynet.DataMessage)
+    - [PublishRequest](#Scynet.PublishRequest)
+    - [PublishResponse](#Scynet.PublishResponse)
+    - [PullRequest](#Scynet.PullRequest)
+    - [PullResponse](#Scynet.PullResponse)
+    - [SeekRequest](#Scynet.SeekRequest)
+    - [StreamingPullRequest](#Scynet.StreamingPullRequest)
+    - [StreamingPullResponse](#Scynet.StreamingPullResponse)
+    - [Subscriber](#Scynet.Subscriber)
+  
+  
+  
+    - [PublisherApi](#Scynet.PublisherApi)
+    - [SubscriberApi](#Scynet.SubscriberApi)
   
 
 - [Scalar Value Types](#scalar-value-types)
@@ -61,11 +75,6 @@
 Used for different filters that can abe applied to the query.
 
 
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| status | [AgentCondition](#Scynet.AgentCondition) |  | Get only agents with certain condition. |
-
-
 
 
 
@@ -73,6 +82,21 @@ Used for different filters that can abe applied to the query.
 <a name="Scynet.AgentRequest"/>
 
 ### AgentRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| uuid | [string](#string) |  | The universal identifier of the agent we want to get. |
+
+
+
+
+
+
+<a name="Scynet.AgentStartRequest"/>
+
+### AgentStartRequest
 
 
 
@@ -86,15 +110,15 @@ Used for different filters that can abe applied to the query.
 
 
 
-<a name="Scynet.AgentResponse"/>
+<a name="Scynet.AgentStatusResponse"/>
 
-### AgentResponse
-Return the agent after every request.
+### AgentStatusResponse
+
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| agent | [Agent](#Scynet.Agent) |  |  |
+| running | [bool](#bool) |  |  |
 
 
 
@@ -122,17 +146,17 @@ The list of avalable agents.
  
 
 
-<a name="Scynet.Component"/>
+<a name="Scynet.ComponentApi"/>
 
-### Component
+### ComponentApi
 The Api whic is implemented by the different components. 
 It is caled by the hatchery to instantiate the agents.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| AgentStart | [AgentRequest](#Scynet.AgentRequest) | [AgentResponse](#Scynet.AgentRequest) | Start runngin a particular agent |
-| AgentStop | [AgentRequest](#Scynet.AgentRequest) | [AgentResponse](#Scynet.AgentRequest) | Stop that agent |
-| AgentStatus | [AgentRequest](#Scynet.AgentRequest) | [AgentResponse](#Scynet.AgentRequest) | Check the status of an agent. |
+| AgentStart | [AgentStartRequest](#Scynet.AgentStartRequest) | [Void](#Scynet.AgentStartRequest) | Start runngin a particular agent |
+| AgentStop | [AgentRequest](#Scynet.AgentRequest) | [Void](#Scynet.AgentRequest) | Stop that agent |
+| AgentStatus | [AgentRequest](#Scynet.AgentRequest) | [AgentStatusResponse](#Scynet.AgentRequest) | Check the status of an agent. |
 | AgentList | [AgentQuery](#Scynet.AgentQuery) | [ListOfAgents](#Scynet.AgentQuery) | Retrieve a list of agents. |
 
  
@@ -161,15 +185,30 @@ It is caled by the hatchery to instantiate the agents.
 
 
 
-<a name="Scynet.AgentSubscriptionResponse"/>
+<a name="Scynet.AgnentQueryRequest"/>
 
-### AgentSubscriptionResponse
+### AgnentQueryRequest
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| topic | [Topic](#Scynet.Topic) |  | The topic which we can listen to for the agent output. |
+| uuid | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="Scynet.ComponentQueryRequest"/>
+
+### ComponentQueryRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| uuid | [string](#string) |  |  |
 
 
 
@@ -184,9 +223,8 @@ It is caled by the hatchery to instantiate the agents.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| uuid | [string](#string) |  | The universal id of the component. |
-| runnerType | [string](#string) |  | The types of eggs this component can run as agents. |
-| canExecuteNewEggs | [bool](#bool) |  | Can it excute agents that it hasn&#39;t registered. |
+| address | [string](#string) |  | The plase we can connect to the component to call methods on it. |
+| component | [Component](#Scynet.Component) |  |  |
 
 
 
@@ -197,6 +235,21 @@ It is caled by the hatchery to instantiate the agents.
 
 ### ComponentRegisterResponse
 
+
+
+
+
+
+
+<a name="Scynet.EggQueryRequest"/>
+
+### EggQueryRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| uuid | [string](#string) |  |  |
 
 
 
@@ -228,79 +281,6 @@ It is caled by the hatchery to instantiate the agents.
 
 
 
-
-<a name="Scynet.StreamReqest"/>
-
-### StreamReqest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| topic | [string](#string) |  | The topic name to search for. |
-
-
-
-
-
-
-<a name="Scynet.StreamRespose"/>
-
-### StreamRespose
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| _stream | [Stream](#Scynet.Stream) |  | The stream |
-| owner | [Agent](#Scynet.Agent) |  | The agent who uses this stream |
-
-
-
-
-
-
-<a name="Scynet.TopicRegisterRequest"/>
-
-### TopicRegisterRequest
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| topic | [Topic](#Scynet.Topic) |  | The topic name to register and create a stream. |
-| config | [TopicRegisterRequest.ConfigEntry](#Scynet.TopicRegisterRequest.ConfigEntry) | repeated | The configuration for the topic. |
-
-
-
-
-
-
-<a name="Scynet.TopicRegisterRequest.ConfigEntry"/>
-
-### TopicRegisterRequest.ConfigEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="Scynet.TopicRegisterRespnse"/>
-
-### TopicRegisterRespnse
-
-
-
-
-
-
  
 
  
@@ -308,18 +288,19 @@ It is caled by the hatchery to instantiate the agents.
  
 
 
-<a name="Scynet.Hatchery"/>
+<a name="Scynet.HatcheryApi"/>
 
-### Hatchery
+### HatcheryApi
 The interface used by the components to call the hatchery.
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
 | RegisterComponent | [ComponentRegisterRequest](#Scynet.ComponentRegisterRequest) | [ComponentRegisterResponse](#Scynet.ComponentRegisterRequest) | Register a component so the hatchery knows it is available and can execute eggs. |
-| RegisterTopic | [TopicRegisterRequest](#Scynet.TopicRegisterRequest) | [TopicRegisterRespnse](#Scynet.TopicRegisterRequest) | Tells the hatchery that a topic is going to be used by one of the agents to push data to. This will most like result in creating a stream. |
-| RegisterEgg | [EggRegisterRequest](#Scynet.EggRegisterRequest) | [EggRegisterResponse](#Scynet.EggRegisterRequest) | Gives an egg to the hatchery, this way it knows that a new egg was generated by the queen or the available harvester functions. |
-| SubscribeAgent | [AgentSubscriptionRequest](#Scynet.AgentSubscriptionRequest) | [AgentSubscriptionResponse](#Scynet.AgentSubscriptionRequest) | Get the resulting stream of an internal/external agent to use by our agent. |
-| GetStream | [StreamReqest](#Scynet.StreamReqest) | [StreamRespose](#Scynet.StreamReqest) | Check to see if a stream is used by any agent, and in the case it is get the stream and the agent. |
+| RegisterEgg | [EggRegisterRequest](#Scynet.EggRegisterRequest) | [EggRegisterResponse](#Scynet.EggRegisterRequest) | Gives an egg to the hatchery, this way it knows that a new egg was generated by the queen or the available harvester functions. I think there should be a way to garbege collec eggs that are no longer usefull but ... |
+| FindComponent | [ComponentQueryRequest](#Scynet.ComponentQueryRequest) | [Component](#Scynet.ComponentQueryRequest) |  |
+| FindEgg | [EggQueryRequest](#Scynet.EggQueryRequest) | [Egg](#Scynet.EggQueryRequest) |  |
+| DeleteComponent | [Component](#Scynet.Component) | [Void](#Scynet.Component) | Used in case the whole component dies, or it was turned off in case of an ubgrade. Should delete any agents owned by this component. |
+| DeleteAgent | [Agent](#Scynet.Agent) | [Void](#Scynet.Agent) | Deletes an agent. If an agent crashes or it was destroyd by the comonent. |
 
  
 
@@ -342,8 +323,24 @@ The interface used by the components to call the hatchery.
 | ----- | ---- | ----- | ----------- |
 | uuid | [string](#string) |  |  |
 | type | [string](#string) |  | the type |
-| status | [AgentCondition](#Scynet.AgentCondition) |  |  |
-| streams | [Stream](#Scynet.Stream) | repeated |  |
+| componentId | [string](#string) |  |  |
+| running | [bool](#bool) |  |  |
+
+
+
+
+
+
+<a name="Scynet.Component"/>
+
+### Component
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| uuid | [string](#string) |  | The universal id of the component. |
+| runnerType | [string](#string) | repeated | The types of eggs this component can run as agents. |
 
 
 
@@ -358,41 +355,204 @@ All the data that defines an agent and is needed for executing it.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| uuid | [string](#string) |  |  |
 | data | [bytes](#bytes) |  |  |
-| component | [string](#string) |  |  |
-| streams | [Stream](#Scynet.Stream) | repeated |  |
+| type | [string](#string) |  |  |
+| componentId | [string](#string) |  |  |
+| outputType | [string](#string) |  |  |
+| inputsTypes | [string](#string) | repeated |  |
 
 
 
 
 
 
-<a name="Scynet.Stream"/>
+<a name="Scynet.Void"/>
 
-### Stream
-The stream representation for an agent.
+### Void
+
+
+
+
+
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+<a name="Stream.proto"/>
+<p align="right"><a href="#top">Top</a></p>
+
+## Stream.proto
+
+
+
+<a name="Scynet.AcknowledgeRequest"/>
+
+### AcknowledgeRequest
+
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| direction | [StreamDirection](#Scynet.StreamDirection) |  | The direction of the data. |
-| topic | [Topic](#Scynet.Topic) |  | The topic used to facilitate the data transfer. |
+| subscriber | [string](#string) |  |  |
+| acknowledgeMessage | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="Scynet.Topic"/>
+<a name="Scynet.DataMessage"/>
 
-### Topic
+### DataMessage
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) |  | The name of the topic. |
-| type | [string](#string) |  | The type of messages that can be send to that topic. |
+| data | [bytes](#bytes) |  |  |
+| topic | [string](#string) |  |  |
+| index | [string](#string) |  | the thing needed to ack the message. |
+| key | [string](#string) |  |  |
+| timestamp | [uint64](#uint64) |  |  |
+
+
+
+
+
+
+<a name="Scynet.PublishRequest"/>
+
+### PublishRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| agentId | [string](#string) |  |  |
+| message | [DataMessage](#Scynet.DataMessage) | repeated |  |
+
+
+
+
+
+
+<a name="Scynet.PublishResponse"/>
+
+### PublishResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| indexes | [string](#string) | repeated |  |
+
+
+
+
+
+
+<a name="Scynet.PullRequest"/>
+
+### PullRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| subscriber | [string](#string) |  |  |
+| returnImmediately | [bool](#bool) |  |  |
+| maxMessages | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="Scynet.PullResponse"/>
+
+### PullResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| messages | [DataMessage](#Scynet.DataMessage) | repeated |  |
+
+
+
+
+
+
+<a name="Scynet.SeekRequest"/>
+
+### SeekRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| subscriber | [string](#string) |  |  |
+| index | [string](#string) |  |  |
+| timestamp | [uint64](#uint64) |  |  |
+
+
+
+
+
+
+<a name="Scynet.StreamingPullRequest"/>
+
+### StreamingPullRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| subscriber | [string](#string) |  |  |
+| messagesAck | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="Scynet.StreamingPullResponse"/>
+
+### StreamingPullResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| messages | [DataMessage](#Scynet.DataMessage) | repeated |  |
+
+
+
+
+
+
+<a name="Scynet.Subscriber"/>
+
+### Subscriber
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| id | [string](#string) |  | Can be the id of an agent, but also the id of onother hatchery. |
+| agentType | [string](#string) |  | The type of agent we want to subscribe to. Used when subscriing to remote agents that |
+| agetnId | [string](#string) |  | The agent&#39;s output that we will subscribe to. |
+| strongOrdering | [bool](#bool) |  | Used to determine if we want the order of the messages to be absoulte. |
+| timeout | [uint64](#uint64) |  | The subscriber will be deleted after inactivity. |
+| bufferSize | [uint32](#uint32) |  | The subscriber will have a buffer to help with backbressure and/or not to overload the client. |
 
 
 
@@ -400,35 +560,34 @@ The stream representation for an agent.
 
  
 
-
-<a name="Scynet.AgentCondition"/>
-
-### AgentCondition
-The state in which an agent is.
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| NonExistent | 0 |  |
-| Stoped | 1 |  |
-| Running | 2 |  |
-
-
-
-<a name="Scynet.StreamDirection"/>
-
-### StreamDirection
-Indicates if agents pull(Out) or push(In) data to the stream.
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| In | 0 | pull |
-| Out | 1 | push |
-| Both | 2 | both |
-
-
  
 
  
+
+
+<a name="Scynet.PublisherApi"/>
+
+### PublisherApi
+The publishing api that will be used exclusively by the agents.
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| Publish | [PublishRequest](#Scynet.PublishRequest) | [PublishResponse](#Scynet.PublishRequest) |  |
+
+
+<a name="Scynet.SubscriberApi"/>
+
+### SubscriberApi
+The subscriber api is used both by agnets and other hatcheries.
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| CreateSubscriber | [Subscriber](#Scynet.Subscriber) | [Subscriber](#Scynet.Subscriber) | Create a subscriber that we will use to listen to the messages produced by the agents. |
+| DeleteSubscriber | [Subscriber](#Scynet.Subscriber) | [Void](#Scynet.Subscriber) | Delete |
+| Acknowledge | [AcknowledgeRequest](#Scynet.AcknowledgeRequest) | [Void](#Scynet.AcknowledgeRequest) | Tell the subscriber that the message was saved or transformed, and we don&#39;t want it again. |
+| Pull | [PullRequest](#Scynet.PullRequest) | [PullResponse](#Scynet.PullRequest) | Get the newest messages. |
+| StreamingPull | [StreamingPullRequest](#Scynet.StreamingPullRequest) | [StreamingPullResponse](#Scynet.StreamingPullRequest) |  |
+| Seek | [SeekRequest](#Scynet.SeekRequest) | [Void](#Scynet.SeekRequest) |  |
 
  
 

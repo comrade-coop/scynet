@@ -15,13 +15,6 @@ service HatcheryApi {
 	// I think there should be a way to garbege collec eggs that are no longer usefull but ...
 	rpc RegisterEgg (EggRegisterRequest) returns (EggRegisterResponse) {};
 
-	/**
-	* Get the resulting stream of an internal/external agent to use by our agent.
-	* If the agnet isn't running or we don't have the data for it, we will start or subscribe to one.
-	*/
-	rpc SubscribeAgent (AgentSubscriptionRequest) returns (Agent) {};
-
-
 	rpc FindComponent (ComponentQueryRequest) returns (Component) {};
 
 	rpc FindEgg (EggQueryRequest) returns (Egg) {};
