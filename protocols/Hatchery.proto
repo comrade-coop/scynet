@@ -15,21 +15,26 @@ service HatcheryApi {
 	// I think there should be a way to garbege collec eggs that are no longer usefull but ...
 	rpc RegisterEgg (EggRegisterRequest) returns (EggRegisterResponse) {};
 
-	rpc FindComponent (ComponentQueryRequest) returns (Component) {};
+	rpc FindComponent (ComponentRequest) returns (Component) {};
 
 	rpc FindEgg (EggQueryRequest) returns (Egg) {};
 
 	// Used in case the whole component dies, or it was turned off in case of an ubgrade.
 	// Should delete any agents owned by this component.
-	rpc DeleteComponent (Component) returns (Void) {};
+	rpc UnregisterComponent (ComponentRequest) returns (Void) {};
 
 	// Deletes an agent. If an agent crashes or it was destroyd by the comonent.
-	rpc DeleteAgent (Agent) returns (Void) {};
+	rpc HandleAgentStop (AgentStopedEvent) returns (Void) {};
 
-	// rpc FindAgnet (AgnentQueryRequest) returns (Agent) {};
 }
 
-message ComponentQueryRequest {
+message AgentStopedEvent {
+	Agent agent = 1;
+	string resaon = 2;
+	uint64 code = 3;
+}
+
+message ComponentRequest {
 	string uuid = 1;
 }
 
