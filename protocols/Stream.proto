@@ -15,10 +15,10 @@ service Publisher {
 service Subscriber {
 
 	// Create a subscriber that we will use to listen to the messages produced by the agents.
-	rpc Subscrive(Subscription) returns (Subscription) {}
+	rpc Subscribe(SubscriptionRequest) returns (SubscriptionResponse) {}
 
 	// Delete
-	rpc Unsubscribe(Subscription) returns (Void) {}
+	rpc Unsubscribe(UnsubscribeRequest) returns (Void) {}
 
 	// Tell the subscriber that the message was saved or transformed, and we don't want it again.
 	rpc Acknowledge(AcknowledgeRequest) returns (Void) {}
@@ -27,28 +27,34 @@ service Subscriber {
 	rpc Pull(PullRequest) returns (PullResponse) {}
 
 	// 
-	rpc StreamingPull(stream StreamingPullRequest) returns (stream StreamingPullResponse) {}
+	rpc StreamingPull(StreamingPullRequest) returns (stream StreamingPullResponse) {}
 
 	//
 	rpc Seek(SeekRequest) returns (Void) {}
 }
 
 message AcknowledgeRequest {
-	string subscriber = 1;
+	string id = 1;
 	string acknowledgeMessage = 2;
+	uint32 partition = 3;
+
 }
 
 message SeekRequest {
-	string subscriber = 1;
+	string id = 1;
 	oneof target {
 		string index = 2;
 		uint64 key = 3;
 	}
 }
 
+message UnsubscribeRequest {
+	string id = 1;
+}
+
 
 message PullRequest {
-	string subscriber = 1;
+	string id = 1;
 	bool returnImmediately = 2;
 	uint32 maxMessages = 3;
 }
@@ -57,7 +63,7 @@ message PullResponse {
 	repeated DataMessage messages = 1;
 }
 
-message Subscription {
+message SubscriptionRequest {
 	string id = 1; // Can be the id of an agent, but also the id of onother hatchery.
 
 	oneof agent {
@@ -72,12 +78,17 @@ message Subscription {
 	uint32 bufferSize = 6; // The subscriber will have a buffer to help with backbressure and/or not to overload the client.
 }
 
+message SubscriptionResponse {
+	string agentId = 1;
+}
+
 message DataMessage {
 	bytes data = 1;
 	string index = 2; // the thing needed to ack the message.
 	uint64 key = 3;
 	string partitionKey = 4;
-	bool redelivary = 5;
+	uint32 partition = 5;
+	bool redelivary = 6;
 }
 
 message PublishRequest {
@@ -90,10 +101,9 @@ message PublishResponse {
 }
 
 message StreamingPullRequest {
-	string subscriber = 1;
-	string messagesAck = 2;
+	string id = 1;
 }
 
 message StreamingPullResponse {
-	repeated DataMessage messages = 1;
+	DataMessage message = 1;
 }

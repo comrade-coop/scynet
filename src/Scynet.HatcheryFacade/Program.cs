@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Confluent.Kafka;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Kafka.Public;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Scynet.HatcheryFacade.RPC;
+using IClusterClient = Orleans.IClusterClient;
 
 namespace Scynet.HatcheryFacade
 {
@@ -47,20 +50,31 @@ namespace Scynet.HatcheryFacade
             return client;
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
-            var service = Hatchery.BindService(new RPC.HatcheryFacade());
-
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) { 
             return WebHost.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
-                    services.AddSingleton<IEnumerable<Server>>(sp => new List<Server>()
+                    services.AddSingleton<RPC.HatcheryFacade, RPC.HatcheryFacade>();
+                    services.AddSingleton<SubscriberFacade, SubscriberFacade>();
+                    services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
+                    services.AddSingleton<IEnumerable<Server>>(sp =>
                     {
-                        new Server()
+                        var hatcheryService = Hatchery.BindService(sp.GetService<RPC.HatcheryFacade>());
+                        var subscriberService = Subscriber.BindService(sp.GetService<SubscriberFacade>());
+                        var loggingInterceptor = sp.GetRequiredService<LoggingInterceptor>();
+                        return new List<Server>()
                         {
-                            Services = { service.Intercept(new LoggingInterceptor(sp.GetRequiredService<ILogger<LoggingInterceptor>>())) },
-                            Ports = { new ServerPort("0.0.0.0", 9998, ServerCredentials.Insecure)}
-                        }
+                            new Server()
+                            {
+                                Services =
+                                {
+                                    hatcheryService.Intercept(loggingInterceptor),
+                                    subscriberService.Intercept(loggingInterceptor),
+                                },
+                                Ports = {new ServerPort("0.0.0.0", 9998, ServerCredentials.Insecure)}
+                            }
+                        };
                     });
                     services.AddSingleton<IHostedService, GrpcBackgroundService>();
                 })
