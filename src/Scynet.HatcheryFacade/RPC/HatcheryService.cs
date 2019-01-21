@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    public class HatcheryService: Hatchery.HatcheryBase
+    public class HatcheryFacade: Hatchery.HatcheryBase
     {
         
     }

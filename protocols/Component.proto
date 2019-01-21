@@ -8,7 +8,7 @@ option csharp_namespace = "Scynet";
 * The Api whic is implemented by the different components. 
 * It is caled by the hatchery to instantiate the agents.
 */
-service ComponentApi {
+service Component {
 	// Start runngin a particular agent
 	rpc AgentStart (AgentStartRequest) returns (Void) {};
 

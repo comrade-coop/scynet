@@ -48,7 +48,7 @@ namespace Scynet.HatcheryFacade
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
-            var service = Hatchery.BindService(new HatcheryService());
+            var service = Hatchery.BindService(new RPC.HatcheryFacade());
 
             return WebHost.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>

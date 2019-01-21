@@ -3,11 +3,6 @@ syntax = "proto3";
 package Scynet;
 option csharp_namespace = "Scynet";
 
-message Component {
-	string uuid = 1; // The universal id of the component.
-	repeated string runnerType = 2; // The types of eggs this component can run as agents.
-}
-
 message Agent {
 	string uuid = 1;
 	string type = 2; // the type

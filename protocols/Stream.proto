@@ -5,14 +5,14 @@ package Scynet;
 option csharp_namespace = "Scynet";
 
 // The publishing api that will be used exclusively by the agents.
-service PublisherApi {
+service Publisher {
 	//
 	rpc Publish(PublishRequest) returns (PublishResponse) {}
 }
 
 
 // The subscriber api is used both by agnets and other hatcheries.
-service SubscriberApi {
+service Subscriber {
 
 	// Create a subscriber that we will use to listen to the messages produced by the agents.
 	rpc Subscrive(Subscription) returns (Subscription) {}

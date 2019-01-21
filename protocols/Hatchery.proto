@@ -7,7 +7,7 @@ option csharp_namespace = "Scynet";
 /**
 * The interface used by the components to call the hatchery.
 */
-service HatcheryApi {
+service Hatchery {
 	// Register a component so the hatchery knows it is available and can execute eggs.
 	rpc RegisterComponent (ComponentRegisterRequest) returns (ComponentRegisterResponse) {};
 
@@ -15,7 +15,7 @@ service HatcheryApi {
 	// I think there should be a way to garbege collec eggs that are no longer usefull but ...
 	rpc RegisterEgg (EggRegisterRequest) returns (EggRegisterResponse) {};
 
-	rpc FindComponent (ComponentRequest) returns (Component) {};
+	rpc FindComponent (ComponentRequest) returns (ComponentResponse) {};
 
 	rpc FindEgg (EggQueryRequest) returns (Egg) {};
 
@@ -36,6 +36,11 @@ message AgentStopedEvent {
 
 message ComponentRequest {
 	string uuid = 1;
+}
+
+message ComponentResponse {
+	string address = 1;
+	repeated string runnerType = 2;
 }
 
 message EggQueryRequest {
@@ -61,7 +66,8 @@ message EggRegisterResponse {
 
 message ComponentRegisterRequest {
 	string address = 1; // The plase we can connect to the component to call methods on it.
-	Component component = 2;
+	string uuid = 2; // The universal id of the component.
+	repeated string runnerType = 3; // The types of eggs this component can run as agents.
 }
 
 message ComponentRegisterResponse {
