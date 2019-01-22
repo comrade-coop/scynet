@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans;
 using Orleans.Configuration;
+using Scynet.GrainInterfaces;
+using Serialize.Linq.Extensions;
 
 namespace Scynet.HatcheryFacade
 {
@@ -68,6 +71,27 @@ namespace Scynet.HatcheryFacade
             await client.Connect();
 
             Console.WriteLine("Client successfully connected to silo host");
+
+            var registry = client.GetGrain<IRegistry<AgentInfo>>(0);
+            await registry.Register(new AgentInfo("5"));
+            await registry.Register(new AgentInfo("2"));
+            await registry.Register(new AgentInfo("4"));
+
+            //var abc = data.Where(s => s.Id.Equals("5")).ToList();
+            //Expression<Func<AgentInfo, bool>> expression = x => x.Id.Equals("5");
+            //var queryNode = expression.ToExpressionNode();
+
+
+            //Expression<Func<List<AgentInfo>, List<AgentInfo>>> z = (x => x.Where(s => s.Id.Equals("5")).ToList());
+            Expression<Func<List<AgentInfo>, List<AgentInfo>>> zz =
+                (x => (from y in x
+                       where y.Equals(5)
+                       select new AgentInfo(y.Id)
+                       ).ToList());
+            var queryNode = zz.ToExpressionNode();
+
+            var res = await registry.QueryAgents(queryNode);
+            Console.WriteLine(res);
 
             return client;
         }

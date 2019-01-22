@@ -29,8 +29,10 @@ namespace Scynet.LocalSilo
                     })
                     .ConfigureApplicationParts(parts => parts
                         .AddApplicationPart(typeof(ComponentAgent).Assembly)
+                        .AddApplicationPart(typeof(AgentRegistry).Assembly)
                         .WithReferences())
-                    .ConfigureLogging(logging => logging.AddConsole());
+                    .ConfigureLogging(logging => logging.AddConsole())
+                    .AddMemoryGrainStorage("Default");
 
                 var host = builder.Build();
 

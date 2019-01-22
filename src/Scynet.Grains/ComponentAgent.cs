@@ -18,6 +18,7 @@ namespace Scynet.Grains
         public ComponentAgent(ILogger<ComponentAgent> logger)
         {
             Logger = logger;
+            State.Engagements = new Dictionary<int, Engagement>();
         }
 
         public Task<IEnumerable<Engagement>> GetActiveEngagements() {
