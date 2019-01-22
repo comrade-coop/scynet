@@ -31,7 +31,6 @@ namespace Scynet.HatcheryFacade
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

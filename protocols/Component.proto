@@ -1,0 +1,49 @@
+syntax = "proto3";
+import "Shared.proto";
+
+package Scynet;
+option csharp_namespace = "Scynet";
+
+/**
+* The Api whic is implemented by the different components. 
+* It is caled by the hatchery to instantiate the agents.
+*/
+service Component {
+	// Start runngin a particular agent
+	rpc AgentStart (AgentStartRequest) returns (Void) {};
+
+	// Stop that agent
+	rpc AgentStop (AgentRequest) returns (Void) {};
+
+	// Check the status of an agent.
+	rpc AgentStatus (AgentRequest) returns (AgentStatusResponse) {}; // Can rais an Agent Not Found Exception
+
+	// Retrieve a list of agents.
+	rpc AgentList (AgentQuery) returns (ListOfAgents) {};
+}
+
+message AgentStartRequest {
+	string uuid = 1; // The universal identifier of the agent we want to interface.
+	Egg egg = 2; // The egg that will be used only when creating the agent, and ignoered otherwise.
+}
+
+message AgentRequest {
+	string uuid = 1; // The universal identifier of the agent we want to get.
+
+}
+
+// Used for different filters that can abe applied to the query.
+message AgentQuery {
+	
+}
+
+// The list of avalable agents.
+message ListOfAgents {
+	repeated Agent agents = 1;
+}
+
+
+message AgentStatusResponse {
+	bool running = 1;
+}
+

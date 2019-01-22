@@ -5,13 +5,23 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scynet.GrainInterfaces", "src\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj", "{82374C73-F607-4151-AF7C-1963C0927C5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scynet.GrainInterfaces", "src\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj", "{82374C73-F607-4151-AF7C-1963C0927C5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scynet.Grains", "src\Scynet.Grains\Scynet.Grains.csproj", "{FEBDC497-9EA1-4E63-B545-C881E6B65D6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scynet.Grains", "src\Scynet.Grains\Scynet.Grains.csproj", "{FEBDC497-9EA1-4E63-B545-C881E6B65D6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scynet.HatcheryFacade", "src\Scynet.HatcheryFacade\Scynet.HatcheryFacade.csproj", "{6C62E616-7675-477D-9A31-37653CC51799}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scynet.HatcheryFacade", "src\Scynet.HatcheryFacade\Scynet.HatcheryFacade.csproj", "{6C62E616-7675-477D-9A31-37653CC51799}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scynet.LocalSilo", "src\Scynet.LocalSilo\Scynet.LocalSilo.csproj", "{E5535EE4-161B-42AF-B3EA-34CB1D50E951}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scynet.LocalSilo", "src\Scynet.LocalSilo\Scynet.LocalSilo.csproj", "{E5535EE4-161B-42AF-B3EA-34CB1D50E951}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7E538073-0E70-4B40-A56B-6AC38FDD8EDD}"
+	ProjectSection(SolutionItems) = preProject
+		protocols\Component.proto = protocols\Component.proto
+		protocols\Hatchery.proto = protocols\Hatchery.proto
+		protocols\Shared.proto = protocols\Shared.proto
+		protocols\Stream.proto = protocols\Stream.proto
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scynet.Tests", "src\Scynet.Tests\Scynet.Tests.csproj", "{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{82374C73-F607-4151-AF7C-1963C0927C5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -74,11 +81,30 @@ Global
 		{E5535EE4-161B-42AF-B3EA-34CB1D50E951}.Release|x64.Build.0 = Release|Any CPU
 		{E5535EE4-161B-42AF-B3EA-34CB1D50E951}.Release|x86.ActiveCfg = Release|Any CPU
 		{E5535EE4-161B-42AF-B3EA-34CB1D50E951}.Release|x86.Build.0 = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|x64.Build.0 = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Debug|x86.Build.0 = Debug|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|x64.ActiveCfg = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|x64.Build.0 = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|x86.ActiveCfg = Release|Any CPU
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{82374C73-F607-4151-AF7C-1963C0927C5B} = {07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}
 		{FEBDC497-9EA1-4E63-B545-C881E6B65D6E} = {07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}
 		{6C62E616-7675-477D-9A31-37653CC51799} = {07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}
 		{E5535EE4-161B-42AF-B3EA-34CB1D50E951} = {07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}
+		{5FA52BCC-D8E8-47F9-8886-D727D21ADF36} = {07D86AAD-C4AE-4977-95B1-89CEDD9BD8B0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {22A4FC77-A3C2-44D1-8512-6DBD80C6F1A7}
 	EndGlobalSection
 EndGlobal

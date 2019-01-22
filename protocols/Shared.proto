@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package Scynet;
+option csharp_namespace = "Scynet";
+
+message Agent {
+	string uuid = 1;
+	string type = 2; // the type
+	string componentId = 3;
+	bool running = 5;
+}
+
+// All the data that defines an agent and is needed for executing it.
+message Egg {
+	string uuid = 1;
+	bytes data = 2;
+	string type = 3;
+	string componentId = 4;
+	string outputType = 5;
+	repeated string inputsTypes = 6;
+}
+
+message Void {
+
+}
