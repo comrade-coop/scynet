@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>BlockchainHarvester</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+    <PackageReference Include="Grpc" Version="1.18.0" />
+    <PackageReference Include="Grpc.Tools" Version="1.18.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Server" Version="2.2.3" />
+    <PackageReference Include="Nethereum.Parity" Version="3.0.0" />
+    <PackageReference Include="Nethereum.Web3" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlockchainHarveser.GrainInterfaces\BlockChainHarvester.GrainInterfaces.csproj" />
+    <ProjectReference Include="..\BlockchainHarvester.Grains\BlockChainHarvester.Grains.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\..\protocols\Shared.proto" GrpcServices="None" />
+    <Protobuf Include="..\..\..\protocols\Hatchery.proto" GrpcServicers="Client" />
+    <Protobuf Include="..\..\..\protocols\Component.proto" GrpcServices="Server" />
+    <Protobuf Include="..\..\..\protocols\Stream.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester", "BlockchainHarvester\BlockChainHarvester.csproj", "{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester.Grains", "BlockchainHarvester.Grains\BlockChainHarvester.Grains.csproj", "{CE13D68A-279B-4DF6-87CB-6620C5DFB231}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester.GrainInterfaces", "BlockchainHarveser.GrainInterfaces\BlockChainHarvester.GrainInterfaces.csproj", "{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE13D68A-279B-4DF6-87CB-6620C5DFB231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE13D68A-279B-4DF6-87CB-6620C5DFB231}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE13D68A-279B-4DF6-87CB-6620C5DFB231}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE13D68A-279B-4DF6-87CB-6620C5DFB231}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {01C3F319-B69C-4B2B-9C92-760981407435}
+	EndGlobalSection
+EndGlobal
