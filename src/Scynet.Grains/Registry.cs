@@ -31,10 +31,17 @@ namespace Scynet.Grains
             return base.WriteStateAsync();
         }
 
-        public Task<K> Query<K>(ExpressionNode expression)
+        public Task<K> QueryRaw<K>(ExpressionNode expression)
         {
             var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, K>>().Compile();
             K result = compiledExpression(State.Items);
+            return Task.FromResult(result);
+        }
+
+        public Task<IEnumerable<K>> QueryCollection<K>(ExpressionNode expression)
+        {
+            var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, IEnumerable<K>>>().Compile();
+            IEnumerable<K> result = compiledExpression(State.Items).ToList();
             return Task.FromResult(result);
         }
     }

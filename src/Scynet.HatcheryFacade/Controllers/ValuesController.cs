@@ -29,10 +29,10 @@ namespace Scynet.HatcheryFacade.Controllers
             await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
             await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
 
-            var res = await registry.Query((x => (from y in x
+            var res = await registry.Query(x =>
+                from y in x
                     where y.Id == Guid.Empty
-                    select y
-                    ).ToList()));
+                    select y);
             Console.WriteLine("----------");
             Console.WriteLine(String.Join('|', from x in res select x.Id));
             Console.WriteLine(res.GetType());

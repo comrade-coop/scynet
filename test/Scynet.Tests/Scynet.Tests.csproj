@@ -13,10 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
-    <ProjectReference Include="..\Scynet.Grains\Scynet.Grains.csproj" />
-    <ProjectReference Include="..\Scynet.HatcheryFacade\Scynet.HatcheryFacade.csproj" />
-    <ProjectReference Include="..\Scynet.LocalSilo\Scynet.LocalSilo.csproj" />
+    <ProjectReference Include="..\..\src\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
+    <ProjectReference Include="..\..\src\Scynet.Grains\Scynet.Grains.csproj" />
+    <ProjectReference Include="..\..\src\Scynet.HatcheryFacade\Scynet.HatcheryFacade.csproj" />
+    <ProjectReference Include="..\..\src\Scynet.LocalSilo\Scynet.LocalSilo.csproj" />
   </ItemGroup>
 
 </Project>

@@ -28,14 +28,33 @@ namespace Scynet.GrainInterfaces
         /// <typeparam name="K">Result type</typeparam>
         /// <param name="expression">An ExpressionNode wrapping an Expression < Func < List < T >, K > > </param>
         /// <seealso cref="Scynet.GrainInterfaces.RegistryExtensions.Query"/>
-        Task<K> Query<K>(ExpressionNode expression);
+        Task<K> QueryRaw<K>(ExpressionNode expression);
+
+        /// <summary>
+        /// Query information from the registry
+        /// </summary>
+        /// <typeparam name="K">Type of elements of the result</typeparam>
+        /// <param name="expression">An ExpressionNode wrapping an Expression < Func < List < T >, IEnumerable< K > > > </param>
+        /// <seealso cref="Scynet.GrainInterfaces.RegistryExtensions.Query"/>
+        Task<IEnumerable<K>> QueryCollection<K>(ExpressionNode expression);
     }
 
     public static class RegistryExtensions
     {
         /// <summary>
-        /// Query information from the registry. This is a wrapper which can simplify work with <see cref="Scynet.GrainInterfaces.IRegistry.Query"/>
-        /// Note: If K is IEnumerable, you should be using the version of Query with one type parameter
+        /// Query information from the registry. This is a wrapper which can simplify work with <see cref="Scynet.GrainInterfaces.IRegistry.QueryCollection"/>
+        /// </summary>
+        /// <typeparam name="T">Registry type</typeparam>
+        /// <typeparam name="K">Type of result item</typeparam>
+        /// <param name="query">A lambda which processes the Registry's information</param>
+        public static Task<IEnumerable<K>> Query<T, K>(this IRegistry<T> registry, Expression<Func<IEnumerable<T>, IEnumerable<K>>> query)
+        {
+            var expressionNode = query.ToExpressionNode();
+            return registry.QueryCollection<K>(expressionNode);
+        }
+
+        /// <summary>
+        /// Query information from the registry. This is a wrapper which can simplify work with <see cref="Scynet.GrainInterfaces.IRegistry.QueryRaw"/>
         /// </summary>
         /// <typeparam name="T">Registry type</typeparam>
         /// <typeparam name="K">Result type</typeparam>
@@ -43,7 +62,7 @@ namespace Scynet.GrainInterfaces
         public static Task<K> Query<T, K>(this IRegistry<T> registry, Expression<Func<IEnumerable<T>, K>> query)
         {
             var expressionNode = query.ToExpressionNode();
-            return registry.Query<K>(expressionNode);
+            return registry.QueryRaw<K>(expressionNode);
         }
     }
 }

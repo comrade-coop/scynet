@@ -29,10 +29,6 @@ namespace Scynet.Grains
             return base.WriteStateAsync();
         }
 
-        public Task<bool> IsInitialized() {
-            return Task.FromResult(State.Inputs != null);
-        }
-
         public Task RegisterInput(Guid agentId) {
             State.Inputs.Add(agentId);
             // TODO: Send input to endpoint
