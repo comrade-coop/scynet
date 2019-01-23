@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Scynet.HatcheryFacade.RPC
 {
+    // TODO: Move this file so it can be shared more easily.
     class GrpcBackgroundService : IHostedService
     {
         private readonly IEnumerable<Server> _servers;
