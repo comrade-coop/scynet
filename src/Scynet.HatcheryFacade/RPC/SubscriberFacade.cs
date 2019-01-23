@@ -22,7 +22,7 @@ namespace Scynet.HatcheryFacade.RPC
         }
 
         public BufferBlock<DataMessage> Buffer = new BufferBlock<DataMessage>();
-        
+
             private readonly ConsumerConfig _config = new ConsumerConfig
         {
                 EnableAutoCommit = false,
@@ -53,7 +53,7 @@ namespace Scynet.HatcheryFacade.RPC
             };
 
             Consumer.Subscribe(AgentId);
-            
+
             Consumer.Assign(new TopicPartitionOffset(AgentId, new Partition(0), new Offset(0)));
             // Yes it is ok to do this, it wont return anything it will just assign.
             //Consumer.Consume(new TimeSpan(1)); // TODO: Find a way to Assign without consuming. Probably impossible.
@@ -75,7 +75,7 @@ namespace Scynet.HatcheryFacade.RPC
         private readonly IEnumerable<string> _brokers;
         private Dictionary<String, InternalSubscription> subscriptions = new Dictionary<string, InternalSubscription>();
 
-        
+
 
         public SubscriberFacade(ILogger<SubscriberFacade> logger, IEnumerable<String> brokers)
         {
@@ -135,7 +135,7 @@ namespace Scynet.HatcheryFacade.RPC
                         subscription.Consumer.Consume(new TimeSpan(0,0,0,10 ))
                     );
                     if(result == null) continue;
-                    
+
                     response.Messages.Add(new DataMessage()
                     {
                         Data = ByteString.CopyFrom(result.Value,

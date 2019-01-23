@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Scynet.GrainInterfaces
 {
+    [Serializable]
     public class ComponentInfo
     {
-        private string Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

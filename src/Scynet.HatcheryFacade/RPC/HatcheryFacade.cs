@@ -7,6 +7,6 @@ namespace Scynet.HatcheryFacade.RPC
 {
     public class HatcheryFacade: Hatchery.HatcheryBase
     {
-        
+
     }
 }

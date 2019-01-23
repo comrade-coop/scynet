@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
+using Scynet.GrainInterfaces;
 
 namespace Scynet.HatcheryFacade.Controllers
 {
@@ -20,8 +21,21 @@ namespace Scynet.HatcheryFacade.Controllers
 
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public async Task<ActionResult<IEnumerable<string>>> Get()
         {
+            // HACK: testing code below
+            var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
+            await registry.Register(new AgentInfo { Id = Guid.Empty });
+            await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
+            await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
+
+            var res = await registry.Query((x => (from y in x
+                    where y.Id == Guid.Empty
+                    select y
+                    ).ToList()));
+            Console.WriteLine("----------");
+            Console.WriteLine(String.Join('|', from x in res select x.Id));
+            Console.WriteLine(res.GetType());
             return new string[] { "value1", "value2" };
         }
 

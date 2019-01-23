@@ -10,7 +10,7 @@
     <PackageReference Include="Confluent.Kafka" Version="1.0-beta" />
     <PackageReference Include="Google.Protobuf" Version="3.6.1" />
     <PackageReference Include="Grpc" Version="1.18.0" />
-    <PackageReference Include="Grpc.Tools" Version="1.18.0">
+    <PackageReference Include="Grpc.Tools" Version="1.18.0" PrivateAssets="All">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
@@ -19,7 +19,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Orleans.Client" Version="2.2.0" />
-    <PackageReference Include="Serialize.Linq" Version="1.7.3.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
   </ItemGroup>
 
@@ -27,7 +26,7 @@
     <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
 
     <Protobuf Include="..\..\protocols\Shared.proto" GrpcServices="None" />
-    <Protobuf Include="..\..\protocols\Hatchery.proto" GrpcServicers="Server" />
+    <Protobuf Include="..\..\protocols\Hatchery.proto" />
     <Protobuf Include="..\..\protocols\Component.proto" GrpcServices="Client" />
     <Protobuf Include="..\..\protocols\Stream.proto" GrpcServices="Both" />
 

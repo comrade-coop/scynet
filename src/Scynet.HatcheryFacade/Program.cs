@@ -39,7 +39,7 @@ namespace Scynet.HatcheryFacade
                     options.ServiceId = "Scynet";
                 })
                 .ConfigureLogging(logging => logging.AddConsole());
-            
+
             IClusterClient client = builder.Build();
             Console.WriteLine("Connecting...");
 
@@ -50,7 +50,8 @@ namespace Scynet.HatcheryFacade
             return client;
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) { 
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
+
             return WebHost.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>
                 {
@@ -60,7 +61,7 @@ namespace Scynet.HatcheryFacade
                     services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
                     // TODO: Find a better way to indicate that these are brokers. OR
                     // TODO: Load brokers from appsettings.json
-                    services.AddSingleton<IEnumerable<string>>(sp => new List<string>() { "127.0.0.1:9092" }); 
+                    services.AddSingleton<IEnumerable<string>>(sp => new List<string>() { "127.0.0.1:9092" });
                     services.AddSingleton<IEnumerable<Server>>(sp =>
                     {
                         var hatcheryService = Hatchery.BindService(sp.GetService<RPC.HatcheryFacade>());

@@ -5,6 +5,7 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Scynet.Grains;
+using Scynet.GrainInterfaces;
 
 namespace Scynet.LocalSilo
 {
@@ -23,13 +24,13 @@ namespace Scynet.LocalSilo
 
                 var builder = new SiloHostBuilder()
                     .UseLocalhostClustering()
+                    .AddMemoryGrainStorage("Default")
                     .Configure<ClusterOptions>(options => {
                         options.ClusterId = "dev";
                         options.ServiceId = "Scynet";
                     })
                     .ConfigureApplicationParts(parts => parts
-                        .AddApplicationPart(typeof(ComponentAgent).Assembly)
-                        .AddApplicationPart(typeof(AgentRegistry).Assembly)
+                        .AddApplicationPart(typeof(Component).Assembly) // Any known Grain class, so it includes the whole assembly
                         .WithReferences())
                     .ConfigureLogging(logging => logging.AddConsole())
                     .AddMemoryGrainStorage("Default");
@@ -40,9 +41,17 @@ namespace Scynet.LocalSilo
 
                 await host.StartAsync();
 
+
                 Console.WriteLine("Yay, everything worked!");
-                Console.WriteLine("\nPress Enter to terminate...\n");
-                Console.ReadLine();
+                Console.WriteLine("\nPress CTRL+C to shut down...\n");
+
+                var interruptted = new TaskCompletionSource<bool>();
+                Console.CancelKeyPress += (s, e) => {
+                    interruptted.TrySetResult(true);
+                };
+                await interruptted.Task;
+
+                Console.WriteLine("Stopping...");
 
                 await host.StopAsync();
 

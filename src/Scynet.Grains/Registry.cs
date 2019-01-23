@@ -31,41 +31,21 @@ namespace Scynet.Grains
             return base.WriteStateAsync();
         }
 
-        public Task<List<T>> QueryAgents(ExpressionNode expression)
+        public Task<K> Query<K>(ExpressionNode expression)
         {
-            var compiledExpression = expression.ToExpression<Func<List<T>, List<T>>>().Compile();
-            List<T> items = compiledExpression(State.Items);
-            return Task.FromResult(items);
+            var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, K>>().Compile();
+            K result = compiledExpression(State.Items);
+            return Task.FromResult(result);
         }
+    }
 
-        public Task<K> Sheny<K>(ExpressionNode expression)
-        {
-            var compiledExpression = expression.ToExpression<Func<List<T>, K>>().Compile();
-            K items = compiledExpression(State.Items);
-            return Task.FromResult(items);
-        }
-
-       public void QueryAgents()
-        {
-            List<AgentInfo> data = new List<AgentInfo>();
-            var query = from c in data
-                        select c.Id;
-            var z = query.AsQueryable();
-
-            Expression<Func<int>> sum = () => 1 + 2;
-
-            //parameter expression where AgentInfo is the type of the parameter and 's' is the name of the parameter
-            ParameterExpression pe = Expression.Parameter(typeof(AgentInfo), "s");
-            //use Expression.Property() to create s.Id expression where s is the parameter and Id is the property name of AgentInfo
-            MemberExpression me = Expression.Property(pe, "Id");
-            //create a constant expression for 18
-            ConstantExpression constant = Expression.Constant("0", typeof(string));
-            // check whether a member expression is greater than a constant expression or not.
-            BinaryExpression body = Expression.Equal(me, constant);
-
-            Console.WriteLine(body);
-            Expression<Func<AgentInfo, bool>> e = Expression.Lambda<Func<AgentInfo, bool>>(body, pe);
-            var res = data.Where(e.Compile());
-        }
+    // HACK: Needed so that Orleans can find the Grain types
+    public class AgentRegistry : Registry<AgentInfo>
+    {
+        public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) {}
+    }
+    public class ComponentRegistry : Registry<ComponentInfo>
+    {
+        public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) {}
     }
 }
