@@ -10,14 +10,19 @@ using System.Threading.Tasks;
 
 namespace Scynet.Grains
 {
-    public class RegistryState<Т>
+    public class RegistryState<T>
     {
-        public List<Т> Items = new List<Т>();
+        public List<T> Items = new List<T>();
+        // TODO: Can the below line be shortened somehow?
+        public Dictionary<Tuple<IRegistryListener<T>, String>, ExpressionNode> Subscriptions =
+            new Dictionary<Tuple<IRegistryListener<T>, String>, ExpressionNode>();
     }
 
     public abstract class Registry<T> : Orleans.Grain<RegistryState<T>>, IRegistry<T>
     {
         private readonly ILogger<Registry<T>> Logger;
+        private Dictionary<Tuple<IRegistryListener<T>, String>, Func<T, bool>> SubscriptionFilterCache =
+            new Dictionary<Tuple<IRegistryListener<T>, String>, Func<T, bool>>();
 
         public Registry(ILogger<Registry<T>> logger)
         {
@@ -28,10 +33,22 @@ namespace Scynet.Grains
         {
             Logger.LogInformation($"Item registered ({info})!");
             State.Items.Add(info);
+            foreach (var subscription in State.Subscriptions) {
+                if (!SubscriptionFilterCache.ContainsKey(subscription.Key)) {
+                    SubscriptionFilterCache[subscription.Key] =
+                        subscription.Value.ToExpression<Func<T, bool>>().Compile();
+                }
+                var filter = SubscriptionFilterCache[subscription.Key];
+                if (filter(info)) {
+                    var listener = subscription.Key.Item1;
+                    var @ref = subscription.Key.Item2;
+                    listener.NewItem(@ref, info);
+                }
+            }
             return base.WriteStateAsync();
         }
 
-        public Task<K> QueryRaw<K>(ExpressionNode expression)
+        public Task<K> QueryValue<K>(ExpressionNode expression)
         {
             var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, K>>().Compile();
             K result = compiledExpression(State.Items);
@@ -43,6 +60,20 @@ namespace Scynet.Grains
             var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, IEnumerable<K>>>().Compile();
             IEnumerable<K> result = compiledExpression(State.Items).ToList();
             return Task.FromResult(result);
+        }
+
+        public Task Subscribe(ExpressionNode expression, IRegistryListener<T> listener, String @ref = "")
+        {
+            var key = Tuple.Create(listener, @ref);
+            SubscriptionFilterCache.Remove(key);
+            State.Subscriptions[key] = expression;
+            return base.WriteStateAsync();
+        }
+
+        public Task Unsubscribe(IRegistryListener<T> listener, String @ref = "")
+        {
+            State.Subscriptions.Remove(Tuple.Create(listener, @ref));
+            return base.WriteStateAsync();
         }
     }
 

@@ -39,10 +39,23 @@ namespace Scynet.HatcheryFacade.Controllers
             return new string[] { "value1", "value2" };
         }
 
+        // HACK: Needed for testing
+        private class TestListener : IRegistryListener<AgentInfo> {
+            public void NewItem(string @ref, AgentInfo thing) {
+                Console.WriteLine("Received test notification for {0}: {1}", @ref, thing.Id);
+            }
+        };
+
         // GET api/values/5
         [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
+        public Task<ActionResult<string>> Get(int id)
         {
+            // HACK: testing code below
+            var test = new TestListener();
+            var testWrap = await client.CreateObjectReference<IRegistryListener<AgentInfo>>(test);
+            var x = client.GetGrain<IRegistry<AgentInfo>>(0);
+            await x.Subscribe(y => y.Id == Guid.Empty, testWrap, "test");
+
             return "value";
         }
 
