@@ -3,11 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester", "BlockchainHarvester\BlockChainHarvester.csproj", "{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockChainHarvester", "BlockchainHarvester\BlockChainHarvester.csproj", "{2C7AE88D-EE1B-49E9-B457-BC22DF46D9AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester.Grains", "BlockchainHarvester.Grains\BlockChainHarvester.Grains.csproj", "{CE13D68A-279B-4DF6-87CB-6620C5DFB231}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockChainHarvester.Grains", "BlockchainHarvester.Grains\BlockChainHarvester.Grains.csproj", "{CE13D68A-279B-4DF6-87CB-6620C5DFB231}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvester.GrainInterfaces", "BlockchainHarveser.GrainInterfaces\BlockChainHarvester.GrainInterfaces.csproj", "{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockChainHarvester.GrainInterfaces", "BlockchainHarveser.GrainInterfaces\BlockChainHarvester.GrainInterfaces.csproj", "{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlockChainExtractor", "BlockChainExtractor\BlockChainExtractor.csproj", "{DA854CE8-F55E-4A0B-9FD1-FC74C860B270}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockChainHarvesterFacade", "BlockChainHarvesterFacade\BlockChainHarvesterFacade.csproj", "{B05CECD8-BEEC-4E7D-A66B-DB1BD467BC55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,14 @@ Global
 		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D47F8BE-C5FA-4D2F-824D-0C64AF7E49DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA854CE8-F55E-4A0B-9FD1-FC74C860B270}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA854CE8-F55E-4A0B-9FD1-FC74C860B270}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA854CE8-F55E-4A0B-9FD1-FC74C860B270}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA854CE8-F55E-4A0B-9FD1-FC74C860B270}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B05CECD8-BEEC-4E7D-A66B-DB1BD467BC55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B05CECD8-BEEC-4E7D-A66B-DB1BD467BC55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B05CECD8-BEEC-4E7D-A66B-DB1BD467BC55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B05CECD8-BEEC-4E7D-A66B-DB1BD467BC55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

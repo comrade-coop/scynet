@@ -1,4 +1,6 @@
-﻿using Scynet;
+﻿using System.ComponentModel;
+using Scynet;
+using Component = Scynet.Component;
 
 namespace BlockchainHarvester
 {

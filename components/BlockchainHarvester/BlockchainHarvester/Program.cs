@@ -25,14 +25,7 @@ namespace BlockchainHarvester
 
                 Channel channel = new Channel("127.0.0.1:9998", ChannelCredentials.Insecure); // TODO: Make the ip configurable.
 
-                var server = new Server()
-                {
-                    Services =
-                    {
-                        Scynet.Component.BindService(new ComponentFacade())
-                    },
-                    Ports = { new ServerPort("0.0.0.0", 0, ServerCredentials.Insecure) }
-                };
+       
 
                 var builder = new SiloHostBuilder()
                     .UseLocalhostClustering()
@@ -46,7 +39,6 @@ namespace BlockchainHarvester
                         .WithReferences()) //TODO: Load the assembly in some other way so we are not dependent on the implementation project.
                     .ConfigureLogging(logging => logging.AddConsole())
                     .ConfigureServices(((context, services) => {
-                        services.AddSingleton<Server>(sc => server);
                         services.AddSingleton<Channel>(sc => channel);
                         // TODO: Find if these will work without a factory.
 
@@ -54,7 +46,12 @@ namespace BlockchainHarvester
                         services.AddSingleton<Scynet.Publisher.PublisherClient>(sc => new Scynet.Publisher.PublisherClient(channel));
                         services.AddSingleton<Scynet.Hatchery.HatcheryClient>(sc => new Scynet.Hatchery.HatcheryClient(channel));
                         
-                    }));
+                    }))
+                    .AddSimpleMessageStreamProvider("SMSProvider")
+                    .AddMemoryGrainStorageAsDefault()
+                    .AddMemoryGrainStorage("PubSubStore")                    ;
+
+                
 
                 
 
@@ -66,14 +63,15 @@ namespace BlockchainHarvester
                 Console.WriteLine("Running...");
 
                 await host.StartAsync();
-                server.Start();
+                
+
+
 
                 Console.WriteLine("Yay, everything worked!");
                 Console.WriteLine("\nPress Enter to terminate...\n");
                 Console.ReadLine();
 
                 await host.StopAsync();
-                await server.ShutdownAsync();
 
                 return 0;
             }

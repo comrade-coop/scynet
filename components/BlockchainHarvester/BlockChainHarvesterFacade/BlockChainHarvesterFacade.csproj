@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyName>BlockchainHarvester</AssemblyName>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,14 +15,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Server" Version="2.2.3" />
-    <PackageReference Include="Nethereum.Parity" Version="3.0.0" />
-    <PackageReference Include="Nethereum.Web3" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlockchainHarveser.GrainInterfaces\BlockChainHarvester.GrainInterfaces.csproj" />
-    <ProjectReference Include="..\BlockchainHarvester.Grains\BlockChainHarvester.Grains.csproj" />
   </ItemGroup>
 
   <ItemGroup>
