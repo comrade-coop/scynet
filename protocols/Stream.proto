@@ -22,11 +22,8 @@ service Subscriber {
 	// Tell the subscriber that the message was saved or transformed, and we don't want it again.
 	rpc Acknowledge (AcknowledgeRequest) returns (Void) {}
 
-	// Get the newest messages.
-	rpc Pull (PullRequest) returns (PullResponse) {}
-
-	//
-	rpc StreamingPull (StreamingPullRequest) returns (stream StreamingPullResponse) {}
+	// 
+	rpc StreamingPull(StreamingPullRequest) returns (stream StreamingPullResponse) {}
 
 	//
 	rpc Seek (SeekRequest) returns (Void) {}

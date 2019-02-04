@@ -61,13 +61,13 @@ namespace Scynet.HatcheryFacade.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<string>> Get(int id)
+        public async Task<string> Get(int id)
         {
             // HACK: testing code below
             var test = new TestListener();
-            var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(test);
-            var x = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await x.Subscribe(y => y.Key == Guid.Empty, testWrap, "test");
+            var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<AgentInfo>>(test);
+            var x = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
+            await x.Subscribe(y => y.Id == Guid.Empty, testWrap, "test");
 
             return "value";
         }

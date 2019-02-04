@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -28,19 +30,46 @@ namespace Scynet.Tests
             var subscriptions =
                 (IDictionary)typeof(SubscriberFacade).GetField("subscriptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .GetValue(SubscriberFacade);
-            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Equal<string>("TestSubscription", key));
+            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Matches("TestSubscription" , key));
 
+        }
+
+        class TestStreamWriter : IServerStreamWriter<StreamingPullResponse>
+        {
+            public List<DataMessage> Messages = new List<DataMessage>();
+            public async Task WriteAsync(StreamingPullResponse message)
+            {
+                Console.WriteLine(message.ToString());
+                Messages.Add(message.Message);
+                return;
+
+            }
+
+            public WriteOptions WriteOptions { get; set; }
         }
 
         [Fact]
         public async void TestPull()
         {
+            
+
             var subscription = await SubscriberFacade.Subscribe(new SubscriptionRequest() { Id = "TestSubscription", AgetnId = "reddit_posts" }, null);
 
+<<<<<<< HEAD
             var result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
             await Task.Delay(1000);
             result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
             foreach (var message in result.Messages)
+=======
+
+
+            var testStream = new TestStreamWriter();
+            await SubscriberFacade.StreamingPull(new StreamingPullRequest() {Id = "TestSubscription" }, testStream, null);
+
+            await Task.Delay(1000);
+
+            foreach (var message in testStream.Messages)
+>>>>>>> Final changes on the streaming facade side.
             {
                 _testOutputHelper.WriteLine(message.ToString());
             }
