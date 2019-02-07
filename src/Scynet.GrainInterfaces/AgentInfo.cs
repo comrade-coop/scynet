@@ -9,7 +9,6 @@ namespace Scynet.GrainInterfaces
     {
         public Guid Id { get; set; }
         public String RunnerType { get; set; }
-        public byte[] EggHash { get; set; }
 
         public AgentInfo()
         {

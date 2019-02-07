@@ -42,11 +42,6 @@ namespace Scynet.HatcheryFacade.RPC
 
             var data = request.Agent.EggData.ToByteArray();
 
-            byte[] hash;
-            using (SHA256 sha256 = SHA256.Create()) {
-                hash = sha256.ComputeHash(data);
-            }
-
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);
             var component = ClusterClient.GetGrain<IComponent>(componentId);
             await agent.Initialize(component, data);
@@ -55,7 +50,6 @@ namespace Scynet.HatcheryFacade.RPC
             await registry.Register(new AgentInfo() {
                 Id = id,
                 RunnerType = request.Agent.ComponentType,
-                EggHash = hash,
             });
 
             return new AgentRegisterResponse();
