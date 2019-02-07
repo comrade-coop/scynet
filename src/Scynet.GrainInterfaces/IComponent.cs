@@ -12,16 +12,16 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Initialize the component
         /// </summary>
-        Task Initialize(String endpoint, String runnerType);
+        Task Initialize(String endpoint, ISet<String> runnerTypes);
+
+        /// <summary>
+        /// Mark the component as disconnected
+        /// </summary>
+        Task Disconnect();
 
         /// <summary>
         /// Register an input for the component
         /// </summary>
         Task RegisterInput(Guid agentId);
-
-        /// <summary>
-        /// Create an agent, likely by registering it the AgentRegistry
-        /// </summary>
-        Task<Guid> CreateAgent(EggDescriptor egg);
     }
 }

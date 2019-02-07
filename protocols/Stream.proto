@@ -6,31 +6,30 @@ option csharp_namespace = "Scynet";
 
 // The publishing api that will be used exclusively by the agents.
 service Publisher {
-	//
-	rpc Publish(PublishRequest) returns (PublishResponse) {}
+	rpc Publish (PublishRequest) returns (PublishResponse) {}
 }
 
 
-// The subscriber api is used both by agnets and other hatcheries.
+// The subscriber api is used both by agents and other hatcheries.
 service Subscriber {
 
 	// Create a subscriber that we will use to listen to the messages produced by the agents.
-	rpc Subscribe(SubscriptionRequest) returns (SubscriptionResponse) {}
+	rpc Subscribe (SubscriptionRequest) returns (SubscriptionResponse) {}
 
 	// Delete
-	rpc Unsubscribe(UnsubscribeRequest) returns (Void) {}
+	rpc Unsubscribe (UnsubscribeRequest) returns (Void) {}
 
 	// Tell the subscriber that the message was saved or transformed, and we don't want it again.
-	rpc Acknowledge(AcknowledgeRequest) returns (Void) {}
+	rpc Acknowledge (AcknowledgeRequest) returns (Void) {}
 
 	// Get the newest messages.
-	rpc Pull(PullRequest) returns (PullResponse) {}
-
-	// 
-	rpc StreamingPull(StreamingPullRequest) returns (stream StreamingPullResponse) {}
+	rpc Pull (PullRequest) returns (PullResponse) {}
 
 	//
-	rpc Seek(SeekRequest) returns (Void) {}
+	rpc StreamingPull (StreamingPullRequest) returns (stream StreamingPullResponse) {}
+
+	//
+	rpc Seek (SeekRequest) returns (Void) {}
 }
 
 message AcknowledgeRequest {
@@ -67,7 +66,7 @@ message SubscriptionRequest {
 	string id = 1; // Can be the id of an agent, but also the id of onother hatchery.
 
 	oneof agent {
-		string agentType = 2; // The type of agent we want to subscribe to. Used when subscriing to remote agents that 
+		string agentType = 2; // The type of agent we want to subscribe to. Used when subscriing to remote agents that
 		string agetnId = 3; // The agent's output that we will subscribe to.
 	}
 

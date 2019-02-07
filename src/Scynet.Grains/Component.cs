@@ -9,8 +9,8 @@ namespace Scynet.Grains
 {
     public class ComponentState {
         public String Endpoint;
-        public String RunnerType;
-        public IList<Guid> Inputs;
+        public ISet<String> RunnerTypes;
+        public IList<Guid> Inputs = new List<Guid>();
     }
 
     public class Component : Orleans.Grain<ComponentState>, IComponent
@@ -22,10 +22,14 @@ namespace Scynet.Grains
             Logger = logger;
         }
 
-        public Task Initialize(String endpoint, String runnerType) {
+        public Task Initialize(String endpoint, ISet<String> runnerTypes) {
             State.Endpoint = endpoint;
-            State.RunnerType = runnerType;
-            State.Inputs = new List<Guid>();
+            State.RunnerTypes = new HashSet<String>(runnerTypes);
+            return base.WriteStateAsync();
+        }
+
+        public Task Disconnect() {
+            State.Endpoint = "";
             return base.WriteStateAsync();
         }
 
@@ -33,12 +37,6 @@ namespace Scynet.Grains
             State.Inputs.Add(agentId);
             // TODO: Send input to endpoint
             return base.WriteStateAsync();
-        }
-
-        public Task<Guid> CreateAgent(EggDescriptor egg) {
-            var agentId = Guid.NewGuid();
-            // TODO: Initialize agent
-            return Task.FromResult(agentId);
         }
     }
 }

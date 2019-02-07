@@ -10,15 +10,34 @@ namespace Scynet.Grains
 {
     public class ComponentAgentState {
         public Dictionary<IEngager, EngagementInfo> Engagements = new Dictionary<IEngager, EngagementInfo>();
+        public IComponent Component;
+        public byte[] Data = {};
     }
 
-    public class ComponentAgent : Grain<ComponentAgentState>, IAgent
+    public class ComponentAgent : Grain<ComponentAgentState>, IComponentAgent
     {
         private readonly ILogger Logger;
 
         public ComponentAgent(ILogger<ComponentAgent> logger)
         {
             Logger = logger;
+        }
+
+        /// <inheritdoc/>
+        public Task Initialize(IComponent component, byte[] data) {
+            State.Component = component;
+            State.Data = data;
+            return base.WriteStateAsync();
+        }
+
+        /// <inheritdoc/>
+        public Task<IComponent> GetComponent() {
+            return Task.FromResult(State.Component);
+        }
+
+        /// <inheritdoc/>
+        public Task<byte[]> GetData() {
+            return Task.FromResult(State.Data);
         }
 
         /// <inheritdoc/>
