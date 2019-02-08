@@ -10,7 +10,7 @@ namespace GrainInterfaces
     {
         Task AgentStart(MockEgg egg);
         Task AgentStop(string agentId);
-        Task GetAgentStatus(string agentId);
-        Task GetAllAgents();
+        Task<bool> GetAgentStatus(string agentId);
+        Task<List<MockAgent>> GetAllAgents();
     }
 }

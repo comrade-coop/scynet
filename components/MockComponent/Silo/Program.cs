@@ -53,7 +53,8 @@ namespace Silo
             // In this particular case it logs using the Microsoft.Extensions.Logging.Console package.
             .ConfigureLogging(logging => logging.AddConsole())
             //need to configure a grain storage called "PubSubStore" for using streaming with ExplicitSubscribe pubsub type
-            .AddMemoryGrainStorage("PubSubStore");
+            //.AddMemoryGrainStorage("PubSubStore");
+            .AddMemoryGrainStorage("Default");
             // Depends on your application requirements, you can configure your silo with other stream providers, which can provide other 
             // features, such as persistence or recoverability. 
             // For more information, please see http://dotnet.github.io/orleans/Documentation/Orleans-Streams/Stream-Providers.html

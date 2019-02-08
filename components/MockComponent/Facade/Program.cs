@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Threading;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Runtime;
+using GrainInterfaces;
+using System.Text;
 
-namespace Silo
+namespace Facade
 {
     class Program
     {
@@ -21,6 +24,14 @@ namespace Silo
         private static async Task RunMainAsync()
         {
             var client = await StartClientWithRetries();
+            var grain = client.GetGrain<IAgentRegistryGrain>("0");
+            MockEgg egg = new MockEgg()
+            {
+                Id = "sheny",
+                Data = Encoding.ASCII.GetBytes("Agent1")
+            };
+            await grain.AgentStart(egg);
+            var agentsList = await grain.GetAllAgents();
 
             var server = new Server()
             {
@@ -33,6 +44,10 @@ namespace Silo
 
             Console.WriteLine("Starting facade...");
             server.Start();
+
+            Console.WriteLine("Facade started");
+
+            await server.ShutdownAsync();
         }
 
         private static async Task<IClusterClient> StartClientWithRetries()

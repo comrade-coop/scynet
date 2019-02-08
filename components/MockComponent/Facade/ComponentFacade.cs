@@ -8,7 +8,7 @@ using Component = Scynet.Component;
 using Orleans;
 using GrainInterfaces;
 
-namespace Silo
+namespace Facade
 {
     public class ComponentFacade : Component.ComponentBase
     {
@@ -26,26 +26,40 @@ namespace Silo
                 Id = request.Uuid,
                 Data = request.Egg.Data.ToByteArray()
             };
-            var res = client.GetGrain<IAgentRegistryGrain>("0").AgentStart(egg);
-            return base.AgentStart(request, context);
+            client.GetGrain<IAgentRegistryGrain>("0").AgentStart(egg).Wait();
+            return Task.FromResult(new Scynet.Void());
         }
 
         public override Task<Scynet.Void> AgentStop(AgentRequest request, ServerCallContext context)
         {
-            client.GetGrain<IAgentRegistryGrain>("0").AgentStop(request.Uuid);
-            return base.AgentStop(request, context);
+            client.GetGrain<IAgentRegistryGrain>("0").AgentStop(request.Uuid).Wait();
+            return Task.FromResult(new Scynet.Void()); ;
         }
 
-        public override Task<ListOfAgents> AgentList(AgentQuery request, ServerCallContext context)
+        public override async Task<ListOfAgents> AgentList(AgentQuery request, ServerCallContext context)
         {
-            var list = client.GetGrain<IAgentRegistryGrain>("0").GetAllAgents();
-            return base.AgentList(request, context);
+            var agentsList = await client.GetGrain<IAgentRegistryGrain>("0").GetAllAgents();
+            ListOfAgents agentsListResponse = new ListOfAgents();
+            foreach (var agent in agentsList)
+            {
+                var agentResponse = new Agent()
+                {
+                    Uuid = agent.Id,
+                    Running = agent.IsRunning
+                };
+                agentsListResponse.Agents.Add(agentResponse);
+            }
+
+            return agentsListResponse;
         }
 
-        public override Task<AgentStatusResponse> AgentStatus(AgentRequest request, ServerCallContext context)
+        public override async Task<AgentStatusResponse> AgentStatus(AgentRequest request, ServerCallContext context)
         {
-            var status = client.GetGrain<IAgentRegistryGrain>("0").GetAgentStatus(request.Uuid);
-            return base.AgentStatus(request, context);
+            var status = await client.GetGrain<IAgentRegistryGrain>("0").GetAgentStatus(request.Uuid);
+            return new AgentStatusResponse()
+            {
+                Running = status
+            };
         }
 
     }

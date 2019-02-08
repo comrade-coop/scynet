@@ -9,6 +9,7 @@ namespace Grains
     using System.Threading.Tasks;
     using GrainInterfaces;
     using Orleans;
+    using System.Linq;
 
     public class AgentRegistryState
     {
@@ -52,14 +53,14 @@ namespace Grains
             return Task.CompletedTask;
         }
 
-        public Task GetAgentStatus(string agentId)
+        public Task<bool> GetAgentStatus(string agentId)
         {
             return Task.FromResult(State.Agents[agentId].IsRunning);
         }
 
-        public Task GetAllAgents()
+        public Task<List<MockAgent>> GetAllAgents()
         {
-            return Task.FromResult(State.Agents.Values);
+            return Task.FromResult(State.Agents.Values.ToList());
         }
     }
 }
