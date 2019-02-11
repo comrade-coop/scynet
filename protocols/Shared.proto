@@ -8,7 +8,7 @@ message Agent {
 	string uuid = 1;
 	bytes eggData = 2; // optional
 	string componentType = 3;
-	string componentId = 4;
+	string componentId = 4; // id of the component in which the agent is running
 	// string outputType = 5;
 	// repeated string inputsTypes = 6;
 }

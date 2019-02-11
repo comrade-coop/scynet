@@ -24,12 +24,13 @@ namespace Facade
         private static async Task RunMainAsync()
         {
             var client = await StartClientWithRetries();
-            var grain = client.GetGrain<IAgentRegistryGrain>("0");
-            MockEgg egg = new MockEgg()
+            var grain = client.GetGrain<IAgentRegistryGrain>(0);
+            MockAgent egg = new MockAgent()
             {
                 Id = "sheny",
-                Data = Encoding.ASCII.GetBytes("Agent1")
+                EggData = Encoding.ASCII.GetBytes("Agent1")
             };
+
             await grain.AgentStart(egg);
             var agentsList = await grain.GetAllAgents();
 

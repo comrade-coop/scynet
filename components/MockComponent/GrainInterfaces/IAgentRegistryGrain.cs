@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace GrainInterfaces
 {
-    public interface IAgentRegistryGrain : IGrainWithStringKey
+    public interface IAgentRegistryGrain : IGrainWithIntegerKey
     {
-        Task AgentStart(MockEgg egg);
+        Task AgentStart(MockAgent egg);
         Task AgentStop(string agentId);
-        Task<bool> GetAgentStatus(string agentId);
+        Task<bool> IsAgentRunning(string agentId);
         Task<List<MockAgent>> GetAllAgents();
     }
 }

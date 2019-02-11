@@ -19,33 +19,32 @@ namespace Facade
             this.client = client;
         }
 
-        public override Task<Scynet.Void> AgentStart(AgentStartRequest request, ServerCallContext context)
+        public override async Task<Scynet.Void> AgentStart(AgentStartRequest request, ServerCallContext context)
         {
-            MockEgg egg = new MockEgg
+            MockAgent egg = new MockAgent
             {
-                Id = request.Uuid,
-                Data = request.Egg.Data.ToByteArray()
+                Id = request.Egg.Uuid,
+                EggData = request.Egg.EggData.ToByteArray()
             };
-            client.GetGrain<IAgentRegistryGrain>("0").AgentStart(egg).Wait();
-            return Task.FromResult(new Scynet.Void());
+            await client.GetGrain<IAgentRegistryGrain>(0).AgentStart(egg);
+            return new Scynet.Void();
         }
 
-        public override Task<Scynet.Void> AgentStop(AgentRequest request, ServerCallContext context)
+        public override async Task<Scynet.Void> AgentStop(AgentRequest request, ServerCallContext context)
         {
-            client.GetGrain<IAgentRegistryGrain>("0").AgentStop(request.Uuid).Wait();
-            return Task.FromResult(new Scynet.Void()); ;
+            await client.GetGrain<IAgentRegistryGrain>(0).AgentStop(request.Uuid);
+            return new Scynet.Void(); ;
         }
 
         public override async Task<ListOfAgents> AgentList(AgentQuery request, ServerCallContext context)
         {
-            var agentsList = await client.GetGrain<IAgentRegistryGrain>("0").GetAllAgents();
+            var agentsList = await client.GetGrain<IAgentRegistryGrain>(0).GetAllAgents();
             ListOfAgents agentsListResponse = new ListOfAgents();
             foreach (var agent in agentsList)
             {
                 var agentResponse = new Agent()
                 {
-                    Uuid = agent.Id,
-                    Running = agent.IsRunning
+                    Uuid = agent.Id
                 };
                 agentsListResponse.Agents.Add(agentResponse);
             }
@@ -55,7 +54,7 @@ namespace Facade
 
         public override async Task<AgentStatusResponse> AgentStatus(AgentRequest request, ServerCallContext context)
         {
-            var status = await client.GetGrain<IAgentRegistryGrain>("0").GetAgentStatus(request.Uuid);
+            var status = await client.GetGrain<IAgentRegistryGrain>(0).IsAgentRunning(request.Uuid);
             return new AgentStatusResponse()
             {
                 Running = status

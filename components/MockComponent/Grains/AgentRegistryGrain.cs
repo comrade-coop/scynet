@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Grains
+﻿namespace Grains
 {
     using System;
     using System.Collections.Generic;
@@ -24,7 +22,7 @@ namespace Grains
 
         }
 
-        public Task AgentStart(MockEgg egg)
+        public Task AgentStart(MockAgent egg)
         {
             MockAgent agent = new MockAgent(egg);
             if(!State.Agents.ContainsKey(agent.Id))
@@ -53,7 +51,7 @@ namespace Grains
             return Task.CompletedTask;
         }
 
-        public Task<bool> GetAgentStatus(string agentId)
+        public Task<bool> IsAgentRunning(string agentId)
         {
             return Task.FromResult(State.Agents[agentId].IsRunning);
         }

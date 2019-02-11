@@ -7,18 +7,18 @@ namespace GrainInterfaces
         public string Id { get; set; }
         public string Name { get; set; }
         public bool IsRunning { get; set; }
+        public byte[] EggData { get; set; }
         //contain stream for data reading
 
-        public MockAgent(string id, string name)
+        public MockAgent()
         {
-            this.Id = id;
-            this.Name = name;
+
         }
 
-        public MockAgent(MockEgg egg)
+        public MockAgent(MockAgent egg)
         {
             this.Id = egg.Id;
-            this.Name = System.Text.Encoding.UTF8.GetString(egg.Data);
+            this.Name = System.Text.Encoding.UTF8.GetString(egg.EggData);
         }
 
         public void Start()
