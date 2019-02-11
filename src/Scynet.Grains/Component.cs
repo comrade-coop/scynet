@@ -1,5 +1,5 @@
 ﻿using System;
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -7,8 +7,9 @@ using Scynet.GrainInterfaces;
 
 namespace Scynet.Grains
 {
-    public class ComponentState {
-        public String Endpoint;
+    public class ComponentState
+    {
+        public String Address;
         public ISet<String> RunnerTypes;
         public IList<Guid> Inputs = new List<Guid>();
     }
@@ -22,20 +23,28 @@ namespace Scynet.Grains
             Logger = logger;
         }
 
-        public Task Initialize(String endpoint, ISet<String> runnerTypes) {
-            State.Endpoint = endpoint;
+        public Task Initialize(String address, ISet<String> runnerTypes)
+        {
+            State.Address = address;
             State.RunnerTypes = new HashSet<String>(runnerTypes);
             return base.WriteStateAsync();
         }
 
-        public Task Disconnect() {
-            State.Endpoint = "";
+        public Task<string> GetAddress()
+        {
+            return Task.FromResult(State.Address);
+        }
+
+        public Task Disconnect()
+        {
+            State.Address = "";
             return base.WriteStateAsync();
         }
 
-        public Task RegisterInput(Guid agentId) {
+        public Task RegisterInput(Guid agentId)
+        {
             State.Inputs.Add(agentId);
-            // TODO: Send input to endpoint
+            // TODO: Send input to address
             return base.WriteStateAsync();
         }
     }

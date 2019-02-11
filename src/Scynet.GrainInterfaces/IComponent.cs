@@ -12,7 +12,12 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Initialize the component
         /// </summary>
-        Task Initialize(String endpoint, ISet<String> runnerTypes);
+        Task Initialize(String address, ISet<String> runnerTypes);
+
+        /// <summary>
+        /// Get the address of the component
+        /// </summary>
+        Task<string> GetAddress();
 
         /// <summary>
         /// Mark the component as disconnected

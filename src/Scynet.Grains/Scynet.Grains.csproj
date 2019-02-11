@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+    <PackageReference Include="Grpc" Version="1.18.0" />
+    <PackageReference Include="Grpc.Tools" Version="1.18.0" PrivateAssets="All">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="2.2.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -18,5 +20,12 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
+
+    <Protobuf Include="..\..\protocols\Shared.proto" GrpcServices="None" />
+    <Protobuf Include="..\..\protocols\Component.proto" GrpcServices="Client" />
+  </ItemGroup>
 
 </Project>

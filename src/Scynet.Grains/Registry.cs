@@ -33,13 +33,16 @@ namespace Scynet.Grains
         {
             Logger.LogInformation($"Item registered ({info})!");
             State.Items.Add(info);
-            foreach (var subscription in State.Subscriptions) {
-                if (!SubscriptionFilterCache.ContainsKey(subscription.Key)) {
+            foreach (var subscription in State.Subscriptions)
+            {
+                if (!SubscriptionFilterCache.ContainsKey(subscription.Key))
+                {
                     SubscriptionFilterCache[subscription.Key] =
                         subscription.Value.ToExpression<Func<T, bool>>().Compile();
                 }
                 var filter = SubscriptionFilterCache[subscription.Key];
-                if (filter(info)) {
+                if (filter(info))
+                {
                     var listener = subscription.Key.Item1;
                     var @ref = subscription.Key.Item2;
                     listener.NewItem(@ref, info);
@@ -82,10 +85,10 @@ namespace Scynet.Grains
     // HACK: Needed so that Orleans can find the Grain types
     public class AgentRegistry : Registry<AgentInfo>
     {
-        public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) {}
+        public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) { }
     }
     public class ComponentRegistry : Registry<ComponentInfo>
     {
-        public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) {}
+        public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) { }
     }
 }

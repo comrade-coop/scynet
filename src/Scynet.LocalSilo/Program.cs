@@ -25,7 +25,8 @@ namespace Scynet.LocalSilo
                 var builder = new SiloHostBuilder()
                     .UseLocalhostClustering()
                     .AddMemoryGrainStorage("Default")
-                    .Configure<ClusterOptions>(options => {
+                    .Configure<ClusterOptions>(options =>
+                    {
                         options.ClusterId = "dev";
                         options.ServiceId = "Scynet";
                     })
@@ -46,7 +47,8 @@ namespace Scynet.LocalSilo
                 Console.WriteLine("\nPress CTRL+C to shut down...\n");
 
                 var interruptted = new TaskCompletionSource<bool>();
-                Console.CancelKeyPress += (s, e) => {
+                Console.CancelKeyPress += (s, e) =>
+                {
                     interruptted.TrySetResult(true);
                 };
                 await interruptted.Task;

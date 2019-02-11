@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    class InternalSubscription: IDisposable
+    class InternalSubscription : IDisposable
     {
         public Thread SubscriberThread { get; set; }
         public Consumer<string, byte[]> Consumer { get; set; }
@@ -23,10 +23,10 @@ namespace Scynet.HatcheryFacade.RPC
 
         public BufferBlock<DataMessage> Buffer = new BufferBlock<DataMessage>();
 
-            private readonly ConsumerConfig _config = new ConsumerConfig
+        private readonly ConsumerConfig _config = new ConsumerConfig
         {
-                EnableAutoCommit = false,
-                AutoOffsetReset = AutoOffsetResetType.Earliest
+            EnableAutoCommit = false,
+            AutoOffsetReset = AutoOffsetResetType.Earliest
         };
 
         public InternalSubscription(string agentId, IEnumerable<string> brokers)
@@ -69,7 +69,7 @@ namespace Scynet.HatcheryFacade.RPC
     }
 
     // TODO: write a subscription getter that trows and exception when there is no subscription.
-    public class SubscriberFacade: Subscriber.SubscriberBase
+    public class SubscriberFacade : Subscriber.SubscriberBase
     {
         private readonly ILogger _logger;
         private readonly IEnumerable<string> _brokers;
@@ -132,9 +132,9 @@ namespace Scynet.HatcheryFacade.RPC
                 for (var i = 0; i < request.MaxMessages; i++)
                 {
                     var result = await Task.Run(() =>
-                        subscription.Consumer.Consume(new TimeSpan(0,0,0,10 ))
+                        subscription.Consumer.Consume(new TimeSpan(0, 0, 0, 10))
                     );
-                    if(result == null) continue;
+                    if (result == null) continue;
 
                     response.Messages.Add(new DataMessage()
                     {
@@ -142,8 +142,8 @@ namespace Scynet.HatcheryFacade.RPC
                             0,
                             result.Value.Length),
                         Index = result.Offset.Value.ToString(),
-                        Key = (uint) result.Timestamp.UnixTimestampMs,
-                        Partition = (uint) result.Partition.Value,
+                        Key = (uint)result.Timestamp.UnixTimestampMs,
+                        Partition = (uint)result.Partition.Value,
                         PartitionKey = result.Key,
                         Redelivary = false
                     });
@@ -200,8 +200,8 @@ namespace Scynet.HatcheryFacade.RPC
                             0,
                             result.Value.Length),
                         Index = result.Offset.Value.ToString(),
-                        Key = (uint) result.Timestamp.UnixTimestampMs,
-                        Partition = (uint) result.Partition.Value,
+                        Key = (uint)result.Timestamp.UnixTimestampMs,
+                        Partition = (uint)result.Partition.Value,
                         PartitionKey = result.Key,
                         Redelivary = false
                     });
@@ -214,7 +214,7 @@ namespace Scynet.HatcheryFacade.RPC
             while (subscription.Buffer.Completion.IsCompleted)
             {
                 var message = await subscription.Buffer.ReceiveAsync();
-                await responseStream.WriteAsync(new StreamingPullResponse() {Message = message});
+                await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
             }
 
             return;
