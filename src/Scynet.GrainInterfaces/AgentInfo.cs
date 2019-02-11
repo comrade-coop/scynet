@@ -8,7 +8,7 @@ namespace Scynet.GrainInterfaces
     public class AgentInfo
     {
         public Guid Id { get; set; }
-        public EggDescriptor Descriptor { get; set; }
+        public String RunnerType { get; set; }
 
         public AgentInfo()
         {

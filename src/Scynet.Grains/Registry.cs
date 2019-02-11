@@ -72,7 +72,9 @@ namespace Scynet.Grains
 
         public Task Unsubscribe(IRegistryListener<T> listener, String @ref = "")
         {
-            State.Subscriptions.Remove(Tuple.Create(listener, @ref));
+            var key = Tuple.Create(listener, @ref);
+            State.Subscriptions.Remove(key);
+            SubscriptionFilterCache.Remove(key);
             return base.WriteStateAsync();
         }
     }
