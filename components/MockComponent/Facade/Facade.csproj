@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Protobuf Include="..\..\..\protocols\Component.proto" GrpcServices="Server" />
+    <Protobuf Include="..\..\..\protocols\Hatchery.proto" GrpcServices="Client" />
     <Protobuf Include="..\..\..\protocols\Shared.proto" GrpcServices="None" />
   </ItemGroup>
 

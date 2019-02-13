@@ -43,7 +43,7 @@ namespace Silo
             // Configure ClusterId and ServiceId
             .Configure<ClusterOptions>(options =>
             {
-                options.ClusterId = "dev";
+                options.ClusterId = "ShenyCluster";
                 options.ServiceId = "SiloService";
             })
             // Configure connectivity

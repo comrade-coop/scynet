@@ -8,6 +8,8 @@ using Orleans.Configuration;
 using Orleans.Runtime;
 using GrainInterfaces;
 using System.Text;
+using Scynet;
+using Google.Protobuf;
 
 namespace Facade
 {
@@ -34,19 +36,46 @@ namespace Facade
             await grain.AgentStart(egg);
             var agentsList = await grain.GetAllAgents();
 
+
+            const int port = 50051;
+            const string host = "localhost";
             var server = new Server()
             {
                 Services =
                 {
                     Scynet.Component.BindService(new ComponentFacade(client))
                 },
-                Ports = { new ServerPort("0.0.0.0", 0, ServerCredentials.Insecure) }
+                Ports = { new ServerPort(host, port, ServerCredentials.Insecure) }
             };
+
 
             Console.WriteLine("Starting facade...");
             server.Start();
+            Console.WriteLine("Facade started");        
 
-            Console.WriteLine("Facade started");
+            //hatchery channel
+            Channel channel = new Channel("127.0.0.1:9998", ChannelCredentials.Insecure);
+            var hatcheryClient = new Scynet.Hatchery.HatcheryClient(channel);
+
+            var componentId = new Guid().ToString();
+            ComponentRegisterRequest hatcheryComponentRegisterRequest = new ComponentRegisterRequest()
+            {
+                Uuid = componentId,
+                Address = host + ":" + port,
+            };
+
+            //add await
+            hatcheryClient.RegisterComponent(hatcheryComponentRegisterRequest);
+
+            Agent agent = new Agent()
+            {
+                Uuid = new Guid().ToString(),
+                ComponentId = componentId,
+                EggData = ByteString.CopyFrom("Agent1", Encoding.Unicode)
+            };
+            AgentRegisterRequest arr = new AgentRegisterRequest();
+            arr.Agent = agent;
+            hatcheryClient.RegisterAgent(arr);
 
             await server.ShutdownAsync();
         }
@@ -58,7 +87,7 @@ namespace Facade
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
                 {
-                    options.ClusterId = "dev";
+                    options.ClusterId = "ShenyCluster";
                     options.ServiceId = "SiloService";
                 })
                 .ConfigureLogging(logging => logging.AddConsole());
