@@ -14,7 +14,8 @@ namespace Scynet.HatcheryFacade.Controllers
     {
         private IClusterClient ClusterClient;
 
-        public ValuesController(IClusterClient clusterClient) {
+        public ValuesController(IClusterClient clusterClient)
+        {
             ClusterClient = clusterClient;
             Console.WriteLine(clusterClient);
         }
@@ -31,8 +32,8 @@ namespace Scynet.HatcheryFacade.Controllers
 
             var res = await registry.Query(x =>
                 from y in x
-                    where y.Id == Guid.Empty
-                    select y);
+                where y.Id == Guid.Empty
+                select y);
             Console.WriteLine("----------");
             Console.WriteLine(String.Join('|', from x in res select x.Id));
             Console.WriteLine(res.GetType());
@@ -40,8 +41,10 @@ namespace Scynet.HatcheryFacade.Controllers
         }
 
         // HACK: Needed for testing
-        private class TestListener : IRegistryListener<AgentInfo> {
-            public void NewItem(string @ref, AgentInfo thing) {
+        private class TestListener : IRegistryListener<AgentInfo>
+        {
+            public void NewItem(string @ref, AgentInfo thing)
+            {
                 Console.WriteLine("Received test notification for {0}: {1}", @ref, thing.Id);
             }
         };

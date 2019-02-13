@@ -11,7 +11,7 @@ using System.Security.Cryptography;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    public class HatcheryFacade: Hatchery.HatcheryBase
+    public class HatcheryFacade : Hatchery.HatcheryBase
     {
         private readonly ILogger<HatcheryFacade> Logger;
         private readonly IClusterClient ClusterClient;
@@ -22,21 +22,24 @@ namespace Scynet.HatcheryFacade.RPC
             ClusterClient = clusterClient;
         }
 
-        public override async Task<ComponentRegisterResponse> RegisterComponent(ComponentRegisterRequest request, ServerCallContext context) {
+        public override async Task<ComponentRegisterResponse> RegisterComponent(ComponentRegisterRequest request, ServerCallContext context)
+        {
             var id = Guid.Parse(request.Uuid);
 
             var component = ClusterClient.GetGrain<IComponent>(id);
             await component.Initialize(request.Address, new HashSet<String>(request.RunnerType));
 
             var registry = ClusterClient.GetGrain<IRegistry<ComponentInfo>>(0);
-            await registry.Register(new ComponentInfo() {
+            await registry.Register(new ComponentInfo()
+            {
                 Id = id
             });
 
             return new ComponentRegisterResponse();
         }
 
-        public override async Task<AgentRegisterResponse> RegisterAgent(AgentRegisterRequest request, ServerCallContext context) {
+        public override async Task<AgentRegisterResponse> RegisterAgent(AgentRegisterRequest request, ServerCallContext context)
+        {
             var id = Guid.Parse(request.Agent.Uuid);
             var componentId = Guid.Parse(request.Agent.ComponentId);
 
@@ -44,10 +47,11 @@ namespace Scynet.HatcheryFacade.RPC
 
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);
             var component = ClusterClient.GetGrain<IComponent>(componentId);
-            await agent.Initialize(component, data);
+            await agent.Initialize(component, request.Agent.ComponentType, data);
 
             var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
-            await registry.Register(new AgentInfo() {
+            await registry.Register(new AgentInfo()
+            {
                 Id = id,
                 RunnerType = request.Agent.ComponentType,
             });
@@ -55,7 +59,8 @@ namespace Scynet.HatcheryFacade.RPC
             return new AgentRegisterResponse();
         }
 
-        public override async Task<Void> UnregisterComponent(ComponentUnregisterRequest request, ServerCallContext context) {
+        public override async Task<Void> UnregisterComponent(ComponentUnregisterRequest request, ServerCallContext context)
+        {
             var id = Guid.Parse(request.Uuid);
 
             var component = ClusterClient.GetGrain<IComponent>(id);
@@ -64,7 +69,8 @@ namespace Scynet.HatcheryFacade.RPC
             return new Void();
         }
 
-        public override async Task<Void> AgentStopped(AgentStoppedEvent request, ServerCallContext context) {
+        public override async Task<Void> AgentStopped(AgentStoppedEvent request, ServerCallContext context)
+        {
             var id = Guid.Parse(request.Agent.Uuid);
 
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);

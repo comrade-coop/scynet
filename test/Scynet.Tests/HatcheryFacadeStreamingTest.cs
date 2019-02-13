@@ -28,7 +28,7 @@ namespace Scynet.Tests
             var subscriptions =
                 (IDictionary)typeof(SubscriberFacade).GetField("subscriptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .GetValue(SubscriberFacade);
-            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Equal<string>("TestSubscription" , key));
+            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Equal<string>("TestSubscription", key));
 
         }
 
@@ -37,9 +37,9 @@ namespace Scynet.Tests
         {
             var subscription = await SubscriberFacade.Subscribe(new SubscriptionRequest() { Id = "TestSubscription", AgetnId = "reddit_posts" }, null);
 
-            var result = await SubscriberFacade.Pull(new PullRequest() {Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5}, null);
+            var result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
             await Task.Delay(1000);
-            result = await SubscriberFacade.Pull(new PullRequest() {Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5}, null);
+            result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
             foreach (var message in result.Messages)
             {
                 _testOutputHelper.WriteLine(message.ToString());

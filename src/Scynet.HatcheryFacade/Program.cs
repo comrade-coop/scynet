@@ -50,7 +50,8 @@ namespace Scynet.HatcheryFacade
             return client;
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) {
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
 
             return WebHost.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>
