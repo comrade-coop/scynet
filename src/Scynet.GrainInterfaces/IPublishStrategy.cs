@@ -7,7 +7,7 @@ namespace Scynet.GrainInterfaces
     /// <summary>
     /// A Strategy which decides what agents to output
     /// </summary>
-    public interface IOutputStrategy : IStrategy, Orleans.IGrainWithGuidKey
+    public interface IPublishStrategy : IStrategy, Orleans.IGrainWithGuidKey
     {
     }
 }
