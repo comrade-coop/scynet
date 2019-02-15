@@ -12,11 +12,11 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Register a component
         /// </summary>
-        Task RegisterComponent(Guid component);
+        Task RegisterComponent(IComponent component);
 
         /// <summary>
         /// Unregister a component
         /// </summary>
-        Task UnregisterComponent(Guid component);
+        Task UnregisterComponent(IComponent component);
     }
 }

@@ -15,9 +15,10 @@ namespace Scynet.Grains
         public IComponent Component;
         public string RunnerType;
         public byte[] Data = { };
+        public List<IAgent> Inputs;
     }
 
-    public class ComponentAgent : Agent<ComponentAgentState>, IComponentAgent
+    public class ComponentAgent : Agent<ComponentAgentState>, IComponentAgent, IEngager
     {
         private readonly ILogger Logger;
         private Channel Channel = null;
@@ -28,11 +29,12 @@ namespace Scynet.Grains
         }
 
         /// <inheritdoc/>
-        public Task Initialize(IComponent component, string runnerType, byte[] data)
+        public Task Initialize(IComponent component, string runnerType, IEnumerable<IAgent> inputs, byte[] data)
         {
             State.Component = component;
             State.RunnerType = runnerType;
             State.Data = data;
+            State.Inputs = inputs.ToList();
             return base.WriteStateAsync();
         }
 
@@ -48,6 +50,12 @@ namespace Scynet.Grains
             return Task.FromResult(State.Data);
         }
 
+        /// <inheritdoc/>
+        public Task<IEnumerable<IAgent>> GetInputs()
+        {
+            return Task.FromResult((IEnumerable<IAgent>)State.Inputs);
+        }
+
         private async Task<Channel> GetChannel()
         {
             if (Channel == null)
@@ -59,9 +67,19 @@ namespace Scynet.Grains
         }
 
         /// <inheritdoc/>
+        public async void Released(IAgent agent)
+        {
+            if (State.Running && State.Inputs.Contains(agent)) {
+                await ReleaseAll();
+            }
+        }
+
+        /// <inheritdoc/>
         public override async Task Start()
         {
             var client = new Scynet.Component.ComponentClient(await GetChannel());
+
+            await Task.WhenAll(State.Inputs.Select(input => input.Engage(this)));
 
             await client.AgentStartAsync(new AgentStartRequest
             {
@@ -70,7 +88,8 @@ namespace Scynet.Grains
                     Uuid = this.GetPrimaryKey().ToString(),
                     EggData = ByteString.CopyFrom(State.Data),
                     ComponentType = State.RunnerType,
-                    ComponentId = State.Component.GetPrimaryKey().ToString()
+                    ComponentId = State.Component.GetPrimaryKey().ToString(),
+                    Inputs = { State.Inputs.Select(i => i.GetPrimaryKey().ToString()) }
                 }
             });
         }
@@ -84,6 +103,8 @@ namespace Scynet.Grains
             {
                 Uuid = this.GetPrimaryKey().ToString()
             });
+
+            await Task.WhenAll(State.Inputs.Select(input => input.Release(this)));
         }
     }
 }

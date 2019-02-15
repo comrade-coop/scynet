@@ -21,7 +21,7 @@ namespace Scynet.GrainInterfaces
         Task Engage(IEngager engager);
 
         /// <summary>
-        /// Release (disengage) the agent. You should do after finishing listening.
+        /// Release (disengage) the agent. You should do this after finishing listening.
         /// </summary>
         /// <param name="engager">Information about the engager to release.</param>
         Task Release(IEngager engager);

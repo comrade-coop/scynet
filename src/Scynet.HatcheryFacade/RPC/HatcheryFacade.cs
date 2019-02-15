@@ -47,12 +47,17 @@ namespace Scynet.HatcheryFacade.RPC
 
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);
             var component = ClusterClient.GetGrain<IComponent>(componentId);
-            await agent.Initialize(component, request.Agent.ComponentType, data);
+            var inputs = request.Agent.Inputs.Select(
+                x => ClusterClient.GetGrain<IAgent>(Guid.Parse(x))
+            ).ToList();
+
+            await agent.Initialize(component, request.Agent.ComponentType, inputs, data);
 
             var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
             await registry.Register(new AgentInfo()
             {
                 Id = id,
+                ComponentId = componentId,
                 RunnerType = request.Agent.ComponentType,
             });
 
@@ -65,6 +70,14 @@ namespace Scynet.HatcheryFacade.RPC
 
             var component = ClusterClient.GetGrain<IComponent>(id);
             await component.Disconnect();
+
+            var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
+            var agents = await registry.Query(list =>
+                from agent in list
+                where agent.ComponentId == id
+                select agent.Id);
+
+            await Task.WhenAll(agents.Select(agent => ClusterClient.GetGrain<IAgent>(agent).ReleaseAll()));
 
             return new Void();
         }

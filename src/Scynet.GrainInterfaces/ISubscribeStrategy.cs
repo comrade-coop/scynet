@@ -7,7 +7,7 @@ namespace Scynet.GrainInterfaces
     /// <summary>
     /// A Strategy which decides what agents are suitable as input
     /// </summary>
-    public interface IInputStrategy : IStrategy, Orleans.IGrainWithGuidKey
+    public interface ISubscribeStrategy : IStrategy, Orleans.IGrainWithGuidKey
     {
     }
 }
