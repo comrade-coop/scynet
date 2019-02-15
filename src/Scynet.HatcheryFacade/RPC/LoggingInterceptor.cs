@@ -14,10 +14,15 @@ namespace Scynet.HatcheryFacade.RPC
         private readonly ILogger<LoggingInterceptor> _logger;
         public LoggingInterceptor(ILogger<LoggingInterceptor> logger) => _logger = logger;
 
-        public override Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
+        public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
             _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}, Peer: {context.Peer}, Status: {context.Deadline}");
-            return continuation(request, context);
+            try {
+                return await continuation(request, context);
+            } catch (Exception err) {
+                _logger.LogError(err.ToString());
+                throw;
+            }
         }
     }
 }

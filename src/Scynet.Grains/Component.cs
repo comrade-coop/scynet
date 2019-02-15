@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Orleans;
 using Scynet.GrainInterfaces;
 
 namespace Scynet.Grains
@@ -10,7 +11,7 @@ namespace Scynet.Grains
     public class ComponentState
     {
         public String Address;
-        public ISet<String> RunnerTypes;
+        public ComponentInfo Info = new ComponentInfo();
         public IList<Guid> Inputs = new List<Guid>();
     }
 
@@ -23,11 +24,15 @@ namespace Scynet.Grains
             Logger = logger;
         }
 
-        public Task Initialize(String address, ISet<String> runnerTypes)
+        public async Task Initialize(String address, ISet<String> runnerTypes)
         {
             State.Address = address;
-            State.RunnerTypes = new HashSet<String>(runnerTypes);
-            return base.WriteStateAsync();
+            State.Info.RunnerTypes = new HashSet<String>(runnerTypes);
+
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
+            await registry.Register(this.GetPrimaryKey(), State.Info);
+
+            await base.WriteStateAsync();
         }
 
         public Task<string> GetAddress()

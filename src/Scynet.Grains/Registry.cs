@@ -10,62 +10,67 @@ using System.Threading.Tasks;
 
 namespace Scynet.Grains
 {
-    public class RegistryState<T>
+    public class RegistryState<K, T>
     {
-        public List<T> Items = new List<T>();
+        public Dictionary<K, T> Items = new Dictionary<K, T>();
         // TODO: Can the below line be shortened somehow?
-        public Dictionary<Tuple<IRegistryListener<T>, String>, ExpressionNode> Subscriptions =
-            new Dictionary<Tuple<IRegistryListener<T>, String>, ExpressionNode>();
+        public Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode> Subscriptions =
+            new Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode>();
     }
 
-    public abstract class Registry<T> : Orleans.Grain<RegistryState<T>>, IRegistry<T>
+    public abstract class Registry<K, T> : Orleans.Grain<RegistryState<K, T>>, IRegistry<K, T>
     {
-        private readonly ILogger<Registry<T>> Logger;
-        private Dictionary<Tuple<IRegistryListener<T>, String>, Func<T, bool>> SubscriptionFilterCache =
-            new Dictionary<Tuple<IRegistryListener<T>, String>, Func<T, bool>>();
+        private readonly ILogger<Registry<K, T>> Logger;
+        private Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<KeyValuePair<K, T>, bool>> SubscriptionFilterCache =
+            new Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<KeyValuePair<K, T>, bool>>();
 
-        public Registry(ILogger<Registry<T>> logger)
+        public Registry(ILogger<Registry<K, T>> logger)
         {
             Logger = logger;
         }
 
-        public Task Register(T info)
+        public Task Register(K key, T info)
         {
             Logger.LogInformation($"Item registered ({info})!");
-            State.Items.Add(info);
+            State.Items[key] = info;
             foreach (var subscription in State.Subscriptions)
             {
                 if (!SubscriptionFilterCache.ContainsKey(subscription.Key))
                 {
                     SubscriptionFilterCache[subscription.Key] =
-                        subscription.Value.ToExpression<Func<T, bool>>().Compile();
+                        subscription.Value.ToExpression<Func<KeyValuePair<K, T>, bool>>().Compile();
                 }
                 var filter = SubscriptionFilterCache[subscription.Key];
-                if (filter(info))
+                if (filter(new KeyValuePair<K, T>(key, info)))
                 {
                     var listener = subscription.Key.Item1;
                     var @ref = subscription.Key.Item2;
-                    listener.NewItem(@ref, info);
+                    listener.NewItem(@ref, key, info);
                 }
             }
             return base.WriteStateAsync();
         }
 
-        public Task<K> QueryValue<K>(ExpressionNode expression)
+        public Task<T> Get(K key)
         {
-            var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, K>>().Compile();
-            K result = compiledExpression(State.Items);
+            return Task.FromResult(State.Items[key]);
+        }
+
+        public Task<U> QueryValue<U>(ExpressionNode expression)
+        {
+            var compiledExpression = expression.ToExpression<Func<IEnumerable<KeyValuePair<K, T>>, U>>().Compile();
+            U result = compiledExpression(State.Items);
             return Task.FromResult(result);
         }
 
-        public Task<IEnumerable<K>> QueryCollection<K>(ExpressionNode expression)
+        public Task<IEnumerable<U>> QueryCollection<U>(ExpressionNode expression)
         {
-            var compiledExpression = expression.ToExpression<Func<IEnumerable<T>, IEnumerable<K>>>().Compile();
-            IEnumerable<K> result = compiledExpression(State.Items).ToList();
+            var compiledExpression = expression.ToExpression<Func<IEnumerable<KeyValuePair<K, T>>, IEnumerable<U>>>().Compile();
+            IEnumerable<U> result = compiledExpression(State.Items).ToList();
             return Task.FromResult(result);
         }
 
-        public Task Subscribe(ExpressionNode expression, IRegistryListener<T> listener, String @ref = "")
+        public Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "")
         {
             var key = Tuple.Create(listener, @ref);
             SubscriptionFilterCache.Remove(key);
@@ -73,7 +78,7 @@ namespace Scynet.Grains
             return base.WriteStateAsync();
         }
 
-        public Task Unsubscribe(IRegistryListener<T> listener, String @ref = "")
+        public Task Unsubscribe(IRegistryListener<K, T> listener, String @ref = "")
         {
             var key = Tuple.Create(listener, @ref);
             State.Subscriptions.Remove(key);
@@ -83,11 +88,11 @@ namespace Scynet.Grains
     }
 
     // HACK: Needed so that Orleans can find the Grain types
-    public class AgentRegistry : Registry<AgentInfo>
+    public class AgentRegistry : Registry<Guid, AgentInfo>
     {
         public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) { }
     }
-    public class ComponentRegistry : Registry<ComponentInfo>
+    public class ComponentRegistry : Registry<Guid, ComponentInfo>
     {
         public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) { }
     }

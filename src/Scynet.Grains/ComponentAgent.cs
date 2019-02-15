@@ -12,6 +12,7 @@ namespace Scynet.Grains
 {
     public class ComponentAgentState : AgentState
     {
+        public AgentInfo Info = new AgentInfo();
         public IComponent Component;
         public string RunnerType;
         public byte[] Data = { };
@@ -29,19 +30,24 @@ namespace Scynet.Grains
         }
 
         /// <inheritdoc/>
-        public Task Initialize(IComponent component, string runnerType, IEnumerable<IAgent> inputs, byte[] data)
+        public async Task Initialize(IComponent component, string runnerType, IEnumerable<IAgent> inputs, byte[] data)
         {
-            State.Component = component;
-            State.RunnerType = runnerType;
+            State.Info.ComponentId = component.GetPrimaryKey();
+            State.Info.RunnerType = runnerType;
             State.Data = data;
             State.Inputs = inputs.ToList();
-            return base.WriteStateAsync();
+
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            await registry.Register(this.GetPrimaryKey(), State.Info);
+
+            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>
         public Task<IComponent> GetComponent()
         {
-            return Task.FromResult(State.Component);
+            var component = GrainFactory.GetGrain<IComponent>(State.Info.ComponentId);
+            return Task.FromResult(component);
         }
 
         /// <inheritdoc/>
@@ -60,7 +66,8 @@ namespace Scynet.Grains
         {
             if (Channel == null)
             {
-                var address = await State.Component.GetAddress();
+                var component = GrainFactory.GetGrain<IComponent>(State.Info.ComponentId);
+                var address = await component.GetAddress();
                 Channel = new Channel(address, ChannelCredentials.Insecure);
             }
             return Channel;
@@ -69,7 +76,8 @@ namespace Scynet.Grains
         /// <inheritdoc/>
         public async void Released(IAgent agent)
         {
-            if (State.Running && State.Inputs.Contains(agent)) {
+            if (State.Running && State.Inputs.Contains(agent))
+            {
                 await ReleaseAll();
             }
         }
@@ -87,8 +95,8 @@ namespace Scynet.Grains
                 {
                     Uuid = this.GetPrimaryKey().ToString(),
                     EggData = ByteString.CopyFrom(State.Data),
-                    ComponentType = State.RunnerType,
-                    ComponentId = State.Component.GetPrimaryKey().ToString(),
+                    ComponentType = State.Info.RunnerType,
+                    ComponentId = State.Info.ComponentId.ToString(),
                     Inputs = { State.Inputs.Select(i => i.GetPrimaryKey().ToString()) }
                 }
             });

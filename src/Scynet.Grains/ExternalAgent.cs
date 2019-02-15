@@ -11,6 +11,7 @@ namespace Scynet.Grains
 {
     public class ExternalAgentState : AgentState
     {
+        public AgentInfo Info = new AgentInfo();
         public string Address;
     }
 
@@ -24,10 +25,15 @@ namespace Scynet.Grains
         }
 
         /// <inheritdoc/>
-        public Task Initialize(string address)
+        public async Task Initialize(string address)
         {
+            // TODO: Fill State.Info
             State.Address = address;
-            return base.WriteStateAsync();
+
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            await registry.Register(this.GetPrimaryKey(), State.Info);
+
+            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>

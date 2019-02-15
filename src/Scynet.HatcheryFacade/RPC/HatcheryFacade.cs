@@ -29,12 +29,6 @@ namespace Scynet.HatcheryFacade.RPC
             var component = ClusterClient.GetGrain<IComponent>(id);
             await component.Initialize(request.Address, new HashSet<String>(request.RunnerType));
 
-            var registry = ClusterClient.GetGrain<IRegistry<ComponentInfo>>(0);
-            await registry.Register(new ComponentInfo()
-            {
-                Id = id
-            });
-
             return new ComponentRegisterResponse();
         }
 
@@ -53,14 +47,6 @@ namespace Scynet.HatcheryFacade.RPC
 
             await agent.Initialize(component, request.Agent.ComponentType, inputs, data);
 
-            var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
-            await registry.Register(new AgentInfo()
-            {
-                Id = id,
-                ComponentId = componentId,
-                RunnerType = request.Agent.ComponentType,
-            });
-
             return new AgentRegisterResponse();
         }
 
@@ -71,11 +57,11 @@ namespace Scynet.HatcheryFacade.RPC
             var component = ClusterClient.GetGrain<IComponent>(id);
             await component.Disconnect();
 
-            var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
+            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agents = await registry.Query(list =>
-                from agent in list
-                where agent.ComponentId == id
-                select agent.Id);
+                from kv in list
+                where kv.Value.ComponentId == id
+                select kv.Key);
 
             await Task.WhenAll(agents.Select(agent => ClusterClient.GetGrain<IAgent>(agent).ReleaseAll()));
 

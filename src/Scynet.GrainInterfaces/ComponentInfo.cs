@@ -7,6 +7,6 @@ namespace Scynet.GrainInterfaces
     [Serializable]
     public class ComponentInfo
     {
-        public Guid Id { get; set; }
+        public ISet<String> RunnerTypes { get; set; }
     }
 }

@@ -26,27 +26,27 @@ namespace Scynet.HatcheryFacade.Controllers
         public async Task<ActionResult<IEnumerable<string>>> Get()
         {
             // HACK: testing code below
-            var registry = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
-            await registry.Register(new AgentInfo { Id = Guid.Empty });
-            await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
-            await registry.Register(new AgentInfo { Id = Guid.NewGuid() });
+            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            await registry.Register(Guid.Empty, new AgentInfo { });
+            await registry.Register(Guid.NewGuid(), new AgentInfo { });
+            await registry.Register(Guid.NewGuid(), new AgentInfo { });
 
             var res = await registry.Query(x =>
                 from y in x
-                where y.Id == Guid.Empty
+                where y.Key == Guid.Empty
                 select y);
             Console.WriteLine("----------");
-            Console.WriteLine(String.Join('|', from x in res select x.Id));
+            Console.WriteLine(String.Join('|', from x in res select x.Key));
             Console.WriteLine(res.GetType());
             return new string[] { "value1", "value2" };
         }
 
         // HACK: Needed for testing
-        private class TestListener : IRegistryListener<AgentInfo>
+        private class TestListener : IRegistryListener<Guid, AgentInfo>
         {
-            public void NewItem(string @ref, AgentInfo thing)
+            public void NewItem(string @ref, Guid key, AgentInfo thing)
             {
-                Console.WriteLine("Received test notification for {0}: {1}", @ref, thing.Id);
+                Console.WriteLine("Received test notification for {0}: {1}", @ref, key, thing);
             }
         };
 
@@ -65,9 +65,9 @@ namespace Scynet.HatcheryFacade.Controllers
         {
             // HACK: testing code below
             var test = new TestListener();
-            var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<AgentInfo>>(test);
-            var x = ClusterClient.GetGrain<IRegistry<AgentInfo>>(0);
-            await x.Subscribe(y => y.Id == Guid.Empty, testWrap, "test");
+            var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(test);
+            var x = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            await x.Subscribe(y => y.Key == Guid.Empty, testWrap, "test");
 
             return "value";
         }
