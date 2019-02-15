@@ -27,9 +27,11 @@ namespace Facade
         {
             var client = await StartClientWithRetries();
             var grain = client.GetGrain<IAgentRegistryGrain>(0);
+            //var agentId = Guid.NewGuid().ToString();
+            var agentId = Guid.Parse("253717bf-34b4-43fc-8129-4c68a6bbe1fe").ToString();
             MockAgent egg = new MockAgent()
             {
-                Id = "sheny",
+                Id = agentId,
                 EggData = Encoding.ASCII.GetBytes("Agent1")
             };
 
@@ -57,7 +59,8 @@ namespace Facade
             Channel channel = new Channel("127.0.0.1:9998", ChannelCredentials.Insecure);
             var hatcheryClient = new Scynet.Hatchery.HatcheryClient(channel);
 
-            var componentId = new Guid().ToString();
+            //var componentId = Guid.NewGuid().ToString();
+            var componentId = Guid.Parse("7730a43f-42a7-49db-b569-50e04929c4f9").ToString();
             ComponentRegisterRequest hatcheryComponentRegisterRequest = new ComponentRegisterRequest()
             {
                 Uuid = componentId,
@@ -69,7 +72,7 @@ namespace Facade
 
             Agent agent = new Agent()
             {
-                Uuid = new Guid().ToString(),
+                Uuid = agentId,
                 ComponentId = componentId,
                 EggData = ByteString.CopyFrom("Agent1", Encoding.Unicode)
             };
@@ -84,7 +87,7 @@ namespace Facade
         {
             attempt = 0;
             var clientBuilder = new ClientBuilder()
-                .UseLocalhostClustering()
+                .UseLocalhostClustering(gatewayPort: 30001)
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "ShenyCluster";

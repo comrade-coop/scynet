@@ -39,7 +39,7 @@ namespace Silo
         {
             var builder = new SiloHostBuilder()
             // Use localhost clustering for a single local silo
-            .UseLocalhostClustering()
+            .UseLocalhostClustering(siloPort: 11112, gatewayPort: 30001)
             // Configure ClusterId and ServiceId
             .Configure<ClusterOptions>(options =>
             {
