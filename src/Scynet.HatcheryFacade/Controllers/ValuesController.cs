@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Scynet.GrainInterfaces;
+using Scynet.Grains;
 
 namespace Scynet.HatcheryFacade.Controllers
 {
@@ -49,6 +50,15 @@ namespace Scynet.HatcheryFacade.Controllers
             }
         };
 
+        // HACK: Needed for testing
+        private class TestEngager : IEngager
+        {
+            public void Released(IAgent agent)
+            {
+                Console.WriteLine("Released agent");
+            }
+        };
+
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult<string>> Get(int id)
@@ -60,6 +70,21 @@ namespace Scynet.HatcheryFacade.Controllers
             await x.Subscribe(y => y.Id == Guid.Empty, testWrap, "test");
 
             return "value";
+        }
+
+        // GET api/values/xxx
+        [Route("Engage")]
+        public async Task<ActionResult<string>> Engage()
+        {
+            // HACK: testing code below
+            var test = new TestEngager();
+            var testWrap = await ClusterClient.CreateObjectReference<IEngager>(test);
+            var id = Guid.Parse("253717bf-34b4-43fc-8129-4c68a6bbe1fe");
+            string name = typeof(ComponentAgent).FullName;
+            var x = ClusterClient.GetGrain<IAgent>(id, name);
+            await x.Engage(testWrap);
+            var p = await x.GetActiveEngagements();
+            return "engagement completed";
         }
 
         // POST api/values
