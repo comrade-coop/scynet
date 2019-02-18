@@ -30,7 +30,7 @@ namespace Scynet.Tests
             var subscriptions =
                 (IDictionary)typeof(SubscriberFacade).GetField("subscriptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .GetValue(SubscriberFacade);
-            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Matches("TestSubscription" , key));
+            Assert.Collection<string>((IEnumerable<string>)subscriptions.Keys, key => Assert.Matches("TestSubscription", key));
 
         }
 
@@ -51,14 +51,11 @@ namespace Scynet.Tests
         [Fact]
         public async void TestPull()
         {
-            
 
             var subscription = await SubscriberFacade.Subscribe(new SubscriptionRequest() { Id = "TestSubscription", AgetnId = "reddit_posts" }, null);
 
-
-
             var testStream = new TestStreamWriter();
-            await SubscriberFacade.StreamingPull(new StreamingPullRequest() {Id = "TestSubscription" }, testStream, null);
+            await SubscriberFacade.StreamingPull(new StreamingPullRequest() { Id = "TestSubscription" }, testStream, null);
 
             await Task.Delay(1000);
 

@@ -9,6 +9,9 @@ option csharp_namespace = "Scynet";
 * It is caled by the hatchery to instantiate the agents.
 */
 service Component {
+	// Register a new input to the component
+	rpc RegisterInput (RegisterInputRequest) returns (Void) {};
+
 	// Start running a particular agent
 	rpc AgentStart (AgentStartRequest) returns (Void) {};
 
@@ -20,6 +23,10 @@ service Component {
 
 	// Retrieve a list of running agents.
 	rpc AgentList (AgentQuery) returns (ListOfAgents) {};
+}
+
+message RegisterInputRequest {
+	Agent input = 2;
 }
 
 message AgentStartRequest {

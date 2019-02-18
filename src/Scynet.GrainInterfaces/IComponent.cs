@@ -27,6 +27,6 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Register an input for the component
         /// </summary>
-        Task RegisterInput(Guid agentId);
+        Task RegisterInput(IAgent agent);
     }
 }

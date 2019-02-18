@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    public class PublisherFacade: Publisher.PublisherBase
+    public class PublisherFacade : Publisher.PublisherBase
     {
         private readonly ILogger<PublisherFacade> _logger;
         private MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
@@ -27,14 +27,14 @@ namespace Scynet.HatcheryFacade.RPC
 
             foreach (var message in request.Message)
             {
-               await producer.ProduceAsync(request.AgentId,new Message<string, byte[]>() { Key = message.PartitionKey, Value = message.Data.ToByteArray(), Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime)  }, context.CancellationToken);
+                await producer.ProduceAsync(request.AgentId, new Message<string, byte[]>() { Key = message.PartitionKey, Value = message.Data.ToByteArray(), Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime) }, context.CancellationToken);
             }
-           
-            
 
-    
 
-            return new PublishResponse() {  };
+
+
+
+            return new PublishResponse() { };
         }
     }
 }

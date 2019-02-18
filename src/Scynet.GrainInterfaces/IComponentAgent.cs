@@ -12,7 +12,7 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Initialize the agent
         /// </summary>
-        Task Initialize(IComponent component, string runnerType, IEnumerable<IAgent> inputs, byte[] data);
+        Task Initialize(AgentInfo info, IEnumerable<IAgent> inputs, byte[] data);
 
         /// <summary>
         /// Get the component of the agent

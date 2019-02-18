@@ -35,17 +35,21 @@ namespace Scynet.HatcheryFacade.RPC
         public override async Task<AgentRegisterResponse> RegisterAgent(AgentRegisterRequest request, ServerCallContext context)
         {
             var id = Guid.Parse(request.Agent.Uuid);
-            var componentId = Guid.Parse(request.Agent.ComponentId);
-
-            var data = request.Agent.EggData.ToByteArray();
 
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);
-            var component = ClusterClient.GetGrain<IComponent>(componentId);
+
+            var data = request.Agent.EggData.ToByteArray();
             var inputs = request.Agent.Inputs.Select(
                 x => ClusterClient.GetGrain<IAgent>(Guid.Parse(x))
             ).ToList();
 
-            await agent.Initialize(component, request.Agent.ComponentType, inputs, data);
+            await agent.Initialize(new AgentInfo
+            {
+                ComponentId = Guid.Parse(request.Agent.ComponentId),
+                OutputShapes = request.Agent.Outputs.Select(o => o.Dimension.ToList()).ToList(),
+                Frequency = request.Agent.Frequency,
+                RunnerType = request.Agent.ComponentType
+            }, inputs, data);
 
             return new AgentRegisterResponse();
         }

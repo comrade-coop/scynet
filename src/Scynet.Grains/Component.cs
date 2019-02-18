@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Scynet.GrainInterfaces;
@@ -12,16 +13,18 @@ namespace Scynet.Grains
     {
         public String Address;
         public ComponentInfo Info = new ComponentInfo();
-        public IList<Guid> Inputs = new List<Guid>();
+        public IList<IAgent> Inputs = new List<IAgent>();
     }
 
     public class Component : Orleans.Grain<ComponentState>, IComponent
     {
         private readonly ILogger Logger;
+        private Lazy<Channel> Channel;
 
         public Component(ILogger<Component> logger)
         {
             Logger = logger;
+            Channel = new Lazy<Channel>(() => new Channel(State.Address, ChannelCredentials.Insecure));
         }
 
         public async Task Initialize(String address, ISet<String> runnerTypes)
@@ -46,11 +49,21 @@ namespace Scynet.Grains
             return base.WriteStateAsync();
         }
 
-        public Task RegisterInput(Guid agentId)
+        public async Task RegisterInput(IAgent agent)
         {
-            State.Inputs.Add(agentId);
-            // TODO: Send input to address
-            return base.WriteStateAsync();
+            State.Inputs.Add(agent);
+
+            await base.WriteStateAsync();
+
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            var info = await registry.Get(agent.GetPrimaryKey());
+
+            var client = new Scynet.Component.ComponentClient(Channel.Value);
+
+            await client.RegisterInputAsync(new RegisterInputRequest
+            {
+                Input = info.ToProtobuf(agent.GetPrimaryKey())
+            });
         }
     }
 }

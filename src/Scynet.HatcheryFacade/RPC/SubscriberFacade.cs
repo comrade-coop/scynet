@@ -36,7 +36,7 @@ namespace Scynet.HatcheryFacade.RPC
         {
             BufferSize = bufferSize;
             AgentId = agentId;
-           
+
             _config.BootstrapServers = brokers.Aggregate((previous, current) => previous + "," + current);
             Buffer = new BufferBlock<DataMessage>(new DataflowBlockOptions()); // Do I need the buffer size??
 
@@ -153,7 +153,7 @@ namespace Scynet.HatcheryFacade.RPC
                 while (!context.CancellationToken.IsCancellationRequested) // The code here won't work if the send data is wrong.
                 {
                     var consumeResult = subscription.Consumer.Consume(context.CancellationToken);
-                    if(consumeResult == null) { continue; }
+                    if (consumeResult == null) { continue; }
 
                     if (consumeResult.Headers.TryGetLast("previous", out var previous))
                     {
@@ -163,7 +163,7 @@ namespace Scynet.HatcheryFacade.RPC
                             {
                                 toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
                             }
-                            else if(previousTimestamp < lastTimestamp)
+                            else if (previousTimestamp < lastTimestamp)
                             {
                                 toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
                                 continue;
@@ -194,7 +194,7 @@ namespace Scynet.HatcheryFacade.RPC
 
                     toBeSend.Clear();
 
-                    
+
                 }
 
                 subscription.Buffer.Complete();

@@ -13,8 +13,6 @@ namespace Scynet.Grains
     public class ComponentAgentState : AgentState
     {
         public AgentInfo Info = new AgentInfo();
-        public IComponent Component;
-        public string RunnerType;
         public byte[] Data = { };
         public List<IAgent> Inputs;
     }
@@ -30,10 +28,9 @@ namespace Scynet.Grains
         }
 
         /// <inheritdoc/>
-        public async Task Initialize(IComponent component, string runnerType, IEnumerable<IAgent> inputs, byte[] data)
+        public async Task Initialize(AgentInfo info, IEnumerable<IAgent> inputs, byte[] data)
         {
-            State.Info.ComponentId = component.GetPrimaryKey();
-            State.Info.RunnerType = runnerType;
+            State.Info = info;
             State.Data = data;
             State.Inputs = inputs.ToList();
 
@@ -91,14 +88,11 @@ namespace Scynet.Grains
 
             await client.AgentStartAsync(new AgentStartRequest
             {
-                Egg = new Agent
-                {
-                    Uuid = this.GetPrimaryKey().ToString(),
-                    EggData = ByteString.CopyFrom(State.Data),
-                    ComponentType = State.Info.RunnerType,
-                    ComponentId = State.Info.ComponentId.ToString(),
-                    Inputs = { State.Inputs.Select(i => i.GetPrimaryKey().ToString()) }
-                }
+                Egg = State.Info.ToProtobuf(
+                    this.GetPrimaryKey(),
+                    State.Data,
+                    State.Inputs.Select(i => i.GetPrimaryKey())
+                )
             });
         }
 

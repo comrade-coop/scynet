@@ -9,6 +9,8 @@ namespace Scynet.GrainInterfaces
     {
         public Guid ComponentId { get; set; }
         public String RunnerType { get; set; }
+        public List<List<uint>> OutputShapes { get; set; }
+        public uint Frequency { get; set; }
 
         public AgentInfo()
         {

@@ -10,6 +10,12 @@ message Agent {
 	string componentType = 3;
 	string componentId = 4; // id of the component in which the agent is running
 	repeated string inputs = 6;
+	repeated Shape outputs = 7;
+	uint32 frequency = 8;
+}
+
+message Shape {
+	repeated uint32 dimension = 1;
 }
 
 message Void {

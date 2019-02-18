@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
-    <ProjectReference Include="..\Scynet.Grains\Scynet.Grains.csproj" />
 
     <Protobuf Include="..\..\protocols\Shared.proto" GrpcServices="None" />
     <Protobuf Include="..\..\protocols\Hatchery.proto" />

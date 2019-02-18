@@ -17,9 +17,12 @@ namespace Scynet.HatcheryFacade.RPC
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
             _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}, Peer: {context.Peer}, Status: {context.Deadline}");
-            try {
+            try
+            {
                 return await continuation(request, context);
-            } catch (Exception err) {
+            }
+            catch (Exception err)
+            {
                 _logger.LogError(err.ToString());
                 throw;
             }
