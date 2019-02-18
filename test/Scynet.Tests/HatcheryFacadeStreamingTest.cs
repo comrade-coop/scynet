@@ -55,12 +55,6 @@ namespace Scynet.Tests
 
             var subscription = await SubscriberFacade.Subscribe(new SubscriptionRequest() { Id = "TestSubscription", AgetnId = "reddit_posts" }, null);
 
-<<<<<<< HEAD
-            var result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
-            await Task.Delay(1000);
-            result = await SubscriberFacade.Pull(new PullRequest() { Id = "TestSubscription", ReturnImmediately = true, MaxMessages = 5 }, null);
-            foreach (var message in result.Messages)
-=======
 
 
             var testStream = new TestStreamWriter();
@@ -69,7 +63,6 @@ namespace Scynet.Tests
             await Task.Delay(1000);
 
             foreach (var message in testStream.Messages)
->>>>>>> Final changes on the streaming facade side.
             {
                 _testOutputHelper.WriteLine(message.ToString());
             }
