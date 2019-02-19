@@ -18,5 +18,4 @@ read -p "Press enter to continue"
 
 grpcc -a 127.0.0.1:$1 -i -p Component.proto --eval 'client.AgentStatus({ uuid: "q1" }, printReply)'
 
-
 read -p "Press enter to continue"

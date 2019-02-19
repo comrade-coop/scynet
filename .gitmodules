@@ -1,3 +1,6 @@
 [submodule "kubernetes/kubernetes-kafka"]
 	path = kubernetes/kubernetes-kafka
 	url = https://github.com/Yolean/kubernetes-kafka.git
+[submodule "components/AutoKerasQueen/autokeras"]
+	path = components/AutoKerasQueen/autokeras
+	url = https://github.com/jhfjhfj1/autokeras

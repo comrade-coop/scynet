@@ -60,10 +60,6 @@ def serve():
 	server.start()
 	print("Listening on: 127.0.0.1:{}".format(port))
 
-	import os
-	
-	os.system(f'tmux new-window "exec bash ./test.sh {port}"')
-
 	try:
 		while True:
 			time.sleep(_ONE_DAY_IN_SECONDS)
