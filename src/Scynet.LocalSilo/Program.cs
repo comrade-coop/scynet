@@ -24,7 +24,6 @@ namespace Scynet.LocalSilo
 
                 var builder = new SiloHostBuilder()
                     .UseLocalhostClustering()
-                    .AddMemoryGrainStorage("Default")
                     .Configure<ClusterOptions>(options =>
                     {
                         options.ClusterId = "dev";
@@ -34,6 +33,7 @@ namespace Scynet.LocalSilo
                         .AddApplicationPart(typeof(Component).Assembly) // Any known Grain class, so it includes the whole assembly
                         .WithReferences())
                     .ConfigureLogging(logging => logging.AddConsole())
+                    .UseInMemoryReminderService()
                     .AddMemoryGrainStorage("Default");
 
                 var host = builder.Build();

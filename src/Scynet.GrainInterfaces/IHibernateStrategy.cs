@@ -9,5 +9,9 @@ namespace Scynet.GrainInterfaces
     /// </summary>
     public interface IHibernateStrategy : IStrategy, Orleans.IGrainWithGuidKey
     {
+        /// <summary>
+        /// Change the frequency of running the hibernation strategy
+        /// </summary>
+        Task SetUpdateFrequency(TimeSpan updateFrequency);
     }
 }
