@@ -18,5 +18,10 @@ namespace Scynet.GrainInterfaces
         /// Unregister a component
         /// </summary>
         Task UnregisterComponent(IComponent component);
+
+        /// <summary>
+        /// Change the logic of the strategy
+        /// </summary>
+        Task SetStrategyLogic(String type, String source);
     }
 }

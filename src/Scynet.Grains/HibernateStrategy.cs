@@ -13,15 +13,18 @@ namespace Scynet.Grains
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
         public TimeSpan UpdateFrequency = new TimeSpan(0, 10, 0);
+        public IAgentStrategyLogic Logic = new BasicHibernateStrategy();
     }
 
     public class HibernateStrategy : Orleans.Grain<HibernateStrategyState>, IHibernateStrategy, IRemindable
     {
         private readonly ILogger Logger;
+        private readonly AgentStrategyLogicContext StrategyContext;
 
         public HibernateStrategy(ILogger<HibernateStrategy> logger)
         {
             Logger = logger;
+            StrategyContext = new AgentStrategyLogicContext(GrainFactory);
         }
 
         public async Task RegisterComponent(IComponent component)
@@ -43,6 +46,12 @@ namespace Scynet.Grains
             State.UpdateFrequency = updateFrequency;
             await base.WriteStateAsync();
             await UpdateReminder();
+        }
+
+        public async Task SetStrategyLogic(String type, String source)
+        {
+            await State.Logic.SetSource(source);
+            await base.WriteStateAsync();
         }
 
         private async Task UpdateReminder()
@@ -76,16 +85,12 @@ namespace Scynet.Grains
 
         private async Task TryHibernate(Guid id, AgentInfo agentInfo)
         {
-            if (await ShouldHibernate(id, agentInfo))
+            if (await State.Logic.Apply(id, agentInfo, StrategyContext))
             {
                 var agent = GrainFactory.GetGrain<IAgent>(id);
                 await agent.ReleaseAll();
             };
-        }
-
-        private async Task<bool> ShouldHibernate(Guid id, AgentInfo agentInfo)
-        {
-            return false;
+            await base.WriteStateAsync();
         }
     }
 }

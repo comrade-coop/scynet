@@ -11,15 +11,18 @@ namespace Scynet.Grains
     public class PublishStrategyState
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
+        public IAgentStrategyLogic Logic = new BasicPublishStrategy();
     }
 
     public class PublishStrategy : Orleans.Grain<PublishStrategyState>, IPublishStrategy, IRegistryListener<Guid, AgentInfo>
     {
         private readonly ILogger Logger;
+        private readonly AgentStrategyLogicContext StrategyContext;
 
         public PublishStrategy(ILogger<PublishStrategy> logger)
         {
             Logger = logger;
+            StrategyContext = new AgentStrategyLogicContext(GrainFactory);
         }
 
         public async Task RegisterComponent(IComponent component)
@@ -36,16 +39,22 @@ namespace Scynet.Grains
             await UpdateListener();
         }
 
+        public async Task SetStrategyLogic(String type, String source)
+        {
+            await State.Logic.SetSource(source);
+            await base.WriteStateAsync();
+        }
+
         public async void NewItem(String @ref, Guid id, AgentInfo agentInfo)
         {
             if (@ref == typeof(PublishStrategy).FullName)
             {
-                if (await ShouldPublish(id, agentInfo))
+                if (await State.Logic.Apply(id, agentInfo, StrategyContext))
                 {
                     var agent = GrainFactory.GetGrain<IAgent>(id);
                     // HACK: Don't use a fake publisher...
                     var publisher = GrainFactory.GetGrain<FakePublisher>(0);
-                    publisher.PublishAgent(agent);
+                    await publisher.PublishAgent(agent);
                 }
             }
         }
@@ -62,11 +71,6 @@ namespace Scynet.Grains
             {
                 await registry.Unsubscribe(this, typeof(PublishStrategy).FullName);
             }
-        }
-
-        private async Task<bool> ShouldPublish(Guid id, AgentInfo agentInfo)
-        {
-            return true;
         }
     }
 

@@ -37,11 +37,11 @@ namespace Scynet.Tests
         class TestStreamWriter : IServerStreamWriter<StreamingPullResponse>
         {
             public List<DataMessage> Messages = new List<DataMessage>();
-            public async Task WriteAsync(StreamingPullResponse message)
+            public Task WriteAsync(StreamingPullResponse message)
             {
                 Console.WriteLine(message.ToString());
                 Messages.Add(message.Message);
-                return;
+                return Task.CompletedTask;
 
             }
 

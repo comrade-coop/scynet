@@ -11,15 +11,18 @@ namespace Scynet.Grains
     public class SubscribeStrategyState
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
+        public IAgentStrategyLogic Logic = new BasicHibernateStrategy();
     }
 
     public class SubscribeStrategy : Orleans.Grain<SubscribeStrategyState>, ISubscribeStrategy, IRegistryListener<Guid, AgentInfo>
     {
         private readonly ILogger Logger;
+        private readonly AgentStrategyLogicContext StrategyContext;
 
         public SubscribeStrategy(ILogger<SubscribeStrategy> logger)
         {
             Logger = logger;
+            StrategyContext = new AgentStrategyLogicContext(GrainFactory);
         }
 
         public async Task RegisterComponent(IComponent component)
@@ -36,11 +39,17 @@ namespace Scynet.Grains
             await UpdateListener();
         }
 
+        public async Task SetStrategyLogic(String type, String source)
+        {
+            await State.Logic.SetSource(source);
+            await base.WriteStateAsync();
+        }
+
         public async void NewItem(String @ref, Guid id, AgentInfo agentInfo)
         {
             if (@ref == typeof(SubscribeStrategy).FullName)
             {
-                if (await ShouldSubscribe(id, agentInfo))
+                if (await State.Logic.Apply(id, agentInfo, StrategyContext))
                 {
                     var agent = GrainFactory.GetGrain<IAgent>(id);
                     await Task.WhenAll(State.Components.Select(component => component.RegisterInput(agent)));
@@ -59,11 +68,6 @@ namespace Scynet.Grains
             {
                 await registry.Unsubscribe(this, typeof(SubscribeStrategy).FullName);
             }
-        }
-
-        private async Task<bool> ShouldSubscribe(Guid id, AgentInfo agentInfo)
-        {
-            return true;
         }
     }
 }
