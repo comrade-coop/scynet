@@ -70,7 +70,7 @@ def serve():
 
 	# I am doing this so I don't have to use make or sth simmilar.
 	import os
-	os.system(f'tmux new-window "exec bash ./test_queen.sh {port}"')
+	os.system(f'tmux new-window "exec bash ./test/test_queen.sh {port}"')
 
 	try:
 		while True:

@@ -52,8 +52,20 @@ def evaluate(x_test, y_test):
 
 class ObservableSearcher(BayesianSearcher):
 	def add_model(self, metric_value, loss, graph, model_id):
-			print("Got the model[" + str(model_id) +  "]: " + str(loss) + " " + str(metric_value) + " ")
-			return super().add_model(metric_value, loss, graph, model_id)
+		
+		# Save all the models in the controller so we don't have anything here.
+		if model_id == 0:
+			new_best = True
+		else:
+			new_best = model_id == self.get_best_model_id()
+			print(f"Got the model[{model_id}]: {loss} {metric_value} {self.get_best_model_id()}")
+
+				
+		if new_best:
+			print("Saving new best!")
+			model = graph.produce_keras_model().save("./model.h5")
+
+		return super().add_model(metric_value, loss, graph, model_id)
 
 class Queen(Process):
 	def __init__(self, uuid, egg, **kwargs):
