@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Agent
 {
     public class AgentState
     {

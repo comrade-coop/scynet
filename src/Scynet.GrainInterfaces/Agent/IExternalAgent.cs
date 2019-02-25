@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Agent
 {
     /// <summary>
     /// An agent created by a component
@@ -12,11 +11,11 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Initialize the agent
         /// </summary>
-        Task Initialize(string address);
+        Task Initialize(String address);
 
         /// <summary>
         /// Get the component of the agent
         /// </summary>
-        Task<string> GetAddress();
+        Task<String> GetAddress();
     }
 }

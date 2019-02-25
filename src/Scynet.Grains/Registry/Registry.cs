@@ -1,14 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
-using Scynet.GrainInterfaces;
-using Serialize.Linq.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Serialize.Linq.Nodes;
+using Scynet.GrainInterfaces.Registry;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Registry
 {
     public class RegistryState<K, T>
     {
@@ -21,8 +20,8 @@ namespace Scynet.Grains
     public abstract class Registry<K, T> : Orleans.Grain<RegistryState<K, T>>, IRegistry<K, T>
     {
         private readonly ILogger<Registry<K, T>> Logger;
-        private Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<KeyValuePair<K, T>, bool>> SubscriptionFilterCache =
-            new Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<KeyValuePair<K, T>, bool>>();
+        private Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<K, T, bool>> SubscriptionFilterCache =
+            new Dictionary<Tuple<IRegistryListener<K, T>, String>, Func<K, T, bool>>();
 
         public Registry(ILogger<Registry<K, T>> logger)
         {
@@ -38,10 +37,10 @@ namespace Scynet.Grains
                 if (!SubscriptionFilterCache.ContainsKey(subscription.Key))
                 {
                     SubscriptionFilterCache[subscription.Key] =
-                        subscription.Value.ToExpression<Func<KeyValuePair<K, T>, bool>>().Compile();
+                        subscription.Value.ToExpression<Func<K, T, bool>>().Compile();
                 }
                 var filter = SubscriptionFilterCache[subscription.Key];
-                if (filter(new KeyValuePair<K, T>(key, info)))
+                if (filter(key, info))
                 {
                     var listener = subscription.Key.Item1;
                     var @ref = subscription.Key.Item2;
@@ -88,11 +87,11 @@ namespace Scynet.Grains
     }
 
     // HACK: Needed so that Orleans can find the Grain types
-    public class AgentRegistry : Registry<Guid, AgentInfo>
+    public class AgentRegistry : Registry<Guid, GrainInterfaces.Agent.AgentInfo>
     {
         public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) { }
     }
-    public class ComponentRegistry : Registry<Guid, ComponentInfo>
+    public class ComponentRegistry : Registry<Guid, GrainInterfaces.Component.ComponentInfo>
     {
         public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) { }
     }

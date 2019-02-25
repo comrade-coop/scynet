@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Scynet.GrainInterfaces.Component;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Agent
 {
     /// <summary>
     /// An agent created by a component

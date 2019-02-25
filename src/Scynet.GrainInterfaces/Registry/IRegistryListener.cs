@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Registry
 {
     /// <summary>
     /// A receiver of messages comming from a registry

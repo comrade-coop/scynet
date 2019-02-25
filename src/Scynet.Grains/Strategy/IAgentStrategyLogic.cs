@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Strategy
 {
     /// <summary>
     /// Context which contains additional information that can be used by the strategy

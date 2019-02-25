@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
+using Scynet.GrainInterfaces.Registry;
+using Scynet.Grains.Agent;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Component
 {
     public class ComponentState
     {

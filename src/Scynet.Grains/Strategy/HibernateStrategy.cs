@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Runtime;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
+using Scynet.GrainInterfaces.Registry;
+using Scynet.GrainInterfaces.Strategy;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Strategy
 {
     public class HibernateStrategyState
     {

@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Scynet.GrainInterfaces.Agent;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Component
 {
     /// <summary>
     /// A component
@@ -17,7 +18,7 @@ namespace Scynet.GrainInterfaces
         /// <summary>
         /// Get the address of the component
         /// </summary>
-        Task<string> GetAddress();
+        Task<String> GetAddress();
 
         /// <summary>
         /// Mark the component as disconnected

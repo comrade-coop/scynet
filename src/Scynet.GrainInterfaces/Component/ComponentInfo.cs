@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Component
 {
     [Serializable]
     public class ComponentInfo

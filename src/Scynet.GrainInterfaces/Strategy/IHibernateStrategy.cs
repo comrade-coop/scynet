@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Scynet.GrainInterfaces
+namespace Scynet.GrainInterfaces.Strategy
 {
     /// <summary>
     /// A Strategy which decides when to hibernate agents

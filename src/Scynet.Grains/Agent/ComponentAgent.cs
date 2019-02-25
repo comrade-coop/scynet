@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
+using Scynet.GrainInterfaces.Registry;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Agent
 {
     public class ComponentAgentState : AgentState
     {

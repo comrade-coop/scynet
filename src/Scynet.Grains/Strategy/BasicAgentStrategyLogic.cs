@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Grpc.Core;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Registry;
+using Scynet.GrainInterfaces.Strategy;
 
-namespace Scynet.Grains
+namespace Scynet.Grains.Strategy
 {
     [Serializable]
     public abstract class BasicAgentStrategyLogic : IAgentStrategyLogic
