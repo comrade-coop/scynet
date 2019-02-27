@@ -10,6 +10,7 @@ namespace Scynet.GrainInterfaces.Agent
         public String RunnerType { get; set; }
         public List<List<uint>> OutputShapes { get; set; }
         public uint Frequency { get; set; }
+        public IAgent Agent { get; set; }
 
         public AgentInfo()
         {
