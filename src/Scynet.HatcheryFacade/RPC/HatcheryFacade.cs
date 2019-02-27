@@ -48,7 +48,8 @@ namespace Scynet.HatcheryFacade.RPC
                 ComponentId = Guid.Parse(request.Agent.ComponentId),
                 OutputShapes = request.Agent.Outputs.Select(o => o.Dimension.ToList()).ToList(),
                 Frequency = request.Agent.Frequency,
-                RunnerType = request.Agent.ComponentType
+                RunnerType = request.Agent.ComponentType,
+                Agent = agent
             }, inputs, data);
 
             return new AgentRegisterResponse();
