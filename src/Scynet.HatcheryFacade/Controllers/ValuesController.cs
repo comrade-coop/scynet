@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
+using Scynet.GrainInterfaces.Registry;
 
 namespace Scynet.HatcheryFacade.Controllers
 {

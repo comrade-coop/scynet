@@ -5,7 +5,7 @@ using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Scynet.Grains;
-using Scynet.GrainInterfaces;
+using Scynet.GrainInterfaces.Component;
 
 namespace Scynet.LocalSilo
 {
