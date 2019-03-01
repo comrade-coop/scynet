@@ -2,6 +2,7 @@ package scynet
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	uuid "github.com/google/uuid"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -23,13 +24,17 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 }
 
 func queryGetAgent(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
-	id := path[0]
+
+	id, error := uuid.Parse(path[0])
+	if error != nil {
+		return []byte{}, sdk.ErrUnknownRequest("wrong UUID formatting")
+	}
 
 	value := keeper.GetAgent(ctx, id)
 
-	if value == "" {
+	if value.Status == Unavailable {
 		return []byte{}, sdk.ErrUnknownRequest("agent does not exist")
 	}
 
-	return []byte(value), nil
+	return []byte("TODO"), nil
 }

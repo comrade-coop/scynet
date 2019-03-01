@@ -356,3 +356,19 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 *.exe
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# Build
+vendor
+.vendor-new
+build
+
+# IDE
+*.iml
+
+# GO
+*.goe

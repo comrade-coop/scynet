@@ -6,7 +6,8 @@ import (
 
 // RegisterCodec registers concrete types on the Amino codec
 func RegisterCodec(cdc *codec.Codec) {
+	cdc.RegisterConcrete(Agent{}, "scynet/Agent", nil)
 	cdc.RegisterConcrete(MsgPublishAgentPrice{}, "scynet/PublishAgentPrice", nil)
-	cdc.RegisterConcrete(MsgPublishDataPrice{}, "scynet/PublishDataPrice", nil)
+	cdc.RegisterConcrete(MsgPublishData{}, "scynet/PublishDataPrice", nil)
 	cdc.RegisterConcrete(MsgRentAgent{}, "scynet/RentAgent", nil)
 }
