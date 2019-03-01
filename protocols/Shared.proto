@@ -6,9 +6,8 @@ option csharp_namespace = "Scynet";
 // All the data that defines an agent and is needed for executing it.
 message Agent {
 	string uuid = 1;
-	string agentType = 2;
 	bytes eggData = 3; // optional
-	string componentType = 4;
+	string componentType = 4; // the type that can execute this agent.
 	string componentId = 5; // id of the component in which the agent is running
 	repeated string inputs = 6;
 	repeated Shape outputs = 7;
@@ -17,6 +16,14 @@ message Agent {
 
 message Shape {
 	repeated uint32 dimension = 1;
+}
+
+message Blob {
+	Shape shape = 7;
+	repeated float data = 5 [packed = true];
+	repeated float diff = 6 [packed = true];
+	repeated double double_data = 8 [packed = true];
+	repeated double double_diff = 9 [packed = true];
 }
 
 message Void {

@@ -16,4 +16,4 @@ This is the source code for [ScyNet](http://www.scynet.ai/), a decentralized net
 * Install Visual Studio with the .NET Core SDK
 * Open `ScynetLocalSilo.sln` with Visual Studio.
 * Run the `Scynet.LocalSilo` project to start the controller.
-* Run the `Scynet.HatcheryFacade` to start the facade of the hatchery. You might need to do that in a separate Visual Studio instance.
+* Run the `Scynet.HatcheryFacade` to start the facade of the hatchery. You might want to do that in a separate Visual Studio instance, or just use multiple startup project.

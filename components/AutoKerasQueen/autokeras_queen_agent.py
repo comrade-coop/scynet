@@ -68,11 +68,9 @@ class ObservableSearcher(BayesianSearcher):
 		return super().add_model(metric_value, loss, graph, model_id)
 
 class Queen(Process):
-	def __init__(self, uuid, egg, **kwargs):
+	def __init__(self, **kwargs):
 		super(Queen, self).__init__()
-		self.uuid = uuid
-		self.egg = egg
-		self.kwargs = kwargs
+
 		self.dataset = "./dataset"
 		self.path = "res"
 		
