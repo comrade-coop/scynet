@@ -1,4 +1,4 @@
-package scynet
+package agent
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package scynet
+package agent
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
