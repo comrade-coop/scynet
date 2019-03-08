@@ -12,10 +12,9 @@ namespace Scynet.LocalSilo
     {
         public static IGrainStorage Create(IServiceProvider services, string name)
         {
-           // IOptionsSnapshot<MinioGrainStorageOptions> optionsSnapshot = services.GetRequiredService<IOptionsSnapshot<MinioGrainStorageOptions>>();
-            //var options = optionsSnapshot.Get(name);
-            //IMinioStorage storage = ActivatorUtilities.CreateInstance<MinioStorage>(services, options.AccessKey, options.SecretKey, options.Endpoint);
-            return ActivatorUtilities.CreateInstance<FileStorageProvider>(services, name, "./filestoragefolder");
+            IOptionsSnapshot<FileStorageOptions> optionsSnapshot = services.GetRequiredService<IOptionsSnapshot<FileStorageOptions>>();
+            var options = optionsSnapshot.Get(name);
+            return ActivatorUtilities.CreateInstance<FileStorageProvider>(services, name, options.RootDirectory);
         }
     }
 }

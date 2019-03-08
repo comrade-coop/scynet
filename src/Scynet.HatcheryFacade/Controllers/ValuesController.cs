@@ -28,7 +28,7 @@ namespace Scynet.HatcheryFacade.Controllers
         public async Task<ActionResult<IEnumerable<string>>> Get()
         {
             // HACK: testing code below
-            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            /*var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             await registry.Register(Guid.Empty, new AgentInfo { });
             await registry.Register(Guid.NewGuid(), new AgentInfo { });
             await registry.Register(Guid.NewGuid(), new AgentInfo { });
@@ -39,8 +39,7 @@ namespace Scynet.HatcheryFacade.Controllers
                 select y);
             Console.WriteLine("----------");
             Console.WriteLine(String.Join('|', from x in res select x.Key));
-            Console.WriteLine(res.GetType());
-
+            Console.WriteLine(res.GetType());*/
 
             return new string[] { "value1", "value2" };
         }

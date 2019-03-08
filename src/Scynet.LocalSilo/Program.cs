@@ -31,12 +31,16 @@ namespace Scynet.LocalSilo
                         options.ServiceId = "Scynet";
                     })
                     .ConfigureApplicationParts(parts => parts
-                        .AddFrameworkPart(typeof(FileStorageProvider).Assembly)
                         .AddApplicationPart(typeof(Component).Assembly) // Any known Grain class, so it includes the whole assembly
                         .WithReferences())
                     .ConfigureLogging(logging => logging.AddConsole())
                     .UseInMemoryReminderService()
-                    .AddFileGrainStorage("Sheny");
+                    .AddFileGrainStorage("Sheny", opts =>
+                    {
+                        // saves it in bin/debug/netcoreapp2.2/file-storage
+                        // you can use also non-relative path for example: opts.RootDirectory = "C:/Users/Sheny/Desktop/sheny-storage"
+                        opts.RootDirectory = "./file-storage";
+                    });
                     //.AddMemoryGrainStorage("Default");
 
                 var host = builder.Build();
