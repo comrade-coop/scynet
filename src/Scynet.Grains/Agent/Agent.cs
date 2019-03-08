@@ -90,5 +90,11 @@ namespace Scynet.Grains.Agent
         {
             return Task.FromResult(this.GetPrimaryKey().ToString());
         }
+
+        /// <inheritdoc/>
+        public async Task<bool> IsRunning()
+        {
+            return State.Running;
+        }
     }
 }

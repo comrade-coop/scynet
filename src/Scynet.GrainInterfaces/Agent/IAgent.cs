@@ -35,6 +35,11 @@ namespace Scynet.GrainInterfaces.Agent
         /// Release all engagements, also known as "hibernation".
         /// </summary>
         Task ReleaseAll();
+
+        /// <summary>
+        /// Check if the agent is currently running.
+        /// </summary>
+        Task<bool> IsRunning();
     }
 
     public class EngagementInfo

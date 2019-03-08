@@ -11,7 +11,7 @@ namespace Scynet.Grains.Agent
     public class ExternalAgentState : AgentState
     {
         public AgentInfo Info = new AgentInfo();
-        public string Address;
+        // public string Address;
     }
 
     public class ExternalAgent : Agent<ExternalAgentState>, IExternalAgent
@@ -24,10 +24,10 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
-        public async Task Initialize(string address)
+        public async Task Initialize(AgentInfo info)
         {
-            // TODO: Fill State.Info
-            State.Address = address;
+            State.Info = info;
+            // State.Address = address;
 
             var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             await registry.Register(this.GetPrimaryKey(), State.Info);
@@ -35,11 +35,11 @@ namespace Scynet.Grains.Agent
             await base.WriteStateAsync();
         }
 
-        /// <inheritdoc/>
-        public Task<string> GetAddress()
-        {
-            return Task.FromResult(State.Address);
-        }
+        // /// <inheritdoc/>
+        // public Task<string> GetAddress()
+        // {
+        //     return Task.FromResult(State.Address);
+        // }
 
         /// <inheritdoc/>
         public override Task Start()

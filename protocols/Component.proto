@@ -19,7 +19,7 @@ service Component {
 	rpc AgentStop (AgentRequest) returns (Void) {};
 
 	// Check the status of an agent.
-	rpc AgentStatus (AgentRequest) returns (AgentStatusResponse) {}; // Can raise an Agent Not Found Exception
+	rpc AgentStatus (AgentRequest) returns (AgentStatusResponse) {};
 
 	// Retrieve a list of running agents.
 	rpc AgentList (AgentQuery) returns (ListOfAgents) {};
@@ -30,23 +30,21 @@ message RegisterInputRequest {
 }
 
 message AgentStartRequest {
-	Agent egg = 2; // The egg that will be used only when creating the agent. It contains the uuid of the agent
+	Agent egg = 2; // The egg that was previously registered with RegistrAgent. It contains the uuid and data of the agent.
 }
 
 message AgentRequest {
-	string uuid = 1; // The universal identifier of the agent we want to get.
+	string uuid = 1; // The uuid of the agent we want to get.
 }
 
-// Used for different filters that can be applied to the query.
 message AgentQuery {
 
 }
 
-// The list of avalable agents.
+// A list of agents
 message ListOfAgents {
 	repeated Agent agents = 1;
 }
-
 
 message AgentStatusResponse {
 	bool running = 1;

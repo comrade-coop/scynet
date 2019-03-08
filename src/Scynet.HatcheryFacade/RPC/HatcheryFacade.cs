@@ -50,7 +50,8 @@ namespace Scynet.HatcheryFacade.RPC
                 OutputShapes = request.Agent.Outputs.Select(o => o.Dimension.ToList()).ToList(),
                 Frequency = request.Agent.Frequency,
                 RunnerType = request.Agent.ComponentType,
-                Agent = agent
+                Price = request.Agent.Price,
+                Agent = agent,
             }, inputs, data);
 
             return new AgentRegisterResponse();

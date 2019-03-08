@@ -26,8 +26,8 @@
     <ProjectReference Include="..\Scynet.GrainInterfaces\Scynet.GrainInterfaces.csproj" />
 
     <Protobuf Include="..\..\protocols\Shared.proto" GrpcServices="None" />
-    <Protobuf Include="..\..\protocols\Hatchery.proto" />
-    <Protobuf Include="..\..\protocols\Component.proto" GrpcServices="Client" />
+    <Protobuf Include="..\..\protocols\Hatchery.proto" GrpcServices="Server" />
+    <Protobuf Include="..\..\protocols\Component.proto" GrpcServices="Both" />
     <Protobuf Include="..\..\protocols\Stream.proto" GrpcServices="Both" />
 
   </ItemGroup>

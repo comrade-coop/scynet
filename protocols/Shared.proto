@@ -12,6 +12,10 @@ message Agent {
 	repeated string inputs = 6;
 	repeated Shape outputs = 7;
 	uint32 frequency = 8;
+	uint32 price = 9; // the cost of running the agent, mainly for use when making decisions about it
+	// The cost of transferring the agent from one hatchery to another should be in the 1-5 range.
+	// One layer in a neural network is likely in the 10-100 range.
+	// Agents should not include the prices of their inputs if the latter are listed in the structure.
 }
 
 message Shape {
