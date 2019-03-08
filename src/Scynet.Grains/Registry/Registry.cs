@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Serialize.Linq.Nodes;
 using Scynet.GrainInterfaces.Registry;
+using Orleans.Providers;
 
 namespace Scynet.Grains.Registry
 {
@@ -17,6 +18,7 @@ namespace Scynet.Grains.Registry
             new Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode>();
     }
 
+    [StorageProvider(ProviderName = "Sheny")]
     public abstract class Registry<K, T> : Orleans.Grain<RegistryState<K, T>>, IRegistry<K, T>
     {
         private readonly ILogger<Registry<K, T>> Logger;

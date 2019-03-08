@@ -6,6 +6,7 @@ using Orleans.Configuration;
 using Orleans.Hosting;
 using Scynet.Grains;
 using Scynet.GrainInterfaces.Component;
+using Scynet.LocalSilo.StorageProvider;
 
 namespace Scynet.LocalSilo
 {
@@ -30,11 +31,13 @@ namespace Scynet.LocalSilo
                         options.ServiceId = "Scynet";
                     })
                     .ConfigureApplicationParts(parts => parts
+                        .AddFrameworkPart(typeof(FileStorageProvider).Assembly)
                         .AddApplicationPart(typeof(Component).Assembly) // Any known Grain class, so it includes the whole assembly
                         .WithReferences())
                     .ConfigureLogging(logging => logging.AddConsole())
                     .UseInMemoryReminderService()
-                    .AddMemoryGrainStorage("Default");
+                    .AddFileGrainStorage("Sheny");
+                    //.AddMemoryGrainStorage("Default");
 
                 var host = builder.Build();
 

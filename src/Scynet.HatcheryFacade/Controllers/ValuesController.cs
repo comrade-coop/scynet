@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
@@ -39,6 +40,8 @@ namespace Scynet.HatcheryFacade.Controllers
             Console.WriteLine("----------");
             Console.WriteLine(String.Join('|', from x in res select x.Key));
             Console.WriteLine(res.GetType());
+
+
             return new string[] { "value1", "value2" };
         }
 
@@ -73,7 +76,30 @@ namespace Scynet.HatcheryFacade.Controllers
             return "value";
         }
 
-        // GET api/values/xxx
+        [Route("FileStorageTest")]
+        public async Task<ActionResult<string>> FileStorageTest()
+        {
+            var componentId = Guid.Parse("7730a43f-42a7-49db-b569-50e04929c4f9");
+            var agentId = Guid.Parse("253717bf-34b4-43fc-8129-4c68a6bbe1fe");
+            var agentId2 = Guid.Parse("7730a43f-42a7-49db-b569-50e04929c4f9");
+
+            var component = ClusterClient.GetGrain<IComponent>(componentId);
+            await component.Initialize("127.0.0.1", new HashSet<String>(1));
+
+            var agent = ClusterClient.GetGrain<IComponentAgent>(agentId);
+            var agentInfo = new AgentInfo
+            {
+                ComponentId = componentId,
+                Agent = agent
+            };
+            await agent.Initialize(agentInfo, new List<IAgent>(), Encoding.ASCII.GetBytes("Sheny"));
+
+            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            var res = await registry.Get(agentId);
+            return "file storage ok";
+        }
+
+        // GET api/values/engage
         [Route("Engage")]
         public async Task<ActionResult<string>> Engage()
         {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Providers;
 using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
@@ -18,6 +19,7 @@ namespace Scynet.Grains.Component
         public IList<IAgent> Inputs = new List<IAgent>();
     }
 
+    [StorageProvider(ProviderName = "Sheny")]
     public class Component : Orleans.Grain<ComponentState>, IComponent
     {
         private readonly ILogger Logger;
