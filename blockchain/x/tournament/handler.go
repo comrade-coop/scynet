@@ -22,8 +22,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 // Handle handleMsgSubmitAgent
 func handleMsgSubmitAgent(ctx sdk.Context, keeper Keeper, msg MsgSubmitAgent) sdk.Result {
-	//TODO: Perform stateful validity checks
+	//call keeper's submitAgent
+	//withdraw agent publish fee
 
-	//TODO: Update state
+	//agent module should hold a balance of all submitted fees that are related to its transactions.
+	//For every submitAgent, withdraw that balance from agent module and include it in the upcoming tournament's reward
+	//downside: fees submitted before the start of the tournament and after the last submitAgent for that tournament will not be included in that tournament, but the next one
+
 	return sdk.Result{} // return
 }
