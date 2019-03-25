@@ -47,7 +47,7 @@ namespace Scynet.GrainInterfaces.Registry
         /// <param name="expression">An ExpressionNode wrapping an Expression < Func < KeyValuePair< K, T > , bool > > </param>
         /// <param name="listener">The listener which would receive the notifications</param>
         /// <param name="ref">A reference with which the subscription is tracked</param>
-        Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "");
+        Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "", SubscriptionOptions options = SubscriptionOptions.Default);
 
         /// <summary>
         /// Stop listening for new registrations to the registry.
@@ -57,5 +57,13 @@ namespace Scynet.GrainInterfaces.Registry
         Task Unsubscribe(IRegistryListener<K, T> listener, String @ref = "");
 
         // Task Renew(IRegistryListener<K, T> listener);
+    }
+
+    public enum SubscriptionOptions
+    {
+        AllRegistrations,
+        OnlyNew,
+
+        Default = AllRegistrations
     }
 }

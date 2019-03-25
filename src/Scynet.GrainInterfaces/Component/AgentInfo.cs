@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Scynet.GrainInterfaces.Agent
+namespace Scynet.GrainInterfaces.Component
 {
     [Serializable]
     public class AgentInfo
@@ -10,7 +10,7 @@ namespace Scynet.GrainInterfaces.Agent
         public String RunnerType { get; set; }
         public List<List<uint>> OutputShapes { get; set; }
         public uint Frequency { get; set; }
-        public IAgent Agent { get; set; }
+        public uint Price { get; set; }
 
         public AgentInfo()
         {

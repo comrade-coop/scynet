@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Scynet.GrainInterfaces.Agent
+namespace Scynet.GrainInterfaces.Component
 {
     /// <summary>
     /// Base interface for users of agents

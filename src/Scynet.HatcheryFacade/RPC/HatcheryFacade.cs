@@ -6,7 +6,6 @@ using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Scynet.GrainInterfaces;
-using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
 
@@ -37,7 +36,7 @@ namespace Scynet.HatcheryFacade.RPC
         {
             var id = Guid.Parse(request.Agent.Uuid);
 
-            var agent = ClusterClient.GetGrain<IComponentAgent>(id);
+            var agent = ClusterClient.GetGrain<IAgent>(id);
 
             var data = request.Agent.EggData.ToByteArray();
             var inputs = request.Agent.Inputs.Select(
@@ -50,7 +49,7 @@ namespace Scynet.HatcheryFacade.RPC
                 OutputShapes = request.Agent.Outputs.Select(o => o.Dimension.ToList()).ToList(),
                 Frequency = request.Agent.Frequency,
                 RunnerType = request.Agent.ComponentType,
-                Agent = agent
+                Price = request.Agent.Price
             }, inputs, data);
 
             return new AgentRegisterResponse();
@@ -78,7 +77,7 @@ namespace Scynet.HatcheryFacade.RPC
         {
             var id = Guid.Parse(request.Agent.Uuid);
 
-            var agent = ClusterClient.GetGrain<IComponentAgent>(id);
+            var agent = ClusterClient.GetGrain<IAgent>(id);
             await agent.ReleaseAll();
 
             return new Void();

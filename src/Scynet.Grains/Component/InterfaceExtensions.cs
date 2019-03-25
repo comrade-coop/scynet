@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf;
 using Grpc.Core;
-using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
 
-namespace Scynet.Grains.Agent
+namespace Scynet.Grains.Component
 {
     public static class InterfaceExtensions
     {
@@ -17,7 +17,8 @@ namespace Scynet.Grains.Agent
                 ComponentType = info.RunnerType,
                 ComponentId = info.ComponentId.ToString(),
                 Outputs = { info.OutputShapes.Select(i => new Shape { Dimension = { i } }) },
-                Frequency = info.Frequency
+                Frequency = info.Frequency,
+                Price = info.Price
             };
         }
 

@@ -4,25 +4,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
 using Scynet.GrainInterfaces.Strategy;
 
 namespace Scynet.Grains.Strategy
 {
-    public class SubscribeStrategyState
+    public class PricingStrategyState
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
-        public IAgentStrategyLogic Logic = new BasicHibernateStrategy();
+        public IAgentStrategyLogic<uint> Logic = new BasicPricingStrategy();
     }
 
-    public class SubscribeStrategy : Orleans.Grain<SubscribeStrategyState>, ISubscribeStrategy, IRegistryListener<Guid, AgentInfo>
+    public class PricingStrategy : Orleans.Grain<PricingStrategyState>, IPricingStrategy, IRegistryListener<Guid, AgentInfo>
     {
         private readonly ILogger Logger;
         private readonly AgentStrategyLogicContext StrategyContext;
 
-        public SubscribeStrategy(ILogger<SubscribeStrategy> logger)
+        public PricingStrategy(ILogger<PricingStrategy> logger)
         {
             Logger = logger;
             StrategyContext = new AgentStrategyLogicContext(GrainFactory);
@@ -50,12 +49,14 @@ namespace Scynet.Grains.Strategy
 
         public async void NewItem(String @ref, Guid id, AgentInfo agentInfo)
         {
-            if (@ref == typeof(SubscribeStrategy).FullName)
+            if (@ref == typeof(PricingStrategy).FullName)
             {
-                if (await State.Logic.Apply(id, agentInfo, StrategyContext))
+                var newPrice = await State.Logic.Apply(id, agentInfo, StrategyContext);
+                if (newPrice != 0)
                 {
                     var agent = GrainFactory.GetGrain<IAgent>(id);
-                    await Task.WhenAll(State.Components.Select(component => component.RegisterInput(agent)));
+                    // TODO: Set price **before** the agent gets distributed to other components
+                    await agent.SetPrice(newPrice);
                 }
             }
         }
@@ -65,11 +66,16 @@ namespace Scynet.Grains.Strategy
             var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             if (State.Components.Count > 0)
             {
-                await registry.Subscribe((id, agent) => true, this, typeof(SubscribeStrategy).FullName);
+                var components = new HashSet<Guid>(State.Components.Select(component => component.GetPrimaryKey()));
+                await registry.Subscribe(
+                    (id, agent) => components.Contains(agent.ComponentId),
+                    this,
+                    typeof(PricingStrategy).FullName,
+                    SubscriptionOptions.OnlyNew);
             }
             else
             {
-                await registry.Unsubscribe(this, typeof(SubscribeStrategy).FullName);
+                await registry.Unsubscribe(this, typeof(PricingStrategy).FullName);
             }
         }
     }

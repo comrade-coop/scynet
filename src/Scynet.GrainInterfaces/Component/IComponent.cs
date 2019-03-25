@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Scynet.GrainInterfaces.Agent;
 
 namespace Scynet.GrainInterfaces.Component
 {
@@ -29,5 +28,15 @@ namespace Scynet.GrainInterfaces.Component
         /// Register an input for the component
         /// </summary>
         Task RegisterInput(IAgent agent);
+
+        /// <summary>
+        /// Start an agent (assumes said agent is runnable in the component)
+        /// </summary>
+        Task StartAgent(IAgent agent);
+
+        /// <summary>
+        /// Stops an agent (assumes said agent is running in the component, though it is likely harmless if it is not)
+        /// </summary>
+        Task StopAgent(IAgent agent);
     }
 }

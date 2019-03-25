@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
-using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
 
@@ -81,12 +80,10 @@ namespace Scynet.HatcheryFacade.Controllers
             var test = new TestEngager();
             var testWrap = await ClusterClient.CreateObjectReference<IEngager>(test);
             var id = Guid.Parse("253717bf-34b4-43fc-8129-4c68a6bbe1fe");
-            //var x = ClusterClient.GetGrain<IAgent>(id, "Scynet.Grains.ComponentAgent");
-            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            var agentInfo = await registry.Get(id);
-            var engagements2 = await agentInfo.Agent.GetActiveEngagements();
-            await agentInfo.Agent.Engage(testWrap);
-            var engagements = await agentInfo.Agent.GetActiveEngagements();
+            var agent = ClusterClient.GetGrain<IAgent>(id);
+            var engagements2 = await agent.GetActiveEngagements();
+            await agent.Engage(testWrap);
+            var engagements = await agent.GetActiveEngagements();
             return "engagement completed";
         }
 

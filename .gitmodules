@@ -4,3 +4,6 @@
 [submodule "components/AutoKerasQueen/autokeras"]
 	path = components/AutoKerasQueen/autokeras
 	url = https://github.com/jhfjhfj1/autokeras
+[submodule "protocols"]
+	path = protocols
+	url = https://github.com/comrade-coop/scynet-proto.git

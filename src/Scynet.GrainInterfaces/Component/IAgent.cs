@@ -2,13 +2,38 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Scynet.GrainInterfaces.Agent
+namespace Scynet.GrainInterfaces.Component
 {
     /// <summary>
     /// An agent
     /// </summary>
     public interface IAgent : Orleans.IGrainWithGuidKey
     {
+        /// <summary>
+        /// Initialize the agent
+        /// </summary>
+        Task Initialize(AgentInfo info, IEnumerable<IAgent> inputs, byte[] data);
+
+        /// <summary>
+        /// Update the price of the agent
+        /// </summary>
+        Task SetPrice(uint price);
+
+        /// <summary>
+        /// Get the component of the agent
+        /// </summary>
+        Task<IComponent> GetComponent();
+
+        /// <summary>
+        /// Get the data of the agent
+        /// </summary>
+        Task<byte[]> GetData();
+
+        /// <summary>
+        /// Get the inputs of the agent
+        /// </summary>
+        Task<IEnumerable<IAgent>> GetInputs();
+
         /// <summary>
         /// List engagers of the Agent.
         /// </summary>

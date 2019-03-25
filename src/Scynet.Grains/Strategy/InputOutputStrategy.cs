@@ -4,25 +4,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
 using Scynet.GrainInterfaces.Strategy;
 
 namespace Scynet.Grains.Strategy
 {
-    public class PublishStrategyState
+    public class InputOutputStrategyState
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
-        public IAgentStrategyLogic Logic = new BasicPublishStrategy();
+        public IAgentStrategyLogic<bool> Logic = new BasicInputOutputStrategy();
     }
 
-    public class PublishStrategy : Orleans.Grain<PublishStrategyState>, IPublishStrategy, IRegistryListener<Guid, AgentInfo>
+    public class InputOutputStrategy : Orleans.Grain<InputOutputStrategyState>, IInputOutputStrategy, IRegistryListener<Guid, AgentInfo>
     {
         private readonly ILogger Logger;
         private readonly AgentStrategyLogicContext StrategyContext;
 
-        public PublishStrategy(ILogger<PublishStrategy> logger)
+        public InputOutputStrategy(ILogger<InputOutputStrategy> logger)
         {
             Logger = logger;
             StrategyContext = new AgentStrategyLogicContext(GrainFactory);
@@ -50,14 +49,12 @@ namespace Scynet.Grains.Strategy
 
         public async void NewItem(String @ref, Guid id, AgentInfo agentInfo)
         {
-            if (@ref == typeof(PublishStrategy).FullName)
+            if (@ref == typeof(InputOutputStrategy).FullName)
             {
                 if (await State.Logic.Apply(id, agentInfo, StrategyContext))
                 {
                     var agent = GrainFactory.GetGrain<IAgent>(id);
-                    // HACK: Don't use a fake publisher...
-                    var publisher = GrainFactory.GetGrain<FakePublisher>(0);
-                    await publisher.PublishAgent(agent);
+                    await Task.WhenAll(State.Components.Select(component => component.RegisterInput(agent)));
                 }
             }
         }
@@ -67,40 +64,12 @@ namespace Scynet.Grains.Strategy
             var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             if (State.Components.Count > 0)
             {
-                var components = new HashSet<Guid>(State.Components.Select(component => component.GetPrimaryKey()));
-                await registry.Subscribe((id, agent) => components.Contains(agent.ComponentId), this, typeof(PublishStrategy).FullName);
+                await registry.Subscribe((id, agent) => true, this, typeof(InputOutputStrategy).FullName);
             }
             else
             {
-                await registry.Unsubscribe(this, typeof(PublishStrategy).FullName);
+                await registry.Unsubscribe(this, typeof(InputOutputStrategy).FullName);
             }
-        }
-    }
-
-    // HACK: Fake publisher, just in order to have an IEngager to give to IAgent::Engage
-    public interface IFakePublisher : Orleans.IGrainWithIntegerKey
-    {
-        Task PublishAgent(IAgent agent);
-    }
-
-    public class FakePublisher : Orleans.Grain, IFakePublisher, IEngager
-    {
-        private readonly ILogger Logger;
-
-        public FakePublisher(ILogger<FakePublisher> logger)
-        {
-            Logger = logger;
-        }
-
-        public async Task PublishAgent(IAgent agent)
-        {
-            Logger.LogInformation($"Agent fake-published ({agent})!");
-            await agent.Engage(this);
-        }
-
-        public void Released(IAgent agent)
-        {
-            Logger.LogInformation($"Fake-published agent hibernated ({agent})!");
         }
     }
 }

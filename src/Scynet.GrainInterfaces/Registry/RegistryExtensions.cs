@@ -48,10 +48,10 @@ namespace Scynet.GrainInterfaces.Registry
         /// <param name="query">A lambda which decides what items are interesting for the listener</param>
         /// <param name="listener">The listener which would receive the notifications</param>
         /// <param name="ref">A reference with which the subscription is tracked</param>
-        public static Task Subscribe<K, T>(this IRegistry<K, T> registry, Expression<Func<K, T, bool>> query, IRegistryListener<K, T> listener, String @ref = "")
+        public static Task Subscribe<K, T>(this IRegistry<K, T> registry, Expression<Func<K, T, bool>> query, IRegistryListener<K, T> listener, String @ref = "", SubscriptionOptions options = SubscriptionOptions.Default)
         {
             var expressionNode = query.ToExpressionNode();
-            return registry.Subscribe(expressionNode, listener, @ref);
+            return registry.Subscribe(expressionNode, listener, @ref, options);
         }
     }
 }

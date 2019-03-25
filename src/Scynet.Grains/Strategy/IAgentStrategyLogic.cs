@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Orleans;
-using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Component;
 
 namespace Scynet.Grains.Strategy
 {
@@ -22,12 +22,12 @@ namespace Scynet.Grains.Strategy
     /// <summary>
     /// Base interface which decides what agents are fit for hibernating/publishing/subscribing
     /// </summary>
-    public interface IAgentStrategyLogic : ISerializable
+    public interface IAgentStrategyLogic<T> : ISerializable
     {
         /// <summary>
         /// Apply the strategy to an agent.
         /// </summary>
-        Task<bool> Apply(Guid id, AgentInfo agent, AgentStrategyLogicContext context);
+        Task<T> Apply(Guid id, AgentInfo agent, AgentStrategyLogicContext context);
 
         /// <summary>
         /// Set the source of the strategy as a string.

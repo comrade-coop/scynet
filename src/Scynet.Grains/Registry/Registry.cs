@@ -9,12 +9,18 @@ using Scynet.GrainInterfaces.Registry;
 
 namespace Scynet.Grains.Registry
 {
+    public class RegistrySubscription
+    {
+        public ExpressionNode Filter;
+        public SubscriptionOptions Options;
+    }
+
     public class RegistryState<K, T>
     {
         public Dictionary<K, T> Items = new Dictionary<K, T>();
         // TODO: Can the below line be shortened somehow?
-        public Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode> Subscriptions =
-            new Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode>();
+        public Dictionary<Tuple<IRegistryListener<K, T>, String>, RegistrySubscription> Subscriptions =
+            new Dictionary<Tuple<IRegistryListener<K, T>, String>, RegistrySubscription>();
     }
 
     public abstract class Registry<K, T> : Orleans.Grain<RegistryState<K, T>>, IRegistry<K, T>
@@ -31,14 +37,21 @@ namespace Scynet.Grains.Registry
         public Task Register(K key, T info)
         {
             Logger.LogInformation($"Item registered ({info})!");
+            var isOld = State.Items.ContainsKey(key);
             State.Items[key] = info;
             foreach (var subscription in State.Subscriptions)
             {
+                if (isOld && subscription.Value.Options == SubscriptionOptions.OnlyNew)
+                {
+                    continue;
+                }
+
                 if (!SubscriptionFilterCache.ContainsKey(subscription.Key))
                 {
                     SubscriptionFilterCache[subscription.Key] =
-                        subscription.Value.ToExpression<Func<K, T, bool>>().Compile();
+                        subscription.Value.Filter.ToExpression<Func<K, T, bool>>().Compile();
                 }
+
                 var filter = SubscriptionFilterCache[subscription.Key];
                 if (filter(key, info))
                 {
@@ -69,11 +82,15 @@ namespace Scynet.Grains.Registry
             return Task.FromResult(result);
         }
 
-        public Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "")
+        public Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "", SubscriptionOptions options = SubscriptionOptions.Default)
         {
             var key = Tuple.Create(listener, @ref);
             SubscriptionFilterCache.Remove(key);
-            State.Subscriptions[key] = expression;
+            State.Subscriptions[key] = new RegistrySubscription
+            {
+                Filter = expression,
+                Options = options,
+            };
             return base.WriteStateAsync();
         }
 
@@ -87,7 +104,7 @@ namespace Scynet.Grains.Registry
     }
 
     // HACK: Needed so that Orleans can find the Grain types
-    public class AgentRegistry : Registry<Guid, GrainInterfaces.Agent.AgentInfo>
+    public class AgentRegistry : Registry<Guid, GrainInterfaces.Component.AgentInfo>
     {
         public AgentRegistry(ILogger<AgentRegistry> logger) : base(logger) { }
     }

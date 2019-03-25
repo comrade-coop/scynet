@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Runtime;
-using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
 using Scynet.GrainInterfaces.Strategy;
@@ -16,7 +15,7 @@ namespace Scynet.Grains.Strategy
     {
         public ISet<IComponent> Components = new HashSet<IComponent>();
         public TimeSpan UpdateFrequency = new TimeSpan(0, 10, 0);
-        public IAgentStrategyLogic Logic = new BasicHibernateStrategy();
+        public IAgentStrategyLogic<bool> Logic = new BasicHibernateStrategy();
     }
 
     public class HibernateStrategy : Orleans.Grain<HibernateStrategyState>, IHibernateStrategy, IRemindable
