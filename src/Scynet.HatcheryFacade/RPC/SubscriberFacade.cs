@@ -9,12 +9,16 @@ using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 using Google.Protobuf;
 using Grpc.Core;
+using Orleans;
 using Microsoft.Extensions.Logging;
+using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Registry;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    class InternalSubscription : IDisposable
+    class InternalSubscription : IDisposable, IEngager
     {
+        public enum SubscriptionStatus : byte { Pending, Running, Errored };
         public Thread SubscriberThread { get; set; }
         public Consumer<string, byte[]> Consumer { get; set; }
         public string AgentId
@@ -23,6 +27,7 @@ namespace Scynet.HatcheryFacade.RPC
             set => _config.GroupId = value;
         }
         public uint BufferSize { get; }
+        public SubscriptionStatus Status { get; private set; } = SubscriptionStatus.Pending;
 
         public BufferBlock<DataMessage> Buffer;
 
@@ -42,7 +47,7 @@ namespace Scynet.HatcheryFacade.RPC
 
         }
 
-        public void Start()
+        public async void Start(IClusterClient clusterClient)
         {
             Consumer = new Consumer<string, byte[]>(_config);
             Consumer.OnPartitionsAssigned += (sender, list) =>
@@ -51,10 +56,24 @@ namespace Scynet.HatcheryFacade.RPC
             };
 
             Consumer.Subscribe(AgentId);
-
             Consumer.Assign(new TopicPartitionOffset(AgentId, new Partition(0), new Offset(0)));
+            Status = SubscriptionStatus.Pending;
+
+            if (clusterClient != null)
+            {
+                var thisWrap = await clusterClient.CreateObjectReference<IEngager>(this);
+                var registry = clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                var agentInfo = await registry.Get(Guid.Parse(AgentId));
+                await agentInfo.Agent.Engage(thisWrap);
+            }
+
+            Status = SubscriptionStatus.Running;
         }
 
+        public void Released(IAgent who)
+        {
+            Status = SubscriptionStatus.Errored;
+        }
 
         public void Dispose()
         {
@@ -68,14 +87,16 @@ namespace Scynet.HatcheryFacade.RPC
     {
         private readonly ILogger _logger;
         private readonly IEnumerable<string> _brokers;
+        private readonly IClusterClient _clusterClient;
         private Dictionary<String, InternalSubscription> subscriptions = new Dictionary<string, InternalSubscription>();
 
 
 
-        public SubscriberFacade(ILogger<SubscriberFacade> logger, IEnumerable<String> brokers)
+        public SubscriberFacade(ILogger<SubscriberFacade> logger, IEnumerable<String> brokers, IClusterClient clusterClient)
         {
             _logger = logger;
             _brokers = brokers;
+            _clusterClient = clusterClient;
         }
 
         public override Task<SubscriptionResponse> Subscribe(SubscriptionRequest request, ServerCallContext context)
@@ -93,7 +114,7 @@ namespace Scynet.HatcheryFacade.RPC
                     break;
             }
             subscriptions.Add(request.Id, subscription);
-            subscription.Start();
+            subscription.Start(_clusterClient);
             return Task.FromResult(new SubscriptionResponse() { AgentId = subscription.AgentId });
         }
 
@@ -119,6 +140,10 @@ namespace Scynet.HatcheryFacade.RPC
         public override Task<Void> Seek(SeekRequest request, ServerCallContext context)
         {
             var subscription = subscriptions[request.Id];
+            if (subscription.Status == InternalSubscription.SubscriptionStatus.Errored)
+            {
+                throw new RpcException(Status.DefaultCancelled, "Subscribed agent failed!");
+            }
 
             // TODO: Support more partitions.
             switch (request.TargetCase)
@@ -153,7 +178,10 @@ namespace Scynet.HatcheryFacade.RPC
                 while (!context.CancellationToken.IsCancellationRequested) // The code here won't work if the send data is wrong.
                 {
                     var consumeResult = subscription.Consumer.Consume(context.CancellationToken);
-                    if (consumeResult == null) { continue; }
+                    if (consumeResult == null)
+                    {
+                        continue;
+                    }
 
                     if (consumeResult.Headers.TryGetLast("previous", out var previous))
                     {
@@ -203,6 +231,10 @@ namespace Scynet.HatcheryFacade.RPC
 
             while (subscription.Buffer.Completion.IsCompleted)
             {
+                if (subscription.Status == InternalSubscription.SubscriptionStatus.Errored)
+                {
+                    throw new RpcException(Status.DefaultCancelled, "Subscribed agent failed!");
+                }
                 var message = await subscription.Buffer.ReceiveAsync();
                 await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
             }

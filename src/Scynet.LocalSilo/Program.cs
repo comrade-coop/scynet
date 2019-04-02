@@ -23,7 +23,7 @@ namespace Scynet.LocalSilo
                 Console.WriteLine("Configuring local silo...");
 
                 var builder = new SiloHostBuilder()
-                    .UseLocalhostClustering()
+                    .UseLocalhostClustering(11111, 30000)
                     .Configure<ClusterOptions>(options =>
                     {
                         options.ClusterId = "dev";

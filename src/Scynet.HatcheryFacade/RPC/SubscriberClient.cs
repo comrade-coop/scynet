@@ -10,13 +10,14 @@ using Google.Protobuf;
 using Grpc.Core;
 using Orleans;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Scynet.GrainInterfaces.Facade;
 using Scynet.GrainInterfaces.Registry;
 using Scynet.GrainInterfaces.Agent;
 
 namespace Scynet.HatcheryFacade.RPC
 {
-    public class SubscriberClient : IFacade
+    public class SubscriberClient : IFacade, IHostedService
     {
         private readonly ILogger _logger;
         private readonly IEnumerable<string> _brokers;
@@ -43,14 +44,22 @@ namespace Scynet.HatcheryFacade.RPC
 
             var registry = ClusterClient.GetGrain<IRegistry<Guid, FacadeInfo>>(0);
 
+            _logger.LogInformation("Registered!");
+            await registry.Register(FacadeGuid, new FacadeInfo()
+            {
+                Facade = facadeWrap,
+                LastUpdate = DateTime.Now,
+            });
+
             Timer = new Timer(async _ =>
             {
+                _logger.LogInformation("Registered!");
                 await registry.Register(FacadeGuid, new FacadeInfo()
                 {
                     Facade = facadeWrap,
                     LastUpdate = DateTime.Now,
                 });
-            }, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(30));
+            }, null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
         }
 
         public async void Start(IExternalAgent agent)
@@ -61,6 +70,16 @@ namespace Scynet.HatcheryFacade.RPC
         public async void Stop(IExternalAgent agent)
         {
             Unsubscribe(await agent.GetAddress(), agent.GetPrimaryKey().ToString());
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         public void Subscribe(string address, string agentId)
@@ -78,7 +97,7 @@ namespace Scynet.HatcheryFacade.RPC
 
             var client = new Subscriber.SubscriberClient(channels[address]);
             var token = cts.Token;
-            var producer = new Producer<string, byte[]>(new Handle());
+            var producer = new Producer<string, byte[]>(new ProducerConfig { BootstrapServers = string.Join(";", _brokers) });
             var subscriptionThread = new Thread(async () =>
             {
                 var subscriptionId = new Guid().ToString();
@@ -86,28 +105,39 @@ namespace Scynet.HatcheryFacade.RPC
                 while (true)
                 {
                     token.ThrowIfCancellationRequested();
-                    using (var pull = client.StreamingPull(
-                        new StreamingPullRequest() { Id = subscriptionId }, null, null, token
-                        ))
+                    try
                     {
-                        while (await pull.ResponseStream.MoveNext(token))
+                        using (var pull = client.StreamingPull(
+                            new StreamingPullRequest() { Id = subscriptionId }, null, null, token
+                            ))
                         {
-                            var message = pull.ResponseStream.Current.Message;
-
-                            await producer.ProduceAsync(agentId, new Message<string, byte[]>()
+                            while (await pull.ResponseStream.MoveNext(token))
                             {
-                                Key = message.PartitionKey,
-                                Value = message.Data.ToByteArray(),
-                                Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime),
-                            }, token);
+                                var message = pull.ResponseStream.Current.Message;
 
-                            await client.AcknowledgeAsync(new AcknowledgeRequest()
-                            {
-                                Id = subscriptionId,
-                                AcknowledgeMessage = message.Index,
-                                Partition = message.Partition,
-                            }, null, null, token);
+                                await producer.ProduceAsync(agentId, new Message<string, byte[]>()
+                                {
+                                    Key = message.PartitionKey,
+                                    Value = message.Data.ToByteArray(),
+                                    Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime),
+                                }, token);
+
+                                await client.AcknowledgeAsync(new AcknowledgeRequest()
+                                {
+                                    Id = subscriptionId,
+                                    AcknowledgeMessage = message.Index,
+                                    Partition = message.Partition,
+                                }, null, null, token);
+                            }
                         }
+                    }
+                    catch (RpcException re)
+                    {
+                        var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                        var agentInfo = await registry.Get(Guid.Parse(agentId));
+                        await agentInfo.Agent.ReleaseAll(); // :(
+                        _logger.LogError(re.ToString());
+                        return;
                     }
                 }
             });

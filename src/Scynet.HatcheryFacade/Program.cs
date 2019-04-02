@@ -32,7 +32,7 @@ namespace Scynet.HatcheryFacade
             Console.WriteLine("Configuring connection to local silo...");
 
             var builder = new ClientBuilder()
-                .UseLocalhostClustering()
+                .UseLocalhostClustering(30000)
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
@@ -59,6 +59,7 @@ namespace Scynet.HatcheryFacade
                     services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
                     services.AddSingleton<RPC.HatcheryFacade, RPC.HatcheryFacade>();
                     services.AddSingleton<SubscriberFacade, SubscriberFacade>();
+                    services.AddSingleton<IHostedService, SubscriberClient>();
                     services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
                     // TODO: Find a better way to indicate that these are brokers. OR
                     // TODO: Load brokers from appsettings.json

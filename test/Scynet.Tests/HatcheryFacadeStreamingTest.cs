@@ -16,7 +16,7 @@ namespace Scynet.Tests
     public class HatcheryFacadeStreamingTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly SubscriberFacade SubscriberFacade = new SubscriberFacade(new Logger<SubscriberFacade>(new LoggerFactory()), new List<string>() { "127.0.0.1:9092" });
+        private readonly SubscriberFacade SubscriberFacade = new SubscriberFacade(new Logger<SubscriberFacade>(new LoggerFactory()), new List<string>() { "127.0.0.1:9092" }, null);
         public HatcheryFacadeStreamingTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;

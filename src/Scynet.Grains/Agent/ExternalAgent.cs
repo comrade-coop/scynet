@@ -59,12 +59,13 @@ namespace Scynet.Grains.Agent
         {
             // TODO: This code is not reliable.
             var now = DateTime.Now;
-            var maxLatency = TimeSpan.FromMinutes(1.5);
+            // var maxLatency = TimeSpan.FromMinutes(1.5);
             var registry = GrainFactory.GetGrain<IRegistry<Guid, FacadeInfo>>(0);
             var activeFacades = (await registry.Query(l =>
                 from i in l
-                where (now - i.Value.LastUpdate) < maxLatency
+                    // where (now - i.Value.LastUpdate) < maxLatency
                 select i.Value.Facade)).ToList();
+            Logger.LogInformation($"Found {activeFacades.Count()} facades");
             State.Facade = activeFacades[(new Random()).Next(activeFacades.Count())];
 
             State.Facade.Start(this); // <- can't await this
