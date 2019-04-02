@@ -28,18 +28,16 @@ namespace Scynet.HatcheryFacade.Controllers
         {
             // HACK: testing code below
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await registry.Register(Guid.Empty, new AgentInfo { });
-            await registry.Register(Guid.NewGuid(), new AgentInfo { });
-            await registry.Register(Guid.NewGuid(), new AgentInfo { });
+            //await registry.Register(Guid.Empty, new AgentInfo { });
+            //await registry.Register(Guid.NewGuid(), new AgentInfo { });
+            //await registry.Register(Guid.NewGuid(), new AgentInfo { });
 
             var res = await registry.Query(x =>
                 from y in x
-                where y.Key == Guid.Empty
                 select y);
-            Console.WriteLine("----------");
-            Console.WriteLine(String.Join('|', from x in res select x.Key));
-            Console.WriteLine(res.GetType());
-            return new string[] { "value1", "value2" };
+
+
+            return res.Select(pair => pair.Key.ToString()).ToArray();
         }
 
         // HACK: Needed for testing
@@ -74,13 +72,13 @@ namespace Scynet.HatcheryFacade.Controllers
         }
 
         // GET api/values/xxx
-        [Route("Engage")]
-        public async Task<ActionResult<string>> Engage()
+        [Route("Engage/{uuid}")]
+        public async Task<ActionResult<string>> Engage(string uuid)
         {
             // HACK: testing code below
             var test = new TestEngager();
             var testWrap = await ClusterClient.CreateObjectReference<IEngager>(test);
-            var id = Guid.Parse("253717bf-34b4-43fc-8129-4c68a6bbe1fe");
+            var id = Guid.Parse(uuid);
             //var x = ClusterClient.GetGrain<IAgent>(id, "Scynet.Grains.ComponentAgent");
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agentInfo = await registry.Get(id);
