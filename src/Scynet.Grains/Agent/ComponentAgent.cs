@@ -64,8 +64,28 @@ namespace Scynet.Grains.Agent
         {
             if (Channel == null)
             {
+                
                 var component = GrainFactory.GetGrain<IComponent>(State.Info.ComponentId);
                 var address = await component.GetAddress();
+                Channel = new Channel(address, ChannelCredentials.Insecure);
+            }else if (Channel.State == ChannelState.TransientFailure || Channel.State == ChannelState.Shutdown)
+            {
+                await Channel.ShutdownAsync();
+                // TODO: Remove when needed, and don't just choose the first one.
+                var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
+                var res = await registry.Query(components =>
+                    from component in components
+                    where component.Value.RunnerTypes.Contains(State.Info.RunnerType)
+                    select component);
+
+                var address = await GrainFactory.GetGrain<IComponent>(res.First().Key).GetAddress();
+
+                var agent_registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                State.Info.ComponentId = res.First().Key;
+                await base.WriteStateAsync();
+
+                await agent_registry.Register(this.GetPrimaryKey(), State.Info);
+
                 Channel = new Channel(address, ChannelCredentials.Insecure);
             }
             return Channel;
