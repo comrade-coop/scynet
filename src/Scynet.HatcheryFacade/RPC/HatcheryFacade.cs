@@ -78,7 +78,8 @@ namespace Scynet.HatcheryFacade.RPC
         {
             var id = Guid.Parse(request.Agent.Uuid);
 
-            var agent = ClusterClient.GetGrain<IComponentAgent>(id);
+            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            var agent = (await registry.Get(id)).Agent;
             await agent.ReleaseAll();
 
             return new Void();

@@ -16,5 +16,10 @@ namespace Scynet.GrainInterfaces.Agent
         {
 
         }
+
+        public bool IsExternal()
+        {
+            return ComponentId == Guid.Empty;
+        }
     }
 }

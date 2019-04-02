@@ -13,7 +13,7 @@ namespace Scynet.Grains.Agent
 {
     public class ComponentAgentState : AgentState
     {
-        public AgentInfo Info = new AgentInfo();
+        public AgentInfo Info;
         public byte[] Data = { };
         public List<IAgent> Inputs;
     }

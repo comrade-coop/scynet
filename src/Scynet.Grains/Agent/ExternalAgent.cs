@@ -1,17 +1,20 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Registry;
+using Scynet.GrainInterfaces.Facade;
 
 namespace Scynet.Grains.Agent
 {
     public class ExternalAgentState : AgentState
     {
-        public AgentInfo Info = new AgentInfo();
+        public AgentInfo Info;
         public string Address;
+        public IFacade Facade;
     }
 
     public class ExternalAgent : Agent<ExternalAgentState>, IExternalAgent
@@ -24,15 +27,25 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
-        public async Task Initialize(string address)
+        public async Task Initialize(AgentInfo info, string address)
         {
-            // TODO: Fill State.Info
+            if (State.Running)
+            {
+                await Stop();
+            }
+
             State.Address = address;
+            State.Info = info;
 
             var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             await registry.Register(this.GetPrimaryKey(), State.Info);
 
             await base.WriteStateAsync();
+
+            if (State.Running)
+            {
+                await Start();
+            }
         }
 
         /// <inheritdoc/>
@@ -42,15 +55,30 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
-        public override Task Start()
+        public override async Task Start()
         {
-            return Task.FromException(new NotImplementedException());
+            // TODO: This code is not reliable.
+            var now = DateTime.Now;
+            var maxLatency = TimeSpan.FromMinutes(1.5);
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, FacadeInfo>>(0);
+            var activeFacades = (await registry.Query(l =>
+                from i in l
+                where (now - i.Value.LastUpdate) < maxLatency
+                select i.Value.Facade)).ToList();
+            State.Facade = activeFacades[(new Random()).Next(activeFacades.Count())];
+
+            State.Facade.Start(this); // <- can't await this
+
+            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>
-        public override Task Stop()
+        public override async Task Stop()
         {
-            return Task.FromException(new NotImplementedException());
+            State.Facade?.Stop(this);
+            State.Facade = null;
+
+            await base.WriteStateAsync();
         }
     }
 }

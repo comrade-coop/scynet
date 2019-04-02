@@ -29,11 +29,6 @@ namespace Scynet.HatcheryFacade.RPC
             {
                 await producer.ProduceAsync(request.AgentId, new Message<string, byte[]>() { Key = message.PartitionKey, Value = message.Data.ToByteArray(), Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime) }, context.CancellationToken);
             }
-
-
-
-
-
             return new PublishResponse() { };
         }
     }

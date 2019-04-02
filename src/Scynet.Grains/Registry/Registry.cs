@@ -95,4 +95,8 @@ namespace Scynet.Grains.Registry
     {
         public ComponentRegistry(ILogger<ComponentRegistry> logger) : base(logger) { }
     }
+    public class FacadeRegistry : Registry<Guid, GrainInterfaces.Facade.FacadeInfo>
+    {
+        public FacadeRegistry(ILogger<FacadeRegistry> logger) : base(logger) { }
+    }
 }

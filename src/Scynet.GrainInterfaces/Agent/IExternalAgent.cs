@@ -11,7 +11,7 @@ namespace Scynet.GrainInterfaces.Agent
         /// <summary>
         /// Initialize the agent
         /// </summary>
-        Task Initialize(String address);
+        Task Initialize(AgentInfo info, String address);
 
         /// <summary>
         /// Get the component of the agent
