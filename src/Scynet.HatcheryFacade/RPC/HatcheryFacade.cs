@@ -69,7 +69,7 @@ namespace Scynet.HatcheryFacade.RPC
                 where kv.Value.ComponentId == id
                 select kv.Key);
 
-            await Task.WhenAll(agents.Select(agent => ClusterClient.GetGrain<IAgent>(agent).ReleaseAll()));
+            await Task.WhenAll(agents.Select(agent => ClusterClient.GetGrain<IComponentAgent>(agent).ReleaseAll()));
 
             return new Void();
         }
