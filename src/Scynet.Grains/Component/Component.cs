@@ -45,10 +45,15 @@ namespace Scynet.Grains.Component
             return Task.FromResult(State.Address);
         }
 
-        public Task Disconnect()
+        public async Task Disconnect()
         {
             State.Address = "";
-            return base.WriteStateAsync();
+            var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
+
+            // TODO: We should have a delete operation.
+            await registry.Register(this.GetPrimaryKey(), new ComponentInfo() { RunnerTypes = new HashSet<string>() });
+
+            await base.WriteStateAsync();
         }
 
         public async Task RegisterInput(IAgent agent)
