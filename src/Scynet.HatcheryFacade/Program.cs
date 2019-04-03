@@ -54,8 +54,13 @@ namespace Scynet.HatcheryFacade
         {
 
             return WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                })
                 .ConfigureServices(services =>
                 {
+                    
                     services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
                     services.AddSingleton<RPC.HatcheryFacade, RPC.HatcheryFacade>();
                     services.AddSingleton<SubscriberFacade, SubscriberFacade>();

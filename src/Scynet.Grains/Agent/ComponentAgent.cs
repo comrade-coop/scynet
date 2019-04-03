@@ -60,34 +60,48 @@ namespace Scynet.Grains.Agent
             return Task.FromResult((IEnumerable<IAgent>)State.Inputs);
         }
 
+        
+
         private async Task<Channel> GetChannel()
         {
+            if (Channel != null)
+            {
+                // If the connections is dead we should try to reconnect.
+                if (Channel.State == ChannelState.TransientFailure || Channel.State == ChannelState.Shutdown)
+                {
+                    Channel = null;
+                }
+            }
+
             if (Channel == null)
             {
-                
+
                 var component = GrainFactory.GetGrain<IComponent>(State.Info.ComponentId);
                 var address = await component.GetAddress();
-                Channel = new Channel(address, ChannelCredentials.Insecure);
-            }else if (Channel.State == ChannelState.TransientFailure || Channel.State == ChannelState.Shutdown)
-            {
-                await Channel.ShutdownAsync();
-                // TODO: Remove when needed, and don't just choose the first one.
-                var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
-                var res = await registry.Query(components =>
-                    from component in components
-                    where component.Value.RunnerTypes.Contains(State.Info.RunnerType)
-                    select component);
 
-                var address = await GrainFactory.GetGrain<IComponent>(res.First().Key).GetAddress();
+                if (String.IsNullOrEmpty(address))
+                {
+                    await Channel.ShutdownAsync();
+                    // TODO: Remove when needed, and don't just choose the first one.
+                    var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
+                    var res = await registry.Query(components =>
+                        from c in components
+                        where c.Value.RunnerTypes.Contains(State.Info.RunnerType)
+                        select c);
 
-                var agent_registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-                State.Info.ComponentId = res.First().Key;
-                await base.WriteStateAsync();
+                    address = await GrainFactory.GetGrain<IComponent>(res.First().Key).GetAddress();
 
-                await agent_registry.Register(this.GetPrimaryKey(), State.Info);
+                    var agentRegistry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                    State.Info.ComponentId = res.First().Key;
+                    await base.WriteStateAsync();
+
+                    await agentRegistry.Register(this.GetPrimaryKey(), State.Info);
+                }
 
                 Channel = new Channel(address, ChannelCredentials.Insecure);
             }
+
+
             return Channel;
         }
 
@@ -127,6 +141,8 @@ namespace Scynet.Grains.Agent
                 Uuid = this.GetPrimaryKey().ToString()
             });
 
+            Channel = null;
+            
             await Task.WhenAll(State.Inputs.Select(input => input.Release(this)));
         }
     }
