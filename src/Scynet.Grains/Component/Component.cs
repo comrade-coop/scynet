@@ -49,7 +49,7 @@ namespace Scynet.Grains.Component
         {
             State.Address = "";
             var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
-
+            State.Info.RunnerTypes.Clear();
             // TODO: We should have a delete operation.
             await registry.Register(this.GetPrimaryKey(), new ComponentInfo() { RunnerTypes = new HashSet<string>() });
 
