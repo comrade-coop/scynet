@@ -60,7 +60,7 @@ namespace Scynet.HatcheryFacade
                 })
                 .ConfigureServices(services =>
                 {
-                    
+
                     services.AddSingleton<IClusterClient>(sp => ConnectClient().Result);
                     services.AddSingleton<RPC.HatcheryFacade, RPC.HatcheryFacade>();
                     services.AddSingleton<SubscriberFacade, SubscriberFacade>();

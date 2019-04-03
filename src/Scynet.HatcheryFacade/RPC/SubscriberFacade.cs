@@ -97,7 +97,7 @@ namespace Scynet.HatcheryFacade.RPC
             _logger = logger;
             _brokers = brokers;
             _clusterClient = clusterClient;
-        
+
         }
 
         public override Task<SubscriptionResponse> Subscribe(SubscriptionRequest request, ServerCallContext context)

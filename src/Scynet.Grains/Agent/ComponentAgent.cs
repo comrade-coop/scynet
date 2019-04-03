@@ -60,17 +60,13 @@ namespace Scynet.Grains.Agent
             return Task.FromResult((IEnumerable<IAgent>)State.Inputs);
         }
 
-        
+
 
         private async Task<Channel> GetChannel()
         {
-            if (Channel != null)
+            if (Channel != null && (Channel.State == ChannelState.TransientFailure || Channel.State == ChannelState.Shutdown))
             {
-                // If the connections is dead we should try to reconnect.
-                if (Channel.State == ChannelState.TransientFailure || Channel.State == ChannelState.Shutdown)
-                {
-                    Channel = null;
-                }
+                Channel = null;
             }
 
             if (Channel == null)
@@ -79,20 +75,20 @@ namespace Scynet.Grains.Agent
                 var component = GrainFactory.GetGrain<IComponent>(State.Info.ComponentId);
                 var address = await component.GetAddress();
 
-                if (String.IsNullOrEmpty(address))
+                if (string.IsNullOrEmpty(address))
                 {
                     await Channel.ShutdownAsync();
                     // TODO: Remove when needed, and don't just choose the first one.
                     var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
-                    var res = await registry.Query(components =>
+                    var viable = await registry.Query(components =>
                         from c in components
                         where c.Value.RunnerTypes.Contains(State.Info.RunnerType)
                         select c);
 
-                    address = await GrainFactory.GetGrain<IComponent>(res.First().Key).GetAddress();
+                    address = await GrainFactory.GetGrain<IComponent>(viable.First().Key).GetAddress();
 
                     var agentRegistry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-                    State.Info.ComponentId = res.First().Key;
+                    State.Info.ComponentId = viable.First().Key;
                     await base.WriteStateAsync();
 
                     await agentRegistry.Register(this.GetPrimaryKey(), State.Info);
@@ -142,7 +138,7 @@ namespace Scynet.Grains.Agent
             });
 
             Channel = null;
-            
+
             await Task.WhenAll(State.Inputs.Select(input => input.Release(this)));
         }
     }
