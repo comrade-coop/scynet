@@ -82,66 +82,58 @@ namespace Scynet.HatcheryFacade.RPC
             return Task.CompletedTask;
         }
 
-        public void Subscribe(string address, string agentId)
+        public async void Subscribe(string address, string agentId)
         {
             if (cancellationTokens.ContainsKey(address + "/" + agentId))
             {
                 return;
             }
+
+            var cts = new CancellationTokenSource();
+            cancellationTokens[address + "/" + agentId] = cts;
+
             if (!channels.ContainsKey(address))
             {
                 channels[address] = new Channel(address, ChannelCredentials.Insecure);
             }
-            var cts = new CancellationTokenSource();
-            cancellationTokens[address + "/" + agentId] = cts;
 
             var client = new Subscriber.SubscriberClient(channels[address]);
-            var token = cts.Token;
             var producer = new Producer<string, byte[]>(new ProducerConfig { BootstrapServers = string.Join(";", _brokers) });
-            var subscriptionThread = new Thread(async () =>
+
+            var subscriptionId = Guid.NewGuid().ToString();
+
+            try
             {
-                var subscriptionId = new Guid().ToString();
+                await client.SubscribeAsync(new SubscriptionRequest() { Id = subscriptionId, AgetnId = agentId, BufferSize = 32 }, null, null, cts.Token);
 
                 while (true)
                 {
-                    token.ThrowIfCancellationRequested();
-                    try
+                    Console.WriteLine("Well, well, here we go!");
+                    cts.Token.ThrowIfCancellationRequested();
+                    using (var pull = client.StreamingPull(new StreamingPullRequest() { Id = subscriptionId }))
                     {
-                        using (var pull = client.StreamingPull(
-                            new StreamingPullRequest() { Id = subscriptionId }, null, null, token
-                            ))
+                        while (await pull.ResponseStream.MoveNext(cts.Token))
                         {
-                            while (await pull.ResponseStream.MoveNext(token))
+                            var message = pull.ResponseStream.Current.Message;
+
+                            await producer.ProduceAsync(agentId, new Message<string, byte[]>()
                             {
-                                var message = pull.ResponseStream.Current.Message;
-
-                                await producer.ProduceAsync(agentId, new Message<string, byte[]>()
-                                {
-                                    Key = message.PartitionKey,
-                                    Value = message.Data.ToByteArray(),
-                                    Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime),
-                                }, token);
-
-                                await client.AcknowledgeAsync(new AcknowledgeRequest()
-                                {
-                                    Id = subscriptionId,
-                                    AcknowledgeMessage = message.Index,
-                                    Partition = message.Partition,
-                                }, null, null, token);
-                            }
+                                Key = message.PartitionKey,
+                                Value = message.Data.ToByteArray(),
+                                Timestamp = new Timestamp((long)message.Key, TimestampType.CreateTime),
+                            }, cts.Token);
                         }
                     }
-                    catch (RpcException re)
-                    {
-                        var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-                        var agentInfo = await registry.Get(Guid.Parse(agentId));
-                        await agentInfo.Agent.ReleaseAll(); // :(
-                        _logger.LogError(re.ToString());
-                        return;
-                    }
                 }
-            });
-            subscriptionThread.Start();
+            }
+            catch (RpcException re)
+            {
+                var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                var agentInfo = await registry.Get(Guid.Parse(agentId));
+                await agentInfo.Agent.ReleaseAll(); // :(
+                _logger.LogError(re.ToString());
+                return;
+            }
         }
 
         public void Unsubscribe(string address, string agentId)

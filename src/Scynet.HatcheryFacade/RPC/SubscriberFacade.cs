@@ -61,10 +61,18 @@ namespace Scynet.HatcheryFacade.RPC
 
             if (clusterClient != null)
             {
-                var thisWrap = await clusterClient.CreateObjectReference<IEngager>(this);
-                var registry = clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-                var agentInfo = await registry.Get(Guid.Parse(AgentId));
-                await agentInfo.Agent.Engage(thisWrap);
+                try
+                {
+                    var thisWrap = await clusterClient.CreateObjectReference<IEngager>(this);
+                    var registry = clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                    var agentInfo = await registry.Get(Guid.Parse(AgentId));
+                    await agentInfo.Agent.Engage(thisWrap);
+                }
+                catch (Exception)
+                {
+                    Status = SubscriptionStatus.Errored;
+                    // Happens..
+                }
             }
 
             Status = SubscriptionStatus.Running;
@@ -176,68 +184,83 @@ namespace Scynet.HatcheryFacade.RPC
             {
                 SortedList<long, ConsumeResult<string, byte[]>> toBeSend = new SortedList<long, ConsumeResult<string, byte[]>>((int)subscription.BufferSize);
                 long lastTimestamp = 0;
-                while (!context.CancellationToken.IsCancellationRequested) // The code here won't work if the send data is wrong.
+                try
                 {
-                    var consumeResult = subscription.Consumer.Consume(context.CancellationToken);
-                    if (consumeResult == null)
+                    while (true) // The code here won't work if the send data is wrong.
                     {
-                        continue;
-                    }
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        var consumeResult = subscription.Consumer.Consume(context.CancellationToken);
+                        if (consumeResult == null) continue;
 
-                    if (consumeResult.Headers.TryGetLast("previous", out var previous))
-                    {
-                        if (long.TryParse(Encoding.ASCII.GetString(previous), out var previousTimestamp))
+                        if (consumeResult.Headers.TryGetLast("previous", out var previous))
                         {
-                            if (previousTimestamp == lastTimestamp)
+                            if (long.TryParse(Encoding.ASCII.GetString(previous), out var previousTimestamp))
                             {
-                                toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                            }
-                            else if (previousTimestamp < lastTimestamp)
-                            {
-                                toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                                continue;
-                            }
-                            else
-                            {
-                                _logger.LogError("This should not be possible");
+                                if (previousTimestamp == lastTimestamp)
+                                {
+                                    toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
+                                }
+                                else if (previousTimestamp < lastTimestamp)
+                                {
+                                    toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
+                                    continue;
+                                }
+                                else
+                                {
+                                    _logger.LogError("This should not be possible");
+                                }
                             }
                         }
-                    }
 
-                    foreach (var (key, result) in toBeSend)
-                    {
-                        subscription.Buffer.Post(new DataMessage()
+                        foreach (var (key, result) in toBeSend)
                         {
-                            Data = ByteString.CopyFrom(result.Value,
-                                0,
-                                result.Value.Length),
-                            Index = result.Offset.Value.ToString(),
-                            Key = (uint)result.Timestamp.UnixTimestampMs,
-                            Partition = (uint)result.Partition.Value,
-                            PartitionKey = result.Key,
-                            Redelivary = false
-                        });
+                            subscription.Buffer.Post(new DataMessage()
+                            {
+                                Data = ByteString.CopyFrom(result.Value,
+                                    0,
+                                    result.Value.Length),
+                                Index = result.Offset.Value.ToString(),
+                                Key = (uint)result.Timestamp.UnixTimestampMs,
+                                Partition = (uint)result.Partition.Value,
+                                PartitionKey = result.Key,
+                                Redelivary = false
+                            });
 
-                        lastTimestamp = result.Timestamp.UnixTimestampMs;
+                            lastTimestamp = result.Timestamp.UnixTimestampMs;
+                        }
+
+                        toBeSend.Clear();
+
+
                     }
-
-                    toBeSend.Clear();
-
-
                 }
-
+                catch (OperationCanceledException) { }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.ToString());
+                }
                 subscription.Buffer.Complete();
+
             });
             subscription.SubscriberThread.Start();
 
-            while (subscription.Buffer.Completion.IsCompleted)
+            while (!subscription.Buffer.Completion.IsCompleted)
             {
                 if (subscription.Status == InternalSubscription.SubscriptionStatus.Errored)
                 {
                     throw new RpcException(Status.DefaultCancelled, "Subscribed agent failed!");
                 }
                 var message = await subscription.Buffer.ReceiveAsync();
+
                 await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
+
+                subscription.Consumer.Commit(new List<TopicPartitionOffset>()
+                {
+                    new TopicPartitionOffset(
+                        new TopicPartition(request.Id, new Partition((int) message.Partition)),
+                        new Offset(Int32.Parse(message.Index))
+                    )
+                });
             }
         }
     }
