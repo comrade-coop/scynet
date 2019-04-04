@@ -36,12 +36,12 @@ namespace Scynet.HatcheryFacade.Controllers
             //await registry.Register(Guid.NewGuid(), new AgentInfo { });
 
             var agentGroup = await registry.Query(agents =>
-                from agent in agents
+                (from agent in agents
                 group agent by agent.Value.RunnerType into category
-                select Tuple.Create(category.Key, category.ToList()));
+                select Tuple.Create(category.Key, category.ToList()))
+                .ToDictionary(category => category.Item1, category => category.Item2));
 
-
-            return agentGroup.ToDictionary(category => category.Item1, category => category.Item2);
+            return agentGroup;
         }
 
         // HACK: Needed for testing
