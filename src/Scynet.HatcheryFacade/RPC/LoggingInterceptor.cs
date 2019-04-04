@@ -17,6 +17,7 @@ namespace Scynet.HatcheryFacade.RPC
         public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(TRequest request,
             ClientInterceptorContext<TRequest, TResponse> context, AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
         {
+            _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}");
             try
             {
                 return continuation(request, context);
@@ -35,20 +36,6 @@ namespace Scynet.HatcheryFacade.RPC
             try
             {
                 return await continuation(request, context);
-            }
-            catch (Exception err)
-            {
-                _logger.LogError(err.ToString());
-                throw;
-            }
-        }
-
-        public override async Task ServerStreamingServerHandler<TRequest, TResponse>(TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context, ServerStreamingServerMethod<TRequest, TResponse> continuation)
-        {
-            _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}, Peer: {context.Peer}, Status: {context.Deadline}");
-            try
-            {
-                await continuation(request, responseStream, context);
             }
             catch (Exception err)
             {

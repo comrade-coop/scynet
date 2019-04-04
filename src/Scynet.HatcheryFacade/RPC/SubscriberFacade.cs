@@ -87,7 +87,7 @@ namespace Scynet.HatcheryFacade.RPC
             Status = SubscriptionStatus.Errored;
         }
 
-        public bool HasAccess()
+        public bool HasAccess(string type)
         {
             // TODO: example implementation that is used to show how we can check if the person did buy the stream.
             if (Id == "test")
@@ -136,8 +136,6 @@ namespace Scynet.HatcheryFacade.RPC
             _logger = logger;
             _clusterClient = clusterClient;
             _configuration = configuration;
-
-
         }
 
         public override Task<SubscriptionResponse> Subscribe(SubscriptionRequest request, ServerCallContext context)
@@ -155,7 +153,7 @@ namespace Scynet.HatcheryFacade.RPC
                     break;
             }
 
-            if (subscription.HasAccess())
+            if (subscription.HasAccess("subscribe"))
             {
                 subscriptions.Add(request.Id, subscription);
                 subscription.Start(_clusterClient);
@@ -236,55 +234,50 @@ namespace Scynet.HatcheryFacade.RPC
                         {
                             if (long.TryParse(Encoding.ASCII.GetString(previous), out var previousTimestamp))
                             {
-                                if (previousTimestamp == lastTimestamp)
+                                if (previousTimestamp <= lastTimestamp)
                                 {
                                     toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                                }
-                                else if (previousTimestamp < lastTimestamp)
-                                {
-                                    toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                                    continue;
                                 }
                                 else
                                 {
                                     _logger.LogError("This should not be possible");
                                 }
+
+                                if (previousTimestamp < lastTimestamp)
+                                {
+                                    continue;
+                                }
                             }
                         }
-                    
-                    else
-                    {
-                        toBeSend.Add(0, consumeResult);
-                    }
-
-                    foreach (var (key, result) in toBeSend)
-                    {
-                        var message = new DataMessage
+                        else
                         {
-                            Data = ByteString.CopyFrom(result.Value,
-                                0,
-                                result.Value.Length),
-                            Index = result.Offset.Value.ToString(),
-                            Key = (uint)result.Timestamp.UnixTimestampMs,
-                            Partition = (uint)result.Partition.Value,
-                            Redelivary = false
-                        };
-
-                        if (!string.IsNullOrEmpty(result.Key))
-                        {
-                            message.PartitionKey = result.Key;
-
+                            toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
                         }
 
+                        foreach (var (key, result) in toBeSend)
+                        {
+                            var message = new DataMessage
+                            {
+                                Data = ByteString.CopyFrom(result.Value,
+                                    0,
+                                    result.Value.Length),
+                                Index = result.Offset.Value.ToString(),
+                                Key = (uint)result.Timestamp.UnixTimestampMs,
+                                Partition = (uint)result.Partition.Value,
+                                Redelivary = false
+                            };
 
-                        subscription.Buffer.Post(message);
+                            if (!string.IsNullOrEmpty(result.Key))
+                            {
+                                message.PartitionKey = result.Key;
+                            }
 
-                        lastTimestamp = result.Timestamp.UnixTimestampMs;
-                    }
+                            subscription.Buffer.Post(message);
+
+                            lastTimestamp = result.Timestamp.UnixTimestampMs;
+                        }
 
                         toBeSend.Clear();
-
-
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -304,8 +297,7 @@ namespace Scynet.HatcheryFacade.RPC
                     throw new RpcException(Status.DefaultCancelled, "Subscribed agent failed!");
                 }
                 var message = await subscription.Buffer.ReceiveAsync();
-
-                if (subscription.HasAccess())
+                if (subscription.HasAccess("message"))
                 {
                     await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
 
