@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
+using Scynet.HatcheryFacade.SignalRNotifications;
 using ILogger = Grpc.Core.Logging.ILogger;
 
 namespace Scynet.HatcheryFacade.Controllers
@@ -18,11 +20,14 @@ namespace Scynet.HatcheryFacade.Controllers
     {
         private readonly IClusterClient ClusterClient;
         private readonly ILogger<AgentsController> _logger;
+        private IHubContext<NotifyHub, IHubClient> _hubContext;
 
-        public AgentsController(IClusterClient clusterClient, ILogger<AgentsController> logger)
+        public AgentsController(IClusterClient clusterClient, ILogger<AgentsController> logger,
+            IHubContext<NotifyHub, IHubClient> hubContext)
         {
             ClusterClient = clusterClient;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         // GET api/agents
@@ -90,6 +95,23 @@ namespace Scynet.HatcheryFacade.Controllers
             await agentInfo.Agent.Engage(testWrap);
             var engagements = await agentInfo.Agent.GetActiveEngagements();
             return $"Engagement completed";
+        }
+
+        // GET api/agents/signalr/{uuid}
+        [Route("signalr/{uuid}")]
+        public string SignalR(string uuid)
+        {
+            string retMessage = string.Empty;
+            try
+            {
+                _hubContext.Clients.All.BroadcastMessage("Test", uuid);
+                retMessage = "Success";
+            }
+            catch (Exception e)
+            {
+                retMessage = e.ToString();
+            }
+            return retMessage;
         }
 
         // POST api/values
