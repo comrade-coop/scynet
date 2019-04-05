@@ -3,28 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Orleans;
 using Scynet.GrainInterfaces.Agent;
 using Scynet.GrainInterfaces.Component;
 using Scynet.GrainInterfaces.Registry;
+using ILogger = Grpc.Core.Logging.ILogger;
 
 namespace Scynet.HatcheryFacade.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class AgentsController : ControllerBase
     {
-        private IClusterClient ClusterClient;
+        private readonly IClusterClient ClusterClient;
+        private readonly ILogger<AgentsController> _logger;
 
-        public ValuesController(IClusterClient clusterClient)
+        public AgentsController(IClusterClient clusterClient, ILogger<AgentsController> logger)
         {
             ClusterClient = clusterClient;
-            Console.WriteLine(clusterClient);
+            _logger = logger;
         }
 
-        // GET api/values
+        // GET api/agents
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<string>>> Get()
+        public async Task<ActionResult<IDictionary<string, List<KeyValuePair<Guid, AgentInfo>>>>> Get()
         {
             // HACK: testing code below
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
@@ -32,12 +35,13 @@ namespace Scynet.HatcheryFacade.Controllers
             //await registry.Register(Guid.NewGuid(), new AgentInfo { });
             //await registry.Register(Guid.NewGuid(), new AgentInfo { });
 
-            var res = await registry.Query(x =>
-                from y in x
-                select y);
+            var agentGroup = await registry.Query(agents =>
+                (from agent in agents
+                group agent by agent.Value.RunnerType into category
+                select Tuple.Create(category.Key, category.ToList()))
+                .ToDictionary(category => category.Item1, category => category.Item2));
 
-
-            return res.Select(pair => pair.Key.ToString()).ToArray();
+            return agentGroup;
         }
 
         // HACK: Needed for testing
@@ -58,7 +62,7 @@ namespace Scynet.HatcheryFacade.Controllers
             }
         };
 
-        // GET api/values/5
+        // GET api/agents/5
         [HttpGet("{id}")]
         public async Task<string> Get(int id)
         {
@@ -71,8 +75,8 @@ namespace Scynet.HatcheryFacade.Controllers
             return "value";
         }
 
-        // GET api/values/xxx
-        [Route("Engage/{uuid}")]
+        // GET api/agents/engage/{uuid}
+        [Route("engage/{uuid}")]
         public async Task<ActionResult<string>> Engage(string uuid)
         {
             // HACK: testing code below
@@ -85,7 +89,7 @@ namespace Scynet.HatcheryFacade.Controllers
             var engagements2 = await agentInfo.Agent.GetActiveEngagements();
             await agentInfo.Agent.Engage(testWrap);
             var engagements = await agentInfo.Agent.GetActiveEngagements();
-            return "engagement completed";
+            return $"Engagement completed";
         }
 
         // POST api/values

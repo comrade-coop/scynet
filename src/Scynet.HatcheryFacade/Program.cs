@@ -56,7 +56,12 @@ namespace Scynet.HatcheryFacade
             return WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                    //config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                })
+                .ConfigureLogging((hostingContext, builder) =>
+                {
+                    builder.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    builder.AddConsole();
                 })
                 .ConfigureServices(services =>
                 {
@@ -68,7 +73,6 @@ namespace Scynet.HatcheryFacade
                     services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
                     // TODO: Find a better way to indicate that these are brokers. OR
                     // TODO: Load brokers from appsettings.json
-                    services.AddSingleton<IEnumerable<string>>(sp => new List<string>() { "127.0.0.1:9092" });
                     services.AddSingleton<IEnumerable<Server>>(sp =>
                     {
                         var hatcheryService = Hatchery.BindService(sp.GetService<RPC.HatcheryFacade>());
@@ -89,6 +93,7 @@ namespace Scynet.HatcheryFacade
                     });
                     services.AddSingleton<IHostedService, GrpcBackgroundService>();
                 })
+
                 .UseStartup<Startup>();
         }
     }

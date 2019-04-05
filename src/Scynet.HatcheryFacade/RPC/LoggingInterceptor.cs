@@ -14,12 +14,13 @@ namespace Scynet.HatcheryFacade.RPC
         private readonly ILogger<LoggingInterceptor> _logger;
         public LoggingInterceptor(ILogger<LoggingInterceptor> logger) => _logger = logger;
 
-        public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
+        public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(TRequest request,
+            ClientInterceptorContext<TRequest, TResponse> context, AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
         {
-            _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}, Peer: {context.Peer}, Status: {context.Deadline}");
+            _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}");
             try
             {
-                return await continuation(request, context);
+                return continuation(request, context);
             }
             catch (Exception err)
             {
@@ -28,12 +29,13 @@ namespace Scynet.HatcheryFacade.RPC
             }
         }
 
-        public override async Task ServerStreamingServerHandler<TRequest, TResponse>(TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context, ServerStreamingServerMethod<TRequest, TResponse> continuation)
+
+        public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
             _logger.LogDebug($"Called from: {context.Host}, Method: {context.Method}, Peer: {context.Peer}, Status: {context.Deadline}");
             try
             {
-                await continuation(request, responseStream, context);
+                return await continuation(request, context);
             }
             catch (Exception err)
             {

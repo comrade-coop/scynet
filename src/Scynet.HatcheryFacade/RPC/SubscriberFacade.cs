@@ -9,6 +9,7 @@ using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Configuration;
 using Orleans;
 using Microsoft.Extensions.Logging;
 using Scynet.GrainInterfaces.Agent;
@@ -21,30 +22,33 @@ namespace Scynet.HatcheryFacade.RPC
         public enum SubscriptionStatus : byte { Pending, Running, Errored };
         public Thread SubscriberThread { get; set; }
         public Consumer<string, byte[]> Consumer { get; set; }
-        public string AgentId
+        public string Id
         {
             get => _config.GroupId;
             set => _config.GroupId = value;
         }
+
+        public string AgentId { get; set; }
         public uint BufferSize { get; }
         public SubscriptionStatus Status { get; private set; } = SubscriptionStatus.Pending;
 
         public BufferBlock<DataMessage> Buffer;
 
-        private readonly ConsumerConfig _config = new ConsumerConfig
-        {
-            EnableAutoCommit = false,
-            AutoOffsetReset = AutoOffsetResetType.Earliest
-        };
+        private readonly ConsumerConfig _config;
+        private Dictionary<String, String> AccessTracking = new Dictionary<string, string>();
 
-        public InternalSubscription(string agentId, IEnumerable<string> brokers, uint bufferSize)
+        public InternalSubscription(string id, IConfiguration config, uint bufferSize)
         {
             BufferSize = bufferSize;
-            AgentId = agentId;
+            _config = new ConsumerConfig();
+            this.Id = id;
 
-            _config.BootstrapServers = brokers.Aggregate((previous, current) => previous + "," + current);
+            config.GetSection("ConsumerConfig").Bind(_config);
+
+            _config.EnableAutoCommit = false;
+            _config.AutoOffsetReset = AutoOffsetResetType.Earliest;
+
             Buffer = new BufferBlock<DataMessage>(new DataflowBlockOptions()); // Do I need the buffer size??
-
         }
 
         public async void Start(IClusterClient clusterClient)
@@ -83,6 +87,34 @@ namespace Scynet.HatcheryFacade.RPC
             Status = SubscriptionStatus.Errored;
         }
 
+        public bool HasAccess(string type)
+        {
+            // TODO: example implementation that is used to show how we can check if the person did buy the stream.
+            if (Id == "test")
+            {
+                if (AccessTracking.ContainsKey("Count"))
+                {
+                    if (int.Parse(AccessTracking["Count"]) == 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    AccessTracking["Count"] = "2";
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public void Dispose()
         {
             Consumer?.Dispose();
@@ -94,24 +126,22 @@ namespace Scynet.HatcheryFacade.RPC
     public class SubscriberFacade : Subscriber.SubscriberBase
     {
         private readonly ILogger _logger;
-        private readonly IEnumerable<string> _brokers;
+
         private readonly IClusterClient _clusterClient;
+        private readonly IConfiguration _configuration;
         private Dictionary<String, InternalSubscription> subscriptions = new Dictionary<string, InternalSubscription>();
 
-
-
-        public SubscriberFacade(ILogger<SubscriberFacade> logger, IEnumerable<String> brokers, IClusterClient clusterClient)
+        public SubscriberFacade(ILogger<SubscriberFacade> logger, IClusterClient clusterClient, IConfiguration configuration)
         {
             _logger = logger;
-            _brokers = brokers;
             _clusterClient = clusterClient;
-
+            _configuration = configuration;
         }
 
         public override Task<SubscriptionResponse> Subscribe(SubscriptionRequest request, ServerCallContext context)
         {
             // TODO: Get the agentId from the hatchery when ready.
-            var subscription = new InternalSubscription("NOAGENT", _brokers, request.BufferSize);
+            var subscription = new InternalSubscription(request.Id, _configuration.GetSection("Kafka"), request.BufferSize);
             switch (request.AgentCase)
             {
                 case SubscriptionRequest.AgentOneofCase.AgentType:
@@ -122,9 +152,17 @@ namespace Scynet.HatcheryFacade.RPC
                 case SubscriptionRequest.AgentOneofCase.None:
                     break;
             }
-            subscriptions.Add(request.Id, subscription);
-            subscription.Start(_clusterClient);
-            return Task.FromResult(new SubscriptionResponse() { AgentId = subscription.AgentId });
+
+            if (subscription.HasAccess("subscribe"))
+            {
+                subscriptions.Add(request.Id, subscription);
+                subscription.Start(_clusterClient);
+                return Task.FromResult(new SubscriptionResponse() { AgentId = subscription.AgentId });
+            }
+            else
+            {
+                throw new RpcException(Status.DefaultCancelled, "Access denied");
+            }
         }
 
         public override Task<Void> Unsubscribe(UnsubscribeRequest request, ServerCallContext context)
@@ -196,25 +234,29 @@ namespace Scynet.HatcheryFacade.RPC
                         {
                             if (long.TryParse(Encoding.ASCII.GetString(previous), out var previousTimestamp))
                             {
-                                if (previousTimestamp == lastTimestamp)
+                                if (previousTimestamp <= lastTimestamp)
                                 {
                                     toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                                }
-                                else if (previousTimestamp < lastTimestamp)
-                                {
-                                    toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
-                                    continue;
                                 }
                                 else
                                 {
                                     _logger.LogError("This should not be possible");
                                 }
+
+                                if (previousTimestamp < lastTimestamp)
+                                {
+                                    continue;
+                                }
                             }
+                        }
+                        else
+                        {
+                            toBeSend.Add(consumeResult.Timestamp.UnixTimestampMs, consumeResult);
                         }
 
                         foreach (var (key, result) in toBeSend)
                         {
-                            subscription.Buffer.Post(new DataMessage()
+                            var message = new DataMessage
                             {
                                 Data = ByteString.CopyFrom(result.Value,
                                     0,
@@ -222,16 +264,20 @@ namespace Scynet.HatcheryFacade.RPC
                                 Index = result.Offset.Value.ToString(),
                                 Key = (uint)result.Timestamp.UnixTimestampMs,
                                 Partition = (uint)result.Partition.Value,
-                                PartitionKey = result.Key,
                                 Redelivary = false
-                            });
+                            };
+
+                            if (!string.IsNullOrEmpty(result.Key))
+                            {
+                                message.PartitionKey = result.Key;
+                            }
+
+                            subscription.Buffer.Post(message);
 
                             lastTimestamp = result.Timestamp.UnixTimestampMs;
                         }
 
                         toBeSend.Clear();
-
-
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -251,16 +297,24 @@ namespace Scynet.HatcheryFacade.RPC
                     throw new RpcException(Status.DefaultCancelled, "Subscribed agent failed!");
                 }
                 var message = await subscription.Buffer.ReceiveAsync();
-
-                await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
-
-                subscription.Consumer.Commit(new List<TopicPartitionOffset>()
+                if (subscription.HasAccess("message"))
                 {
-                    new TopicPartitionOffset(
-                        new TopicPartition(request.Id, new Partition((int) message.Partition)),
-                        new Offset(Int32.Parse(message.Index))
-                    )
-                });
+                    await responseStream.WriteAsync(new StreamingPullResponse() { Message = message });
+
+                    subscription.Consumer.Commit(new List<TopicPartitionOffset>()
+                    {
+                        new TopicPartitionOffset(
+                            new TopicPartition(request.Id, new Partition((int) message.Partition)),
+                            new Offset(Int32.Parse(message.Index))
+                        )
+                    });
+                }
+                else
+                {
+                    subscriptions.Remove(subscription.Id);
+                    subscription.Dispose();
+                    return;
+                }
             }
         }
     }
