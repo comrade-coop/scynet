@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Scynet.HatcheryFacade.RPC;
+using Scynet.HatcheryFacade.SignalRNotifications;
 using IClusterClient = Orleans.IClusterClient;
 
 namespace Scynet.HatcheryFacade
@@ -71,6 +72,7 @@ namespace Scynet.HatcheryFacade
                     services.AddSingleton<SubscriberFacade, SubscriberFacade>();
                     services.AddSingleton<IHostedService, SubscriberClient>();
                     services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
+                    services.AddSingleton<IHostedService, NotificationService>();
                     // TODO: Find a better way to indicate that these are brokers. OR
                     // TODO: Load brokers from appsettings.json
                     services.AddSingleton<IEnumerable<Server>>(sp =>
