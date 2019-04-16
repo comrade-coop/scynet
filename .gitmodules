@@ -1,0 +1,3 @@
+[submodule "input-strategy/src/main/proto"]
+	path = input-strategy/src/main/proto
+	url = https://github.com/comrade-coop/scynet-proto.git
