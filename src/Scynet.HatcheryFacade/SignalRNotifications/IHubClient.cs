@@ -10,5 +10,7 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
     {
         Task BroadcastMessage(string type, string payload);
         Task BroadcastNewAgent(AgentInfo agentInfo);
+        Task BroadcastETHPrice(Object prices);
+        Task BroadcastAgentPredictions(Object predictions);
     }
 }
