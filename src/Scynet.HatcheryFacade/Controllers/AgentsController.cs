@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -42,8 +43,8 @@ namespace Scynet.HatcheryFacade.Controllers
 
             var agentGroup = await registry.Query(agents =>
                 (from agent in agents
-                group agent by agent.Value.RunnerType into category
-                select Tuple.Create(category.Key, category.ToList()))
+                 group agent by agent.Value.RunnerType into category
+                 select Tuple.Create(category.Key, category.ToList()))
                 .ToDictionary(category => category.Item1, category => category.Item2));
 
             return agentGroup;

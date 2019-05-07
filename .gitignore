@@ -1,4 +1,5 @@
-//Parser ignores
+grains-db/
+
 parser/examples/*
 !parser/examples/merge.json
 results/*

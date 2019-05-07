@@ -23,7 +23,7 @@ namespace Scynet.HatcheryFacade.RPC
         private readonly IEnumerable<string> _brokers;
 
         private readonly IClusterClient ClusterClient;
-        private readonly Guid FacadeGuid = new Guid();
+        private readonly Guid FacadeGuid = Guid.NewGuid();
         private Timer Timer;
 
         private Dictionary<string, CancellationTokenSource> cancellationTokens = new Dictionary<string, CancellationTokenSource>();

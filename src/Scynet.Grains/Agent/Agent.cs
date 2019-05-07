@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Providers;
 using Scynet.GrainInterfaces.Agent;
 
 namespace Scynet.Grains.Agent
