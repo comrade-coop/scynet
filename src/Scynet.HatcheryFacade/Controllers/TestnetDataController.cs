@@ -37,11 +37,12 @@ namespace Scynet.HatcheryFacade.Controllers
                 {
                     var x = Blob.Parser.ParseFrom(res);
                     this._hubContext.Clients.All.BroadcastAgentPredictions(x);
-                } catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-                
+
             });
         }
 

@@ -11,8 +11,8 @@ using Scynet.GrainInterfaces.Registry;
 
 namespace Scynet.HatcheryFacade.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    // [Route("api/[controller]")]
+    // [ApiController]
     public class ExternalAgentController : ControllerBase
     {
         private IClusterClient ClusterClient;
