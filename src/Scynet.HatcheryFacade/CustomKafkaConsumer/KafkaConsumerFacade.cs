@@ -31,11 +31,19 @@ namespace Scynet.HatcheryFacade.CustomKafkaConsumer
             //StartX("localhost:9092", "331d591b-184d-4e7c-b075-9841181c05c1");
         }
 
-        public void StartConsuming(string agentUuid, Action<byte[]> callback)
+        public void StartConsuming(string agentUuid, Action<ConsumeResult<string, byte[]>> callback)
         {
             var c = _configuration.GetSection("Kafka");
-            var subscription = new KafkaConsumer(agentUuid, _configuration.GetSection("Kafka"));
-            Subscriptions.Add(agentUuid, subscription);
+            
+            if(!Subscriptions.ContainsKey(agentUuid))
+            {
+                var newSubscription = new KafkaConsumer(agentUuid, _configuration.GetSection("Kafka"));
+                Subscriptions.Add(agentUuid, newSubscription);
+            }
+
+            var subscription = Subscriptions[agentUuid];
+
+
             subscription.Consumer.Subscribe(agentUuid);
 
             subscription.SubscriberThread = new Thread(() =>
@@ -43,7 +51,7 @@ namespace Scynet.HatcheryFacade.CustomKafkaConsumer
                 while (true)
                 {
                     var consumeResult = subscription.Consumer.Consume();
-                    callback(consumeResult.Value);
+                    callback(consumeResult);
                 }
             });
 
