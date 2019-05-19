@@ -45,7 +45,12 @@ namespace Scynet.HatcheryFacade.Controllers
                         Date = dt.ToString(),
                         Value = x.Data[0]
                     };
-                    this._hubContext.Clients.All.BroadcastAgentPredictions(prediction);
+
+                    var treeDaysAgo = DateTime.Now.Subtract(TimeSpan.FromDays(5));
+                    if (dt.CompareTo(treeDaysAgo)>=0)
+                    {
+                        this._hubContext.Clients.All.BroadcastAgentPredictions(prediction);
+                    }
                 } catch(Exception e)
                 {
                     Console.WriteLine(e);

@@ -30,14 +30,14 @@ namespace Scynet.HatcheryFacade
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var ui = Configuration.GetSection("UIServer").Value;
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials()
-                    //.AllowAnyOrigin();
-                    .WithOrigins("http://localhost:4200");
+                    .WithOrigins(ui);
             }));
 
             services.AddSignalR();

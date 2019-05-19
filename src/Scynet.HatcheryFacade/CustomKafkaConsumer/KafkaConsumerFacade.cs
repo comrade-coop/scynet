@@ -39,6 +39,9 @@ namespace Scynet.HatcheryFacade.CustomKafkaConsumer
             {
                 var newSubscription = new KafkaConsumer(agentUuid, _configuration.GetSection("Kafka"));
                 Subscriptions.Add(agentUuid, newSubscription);
+            } else
+            {
+                Subscriptions[agentUuid] = new KafkaConsumer(agentUuid, _configuration.GetSection("Kafka"));
             }
 
             var subscription = Subscriptions[agentUuid];
