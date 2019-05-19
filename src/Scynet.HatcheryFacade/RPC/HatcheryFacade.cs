@@ -38,11 +38,12 @@ namespace Scynet.HatcheryFacade.RPC
             var id = Guid.Parse(request.Agent.Uuid);
 
             var agent = ClusterClient.GetGrain<IComponentAgent>(id);
+            var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
 
             var data = request.Agent.EggData.ToByteArray();
-            var inputs = request.Agent.Inputs.Select(
-                x => ClusterClient.GetGrain<IAgent>(Guid.Parse(x))
-            ).ToList();
+            var inputs = await Task.WhenAll(request.Agent.Inputs.Select(async x =>
+                (await registry.Get(Guid.Parse(x))).Agent
+            ));
 
             await agent.Initialize(new AgentInfo
             {

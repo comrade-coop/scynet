@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Serialize.Linq.Nodes;
 using Scynet.GrainInterfaces.Registry;
+using Orleans.Providers;
 
 namespace Scynet.Grains.Registry
 {

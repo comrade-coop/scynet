@@ -34,8 +34,8 @@ namespace Scynet.HatcheryFacade.CustomKafkaConsumer
         public void StartConsuming(string agentUuid, Action<ConsumeResult<string, byte[]>> callback)
         {
             var c = _configuration.GetSection("Kafka");
-            
-            if(!Subscriptions.ContainsKey(agentUuid))
+
+            if (!Subscriptions.ContainsKey(agentUuid))
             {
                 var newSubscription = new KafkaConsumer(agentUuid, _configuration.GetSection("Kafka"));
                 Subscriptions.Add(agentUuid, newSubscription);

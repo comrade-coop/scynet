@@ -51,11 +51,12 @@ namespace Scynet.HatcheryFacade.Controllers
                     {
                         this._hubContext.Clients.All.BroadcastAgentPredictions(prediction);
                     }
-                } catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-                
+
             });
         }
 
@@ -67,7 +68,7 @@ namespace Scynet.HatcheryFacade.Controllers
                 try
                 {
                     var x = Blob.Parser.ParseFrom(res.Value);
-                    var num = long.Parse(res.Key)*1000;
+                    var num = long.Parse(res.Key) * 1000;
                     var dt = (new DateTime(1970, 1, 1)).AddMilliseconds(num);
                     var priceData = new PriceData
                     {

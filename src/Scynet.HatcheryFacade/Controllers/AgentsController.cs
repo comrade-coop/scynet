@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -36,14 +37,11 @@ namespace Scynet.HatcheryFacade.Controllers
         {
             // HACK: testing code below
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            //await registry.Register(Guid.Empty, new AgentInfo { });
-            //await registry.Register(Guid.NewGuid(), new AgentInfo { });
-            //await registry.Register(Guid.NewGuid(), new AgentInfo { });
 
             var agentGroup = await registry.Query(agents =>
                 (from agent in agents
-                group agent by agent.Value.RunnerType into category
-                select Tuple.Create(category.Key, category.ToList()))
+                 group agent by agent.Value.RunnerType into category
+                 select Tuple.Create(category.Key, category.ToList()))
                 .ToDictionary(category => category.Item1, category => category.Item2));
 
             return agentGroup;
@@ -68,17 +66,17 @@ namespace Scynet.HatcheryFacade.Controllers
         };
 
         // GET api/agents/5
-        [HttpGet("{id}")]
-        public async Task<string> Get(int id)
-        {
-            // HACK: testing code below
-            var test = new TestListener();
-            var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(test);
-            var x = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await x.Subscribe((k, v) => k == Guid.Empty, testWrap, "test");
-
-            return "value";
-        }
+        // [HttpGet("{id}")]
+        // public async Task<string> Get(int id)
+        // {
+        //     // HACK: testing code below
+        //     var test = new TestListener();
+        //     var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(test);
+        //     var x = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+        //     await x.Subscribe((k, v) => k == Guid.Empty, testWrap, "test");
+        //
+        //     return "value";
+        // }
 
         // GET api/agents/engage/{uuid}
         [Route("engage/{uuid}")]
@@ -88,12 +86,12 @@ namespace Scynet.HatcheryFacade.Controllers
             var test = new TestEngager();
             var testWrap = await ClusterClient.CreateObjectReference<IEngager>(test);
             var id = Guid.Parse(uuid);
-            //var x = ClusterClient.GetGrain<IAgent>(id, "Scynet.Grains.ComponentAgent");
+            // var x = ClusterClient.GetGrain<IAgent>(id, "Scynet.Grains.ComponentAgent");
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agentInfo = await registry.Get(id);
-            var engagements2 = await agentInfo.Agent.GetActiveEngagements();
+            // var engagements2 = await agentInfo.Agent.GetActiveEngagements();
             await agentInfo.Agent.Engage(testWrap);
-            var engagements = await agentInfo.Agent.GetActiveEngagements();
+            // var engagements = await agentInfo.Agent.GetActiveEngagements();
             return $"Engagement completed";
         }
 
