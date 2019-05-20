@@ -16,6 +16,9 @@ namespace Scynet.Grains.Agent
         public static Task<ConsumeResult<K, V>> ConsumeAsync<K, V>(this IConsumer<K, V> consumer) {
             return Task.Run(() => consumer.Consume());
         }
+        public static Task<ConsumeResult<K, V>> ConsumeAsync<K, V>(this IConsumer<K, V> consumer, TimeSpan timeout) {
+            return Task.Run(() => consumer.Consume(timeout));
+        }
     }
 
     public class EvaluatorState
@@ -55,7 +58,7 @@ namespace Scynet.Grains.Agent
 
             string agentId = State.TargetAgent.GetPrimaryKey().ToString();
             var consumerConfig = new ConsumerConfig() {
-                GroupId = "evaluatorsala-" + agentId,
+                GroupId = "evaluator-data-" + agentId,
                 BootstrapServers = "127.0.0.1:9092",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
@@ -66,7 +69,7 @@ namespace Scynet.Grains.Agent
             PredictionConsumer.Subscribe(agentId);
             if (agentId == TargetsStream) {
                 consumerConfig = new ConsumerConfig() {
-                    GroupId = "evaluatorsala--" + agentId,
+                    GroupId = "evaluator-target-" + agentId,
                     BootstrapServers = "127.0.0.1:9092",
                     AutoOffsetReset = AutoOffsetReset.Earliest
                 };
@@ -74,54 +77,73 @@ namespace Scynet.Grains.Agent
             TargetConsumer = new ConsumerBuilder<string, byte[]>(consumerConfig).Build();
             TargetConsumer.Subscribe(TargetsStream);
             ResultProducer = new ProducerBuilder<string, byte[]>(producerConfig).Build();
-            ResultStream = agentId + "-evala";
+            ResultStream = agentId + "-evaluated";
         }
 
         private async void Run()
         {
+            Console.WriteLine("Evaluator now running!");
             try {
                 await State.TargetAgent.Engage(this);
                 while (true) {
                     ConsumeResult<string, byte[]> predictionMessage = await PredictionConsumer.ConsumeAsync();
-                    ConsumeResult<string, byte[]> targetMessage = await TargetConsumer.ConsumeAsync();
+                    ConsumeResult<string, byte[]> targetMessage = await TargetConsumer.ConsumeAsync(TimeSpan.FromSeconds(10));
 
-                    while (true) {
-                        var predictionKey = long.Parse(predictionMessage.Key);
-                        var targetKey = long.Parse(targetMessage.Key);
-                        if (predictionKey < targetKey) {
-                            predictionMessage = await PredictionConsumer.ConsumeAsync();
-                        } else if (predictionKey > targetKey) {
-                            targetMessage = await TargetConsumer.ConsumeAsync();
-                        } else {
-                            break;
+                    if (targetMessage == null)
+                    {
+                        do {
+                            Console.WriteLine("J");
+                            var predictionBlob = Blob.Parser.ParseFrom(predictionMessage.Value);
+                            await ResultProducer.ProduceAsync(ResultStream, new Message<string, byte[]> {
+                                Key = predictionMessage.Key,
+                                Value = (new Blob() {
+                                    Shape = new Shape() {
+                                        Dimension = {2}
+                                    },
+                                    Data = {predictionBlob.Data[0], -1}
+                                }).ToByteArray()
+                            });
+                            predictionMessage = await PredictionConsumer.ConsumeAsync(TimeSpan.FromSeconds(2));
+                        } while (predictionMessage != null);
+                    } else {
+
+                        while (true) {
+                            var predictionKey = long.Parse(predictionMessage.Key);
+                            var targetKey = long.Parse(targetMessage.Key);
+                            if (predictionKey < targetKey) {
+                                predictionMessage = await PredictionConsumer.ConsumeAsync();
+                            } else if (predictionKey > targetKey) {
+                                targetMessage = await TargetConsumer.ConsumeAsync();
+                            } else {
+                                break;
+                            }
                         }
 
-                    }
+                        var predictionBlob = Blob.Parser.ParseFrom(predictionMessage.Value);
+                        var targetBlob = Blob.Parser.ParseFrom(targetMessage.Value);
 
-                    var PredictionBlob = Blob.Parser.ParseFrom(predictionMessage.Value);
-                    var TargetBlob = Blob.Parser.ParseFrom(targetMessage.Value);
-
-                    if (PredictionBlob.Data.Count >= 1 && TargetBlob.Data.Count >= 1) {
-                        var i = PredictionBlob.Data[0] > 0.5 ? 1 : 0;
-                        var j = TargetBlob.Data[0] > 0.5 ? 1 : 0;
-                        State.ResultsMatrix[i,j] += 1;
-                        await ResultProducer.ProduceAsync(ResultStream, new Message<string, byte[]> {
-                            Key = predictionMessage.Key,
-                            Value = (new Blob() {
-                                Shape = new Shape() {
-                                    Dimension = {2}
-                                },
-                                Data = {PredictionBlob.Data[0], (i == j ? 1 : 0)}
-                            }).ToByteArray()
-                        });
-                        await base.WriteStateAsync();
-                        // no awaiting here, best-effort
-                        var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[1,0];
-                        var TotalNegative = (double)State.ResultsMatrix[0,1] + State.ResultsMatrix[0,0];
-                        State.TargetAgent.SetMetadata("TruePositive", (State.ResultsMatrix[1,1] / TotalPositive).ToString());
-                        State.TargetAgent.SetMetadata("TrueNegative", (State.ResultsMatrix[0,0] / TotalNegative).ToString());
-                        State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
-                        State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
+                        if (predictionBlob.Data.Count >= 1 && targetBlob.Data.Count >= 1) {
+                            var i = predictionBlob.Data[0] > 0.5 ? 1 : 0;
+                            var j = targetBlob.Data[0] > 0.5 ? 1 : 0;
+                            State.ResultsMatrix[i,j] += 1;
+                            await ResultProducer.ProduceAsync(ResultStream, new Message<string, byte[]> {
+                                Key = predictionMessage.Key,
+                                Value = (new Blob() {
+                                    Shape = new Shape() {
+                                        Dimension = {2}
+                                    },
+                                    Data = {predictionBlob.Data[0], (i == j ? 1 : 0)}
+                                }).ToByteArray()
+                            });
+                            await base.WriteStateAsync();
+                            // no awaiting here, best-effort
+                            var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[1,0];
+                            var TotalNegative = (double)State.ResultsMatrix[0,1] + State.ResultsMatrix[0,0];
+                            State.TargetAgent.SetMetadata("TruePositive", (State.ResultsMatrix[1,1] / TotalPositive).ToString());
+                            State.TargetAgent.SetMetadata("TrueNegative", (State.ResultsMatrix[0,0] / TotalNegative).ToString());
+                            State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
+                            State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
+                        }
                     }
 
                 }
