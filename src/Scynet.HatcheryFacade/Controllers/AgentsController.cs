@@ -21,10 +21,10 @@ namespace Scynet.HatcheryFacade.Controllers
     {
         private readonly IClusterClient ClusterClient;
         private readonly ILogger<AgentsController> _logger;
-        private IHubContext<NotifyHub, IHubClient> _hubContext;
+        private IHubContext<NotifyHub, INotifyHubClient> _hubContext;
 
         public AgentsController(IClusterClient clusterClient, ILogger<AgentsController> logger,
-            IHubContext<NotifyHub, IHubClient> hubContext)
+            IHubContext<NotifyHub, INotifyHubClient> hubContext)
         {
             ClusterClient = clusterClient;
             _logger = logger;
@@ -93,23 +93,6 @@ namespace Scynet.HatcheryFacade.Controllers
             await agentInfo.Agent.Engage(testWrap);
             // var engagements = await agentInfo.Agent.GetActiveEngagements();
             return $"Engagement completed";
-        }
-
-        // GET api/agents/signalr/{uuid}
-        [Route("signalr/{uuid}")]
-        public string SignalR(string uuid)
-        {
-            string retMessage = string.Empty;
-            try
-            {
-                _hubContext.Clients.All.BroadcastMessage("Test", uuid);
-                retMessage = "Success";
-            }
-            catch (Exception e)
-            {
-                retMessage = e.ToString();
-            }
-            return retMessage;
         }
 
         // POST api/values

@@ -15,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
-using Scynet.HatcheryFacade.CustomKafkaConsumer;
 using Scynet.HatcheryFacade.RPC;
 using Scynet.HatcheryFacade.SignalRNotifications;
 using IClusterClient = Orleans.IClusterClient;
@@ -74,7 +73,7 @@ namespace Scynet.HatcheryFacade
                     services.AddSingleton<IHostedService, SubscriberClient>();
                     services.AddSingleton<LoggingInterceptor, LoggingInterceptor>();
                     services.AddSingleton<IHostedService, NotificationService>();
-                    services.AddSingleton<KafkaConsumerFacade, KafkaConsumerFacade>();
+                    services.AddSingleton<KafkaConsumerHelper, KafkaConsumerHelper>();
                     // TODO: Find a better way to indicate that these are brokers. OR
                     // TODO: Load brokers from appsettings.json
                     services.AddSingleton<IEnumerable<Server>>(sp =>

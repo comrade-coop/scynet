@@ -13,7 +13,6 @@ namespace Scynet.Grains.Agent
 {
     public class ComponentAgentState : AgentState
     {
-        public AgentInfo Info;
         public byte[] Data = { };
         public List<IAgent> Inputs;
     }
@@ -35,10 +34,10 @@ namespace Scynet.Grains.Agent
             State.Data = data;
             State.Inputs = inputs.ToList();
 
-            var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await registry.Register(this.GetPrimaryKey(), State.Info);
-
             await base.WriteStateAsync();
+            await UpdateRegistryInfo();
+            var evalutor = GrainFactory.GetGrain<IEvaluator>(this.GetPrimaryKey());
+            await evalutor.Start(this);
         }
 
         /// <inheritdoc/>
@@ -91,7 +90,7 @@ namespace Scynet.Grains.Agent
                     State.Info.ComponentId = viable.First().Key;
                     await base.WriteStateAsync();
 
-                    await agentRegistry.Register(this.GetPrimaryKey(), State.Info);
+                    await UpdateRegistryInfo();
                 }
 
                 Channel = new Channel(address, ChannelCredentials.Insecure);
@@ -125,6 +124,9 @@ namespace Scynet.Grains.Agent
                     State.Inputs.Select(i => i.GetPrimaryKey())
                 )
             });
+
+            var evalutor = GrainFactory.GetGrain<IEvaluator>(this.GetPrimaryKey());
+            await evalutor.Start(this);
         }
 
         /// <inheritdoc/>

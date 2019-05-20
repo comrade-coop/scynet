@@ -6,17 +6,21 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Providers;
 using Scynet.GrainInterfaces.Agent;
+using Scynet.GrainInterfaces.Registry;
 
 namespace Scynet.Grains.Agent
 {
     public class AgentState
     {
+        public AgentInfo Info;
         public Dictionary<IEngager, EngagementInfo> Engagements = new Dictionary<IEngager, EngagementInfo>();
         public bool Running = false;
     }
 
     public abstract class Agent<T> : Grain<T>, IAgent where T : AgentState, new()
     {
+
+        private DateTime lastRegistryUpdate = default(DateTime);
         /// <summary>
         /// Start running agent
         /// </summary>
@@ -90,6 +94,24 @@ namespace Scynet.Grains.Agent
         public Task<String> GetTopic()
         {
             return Task.FromResult(this.GetPrimaryKey().ToString());
+        }
+
+        protected async Task UpdateRegistryInfo(bool critical = true)
+        {
+            if (critical || lastRegistryUpdate < DateTime.Now - TimeSpan.FromSeconds(30)) {
+                lastRegistryUpdate = DateTime.Now;
+                var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+                await registry.Register(this.GetPrimaryKey(), State.Info);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task SetMetadata(string key, string value)
+        {
+            State.Info.Metadata[key] = value;
+
+            await base.WriteStateAsync();
+            await UpdateRegistryInfo(false);
         }
     }
 }

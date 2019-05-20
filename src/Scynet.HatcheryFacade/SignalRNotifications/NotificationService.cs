@@ -12,30 +12,34 @@ using System.Threading.Tasks;
 
 namespace Scynet.HatcheryFacade.SignalRNotifications
 {
-    public class NotificationService : IHostedService
+    public class NotificationService : IHostedService, IRegistryListener<Guid, AgentInfo>
     {
-        private readonly IClusterClient _clusterClient;
-        private readonly ILogger<NotificationService> _logger;
-        private IHubContext<NotifyHub, IHubClient> _hubContext;
+        private readonly IClusterClient ClusterClient;
+        private IHubContext<NotifyHub, INotifyHubClient> HubContext;
 
         public NotificationService(IClusterClient clusterClient, ILogger<NotificationService> logger,
-            IHubContext<NotifyHub, IHubClient> hubContext)
+            IHubContext<NotifyHub, INotifyHubClient> hubContext)
         {
-            _clusterClient = clusterClient;
-            _logger = logger;
-            _hubContext = hubContext;
+            ClusterClient = clusterClient;
+            HubContext = hubContext;
 
-            SubscribeToregistry();
+            SubscribeToRegistry();
         }
 
-        public async void SubscribeToregistry()
+        public async void SubscribeToRegistry()
         {
-            //var listener = new AgentListener(_hubContext);
-            var listener = await this._clusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(
-                new AgentListener(_hubContext)
+            var listener = await this.ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(
+                this
             );
-            var registry = this._clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await registry.Subscribe((k, v) => true, listener, "NewAgentListener");
+            var registry = this.ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
+            await registry.Subscribe((k, v) => true, listener, "NewAgent");
+        }
+
+        public void NewItem(string queryIdentifier, Guid key, AgentInfo item)
+        {
+            if (queryIdentifier == "NewAgent") {
+                this.HubContext.Clients.All.BroadcastNewAgent(key, item);
+            }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

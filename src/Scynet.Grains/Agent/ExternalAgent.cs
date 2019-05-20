@@ -12,7 +12,6 @@ namespace Scynet.Grains.Agent
 {
     public class ExternalAgentState : AgentState
     {
-        public AgentInfo Info;
         public string Address;
         public IFacade Facade;
     }
@@ -37,8 +36,7 @@ namespace Scynet.Grains.Agent
             State.Address = address;
             State.Info = info;
 
-            var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await registry.Register(this.GetPrimaryKey(), State.Info);
+            await UpdateRegistryInfo();
 
             await base.WriteStateAsync();
 

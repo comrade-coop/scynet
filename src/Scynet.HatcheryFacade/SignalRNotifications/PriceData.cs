@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Scynet.HatcheryFacade.CustomKafkaConsumer
+namespace Scynet.HatcheryFacade.SignalRNotifications
 {
     public class PriceData
     {
