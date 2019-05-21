@@ -64,6 +64,7 @@ namespace Scynet.Grains.Agent
                 await Start();
                 State.Running = true;
             }
+            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>
@@ -93,6 +94,8 @@ namespace Scynet.Grains.Agent
                 await Stop();
                 State.Running = false;
             }
+
+            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>

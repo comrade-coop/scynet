@@ -76,7 +76,6 @@ namespace Scynet.Grains.Agent
 
                 if (string.IsNullOrEmpty(address))
                 {
-                    await Channel.ShutdownAsync();
                     // TODO: Remove when needed, and don't just choose the first one.
                     var registry = GrainFactory.GetGrain<IRegistry<Guid, ComponentInfo>>(0);
                     var viable = await registry.Query(components =>
