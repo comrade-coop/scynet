@@ -14,6 +14,7 @@ namespace Scynet.Grains.Agent
     {
         public string Address;
         public IFacade Facade;
+        public DateTime StartedAt;
     }
 
     public class ExternalAgent : Agent<ExternalAgentState>, IExternalAgent
@@ -53,6 +54,16 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
+        public override async Task<bool> IsRunning()
+        {
+            if (DateTime.Now - State.StartedAt > TimeSpan.FromMinutes(20)) {
+                await Stop();
+                await Start();
+            }
+            return true;
+        }
+
+        /// <inheritdoc/>
         public override async Task Start()
         {
             // TODO: This code is not reliable.
@@ -67,6 +78,7 @@ namespace Scynet.Grains.Agent
             State.Facade = activeFacades[(new Random()).Next(activeFacades.Count())];
 
             State.Facade.Start(this); // <- can't await this
+            State.StartedAt = DateTime.Now;
 
             await base.WriteStateAsync();
         }

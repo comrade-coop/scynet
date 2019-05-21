@@ -31,6 +31,11 @@ namespace Scynet.Grains.Agent
         /// </summary>
         abstract public Task Stop();
 
+        /// <summary>
+        /// Check if the agent is running
+        /// </summary>
+        abstract public Task<bool> IsRunning();
+
         private readonly ILogger Logger;
 
         public Agent(ILogger<Agent<T>> logger)
@@ -54,7 +59,7 @@ namespace Scynet.Grains.Agent
                 EngagedSince = DateTime.UtcNow
             };
             await base.WriteStateAsync();
-            if (!State.Running)
+            if (!State.Running || !(await IsRunning()))
             {
                 await Start();
                 State.Running = true;

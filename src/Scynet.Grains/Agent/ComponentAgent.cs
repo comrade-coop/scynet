@@ -110,6 +110,21 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
+        public override async Task<bool> IsRunning()
+        {
+            try {
+                var client = new Scynet.Component.ComponentClient(await GetChannel());
+                var result = await client.AgentStatusAsync(new AgentRequest
+                {
+                    Uuid = this.GetPrimaryKey().ToString()
+                });
+                return result.Running;
+            } catch (Exception) {
+                return false;
+            }
+        }
+
+        /// <inheritdoc/>
         public override async Task Start()
         {
             var client = new Scynet.Component.ComponentClient(await GetChannel());

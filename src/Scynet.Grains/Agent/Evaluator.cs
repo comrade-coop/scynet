@@ -137,12 +137,12 @@ namespace Scynet.Grains.Agent
                             });
                             await base.WriteStateAsync();
                             // no awaiting here, best-effort
-                            var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[1,0];
-                            var TotalNegative = (double)State.ResultsMatrix[0,1] + State.ResultsMatrix[0,0];
+                            var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[0,1];
+                            var TotalNegative = (double)State.ResultsMatrix[1,0] + State.ResultsMatrix[0,0];
                             State.TargetAgent.SetMetadata("TruePositive", (State.ResultsMatrix[1,1] / TotalPositive).ToString());
                             State.TargetAgent.SetMetadata("TrueNegative", (State.ResultsMatrix[0,0] / TotalNegative).ToString());
-                            State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
-                            State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
+                            State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
+                            State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
                         }
                     }
 
