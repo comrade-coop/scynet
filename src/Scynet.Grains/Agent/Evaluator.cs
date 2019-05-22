@@ -84,15 +84,21 @@ namespace Scynet.Grains.Agent
         {
             Console.WriteLine("Evaluator now running!");
             try {
-                await State.TargetAgent.Engage(this);
+                // await State.TargetAgent.Engage(this);
                 while (true) {
                     ConsumeResult<string, byte[]> predictionMessage = await PredictionConsumer.ConsumeAsync();
                     ConsumeResult<string, byte[]> targetMessage = await TargetConsumer.ConsumeAsync(TimeSpan.FromSeconds(10));
 
                     if (targetMessage == null)
                     {
+                        // no awaiting here, best-effort
+                        var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[0,1];
+                        var TotalNegative = (double)State.ResultsMatrix[1,0] + State.ResultsMatrix[0,0];
+                        State.TargetAgent.SetMetadata("TruePositive", (State.ResultsMatrix[1,1] / TotalPositive).ToString());
+                        State.TargetAgent.SetMetadata("TrueNegative", (State.ResultsMatrix[0,0] / TotalNegative).ToString());
+                        State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
+                        State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
                         do {
-                            Console.WriteLine("J");
                             var predictionBlob = Blob.Parser.ParseFrom(predictionMessage.Value);
                             await ResultProducer.ProduceAsync(ResultStream, new Message<string, byte[]> {
                                 Key = predictionMessage.Key,
@@ -136,13 +142,6 @@ namespace Scynet.Grains.Agent
                                 }).ToByteArray()
                             });
                             await base.WriteStateAsync();
-                            // no awaiting here, best-effort
-                            var TotalPositive = (double)State.ResultsMatrix[1,1] + State.ResultsMatrix[0,1];
-                            var TotalNegative = (double)State.ResultsMatrix[1,0] + State.ResultsMatrix[0,0];
-                            State.TargetAgent.SetMetadata("TruePositive", (State.ResultsMatrix[1,1] / TotalPositive).ToString());
-                            State.TargetAgent.SetMetadata("TrueNegative", (State.ResultsMatrix[0,0] / TotalNegative).ToString());
-                            State.TargetAgent.SetMetadata("FalsePositive", (State.ResultsMatrix[1,0] / TotalNegative).ToString());
-                            State.TargetAgent.SetMetadata("FalseNegative", (State.ResultsMatrix[0,1] / TotalPositive).ToString());
                         }
                     }
 

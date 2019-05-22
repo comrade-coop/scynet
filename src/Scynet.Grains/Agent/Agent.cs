@@ -12,7 +12,7 @@ namespace Scynet.Grains.Agent
 {
     public class AgentState
     {
-        public AgentInfo Info;
+        public AgentInfo Info = new AgentInfo();
         public Dictionary<IEngager, EngagementInfo> Engagements = new Dictionary<IEngager, EngagementInfo>();
         public bool Running = false;
     }
@@ -58,13 +58,18 @@ namespace Scynet.Grains.Agent
                 Engager = engager,
                 EngagedSince = DateTime.UtcNow
             };
-            await base.WriteStateAsync();
-            if (!State.Running || !(await IsRunning()))
-            {
-                await Start();
-                State.Running = true;
+            try {
+                if (!State.Running || !(await IsRunning()))
+                {
+                    await Start();
+                    State.Running = true;
+                }
+            } finally {
+                await base.WriteStateAsync();
             }
-            await base.WriteStateAsync();
+
+            var evalutor = GrainFactory.GetGrain<IEvaluator>(this.GetPrimaryKey());
+            await evalutor.Start(this);
         }
 
         /// <inheritdoc/>
@@ -87,15 +92,15 @@ namespace Scynet.Grains.Agent
             }
             State.Engagements.Clear();
 
-            await base.WriteStateAsync();
-
-            if (State.Running)
-            {
-                await Stop();
-                State.Running = false;
+            try {
+                if (State.Running)
+                {
+                    await Stop();
+                    State.Running = false;
+                }
+            } finally {
+                await base.WriteStateAsync();
             }
-
-            await base.WriteStateAsync();
         }
 
         /// <inheritdoc/>
@@ -114,12 +119,12 @@ namespace Scynet.Grains.Agent
         }
 
         /// <inheritdoc/>
-        public async Task SetMetadata(string key, string value)
+        public async Task SetMetadata(string key, string value, bool critical=false)
         {
             State.Info.Metadata[key] = value;
 
             await base.WriteStateAsync();
-            await UpdateRegistryInfo(false);
+            await UpdateRegistryInfo(critical);
         }
     }
 }

@@ -39,7 +39,11 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
             var engager = await _clusterClient.CreateObjectReference<IEngager>(new Engager());
             var registry = _clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agent = (await registry.Get(uuid)).Agent;
-            await agent.Engage(engager);
+            try {
+                await agent.Engage(engager);
+            } catch (Exception e) {
+                Console.WriteLine(e);
+            }
 
             this._kafkaConsumerHelper.ConsumeStream(uuid.ToString(), cancellationToken, (ConsumeResult<string, byte[]> res) =>
             {
@@ -72,7 +76,11 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
             var engager = await _clusterClient.CreateObjectReference<IEngager>(new Engager());
             var registry = _clusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agent = (await registry.Get(uuid)).Agent;
-            await agent.Engage(engager);
+            try {
+                await agent.Engage(engager);
+            } catch (Exception e) {
+                Console.WriteLine(e);
+            }
 
 
             this._kafkaConsumerHelper.ConsumeStream(uuid.ToString() + "-evaluated", cancellationToken, (ConsumeResult<string, byte[]> res) =>
@@ -86,7 +94,7 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
                     {
                         Date = dateTime.ToString(),
                         Value = blob.Data[0],
-                        IsTrue = blob.Data[1] > 0 ? blob.Data[1] > 0.5 : (bool?)null
+                        IsTrue = blob.Data[1] > -0.5 ? blob.Data[1] > 0.5 : (bool?)null
                     });
                 }
             });

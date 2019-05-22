@@ -39,7 +39,7 @@ namespace Scynet.GrainInterfaces.Agent
         /// <summary>
         /// Update the agent's metadata
         /// </summary>
-        Task SetMetadata(string key, string value);
+        Task SetMetadata(string key, string value, bool critical=false);
     }
 
     public class EngagementInfo

@@ -90,6 +90,8 @@ namespace Scynet.HatcheryFacade.Controllers
             var registry = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
             var agentInfo = await registry.Get(id);
             // var engagements2 = await agentInfo.Agent.GetActiveEngagements();
+            Console.WriteLine("Agent is:");
+            Console.WriteLine(agentInfo.Agent);
             await agentInfo.Agent.Engage(testWrap);
             // var engagements = await agentInfo.Agent.GetActiveEngagements();
             return $"Engagement completed";
