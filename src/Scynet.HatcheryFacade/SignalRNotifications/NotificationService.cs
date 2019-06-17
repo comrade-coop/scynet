@@ -16,6 +16,7 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
     {
         private readonly IClusterClient ClusterClient;
         private IHubContext<NotifyHub, INotifyHubClient> HubContext;
+        private Timer Timer;
 
         public NotificationService(IClusterClient clusterClient, ILogger<NotificationService> logger,
             IHubContext<NotifyHub, INotifyHubClient> hubContext)
@@ -28,11 +29,13 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
 
         public async void SubscribeToRegistry()
         {
-            var listener = await this.ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(
-                this
-            );
+            var listener = await this.ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(this);
             var registry = this.ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-            await registry.Subscribe((k, v) => true, listener, "NewAgent");
+
+            Timer = new Timer(async _ =>
+            {
+                await registry.Subscribe((k, v) => true, listener, "NewAgent", TimeSpan.FromSeconds(60));
+            }, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(30));
         }
 
         public void NewItem(string queryIdentifier, Guid key, AgentInfo item)

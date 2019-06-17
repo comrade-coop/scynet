@@ -73,7 +73,7 @@ namespace Scynet.HatcheryFacade.Controllers
         //     var test = new TestListener();
         //     var testWrap = await ClusterClient.CreateObjectReference<IRegistryListener<Guid, AgentInfo>>(test);
         //     var x = ClusterClient.GetGrain<IRegistry<Guid, AgentInfo>>(0);
-        //     await x.Subscribe((k, v) => k == Guid.Empty, testWrap, "test");
+        //     await x.Subscribe((k, v) => k == Guid.Empty, testWrap, "test", TimeSpan.FromMinutes(10));
         //
         //     return "value";
         // }

@@ -37,8 +37,10 @@ namespace Scynet.Grains.Agent
 
             await base.WriteStateAsync();
             await UpdateRegistryInfo();
+
             var evalutor = GrainFactory.GetGrain<IEvaluator>(this.GetPrimaryKey());
-            await evalutor.Start(this);
+            // No await
+            evalutor.Start(this);
         }
 
         /// <inheritdoc/>

@@ -14,8 +14,8 @@ namespace Scynet.Grains.Registry
     {
         public Dictionary<K, T> Items = new Dictionary<K, T>();
         // TODO: Can the below line be shortened somehow?
-        public Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode> Subscriptions =
-            new Dictionary<Tuple<IRegistryListener<K, T>, String>, ExpressionNode>();
+        public Dictionary<Tuple<IRegistryListener<K, T>, String>, Tuple<ExpressionNode, DateTime?>> Subscriptions =
+            new Dictionary<Tuple<IRegistryListener<K, T>, String>, Tuple<ExpressionNode, DateTime?>>();
     }
 
     public abstract class Registry<K, T> : Orleans.Grain<RegistryState<K, T>>, IRegistry<K, T>
@@ -33,13 +33,22 @@ namespace Scynet.Grains.Registry
         {
             Logger.LogInformation($"Item registered ({info})!");
             State.Items[key] = info;
+
+            var staleSubsctiprions = new List<Tuple<IRegistryListener<K, T>, String>>();
             foreach (var subscription in State.Subscriptions)
             {
+                if (subscription.Value.Item2 != null && DateTime.Now > subscription.Value.Item2)
+                {
+                    staleSubsctiprions.Add(subscription.Key);
+                    continue;
+                }
+
                 if (!SubscriptionFilterCache.ContainsKey(subscription.Key))
                 {
                     SubscriptionFilterCache[subscription.Key] =
-                        subscription.Value.ToExpression<Func<K, T, bool>>().Compile();
+                        subscription.Value.Item1.ToExpression<Func<K, T, bool>>().Compile();
                 }
+
                 var filter = SubscriptionFilterCache[subscription.Key];
                 if (filter(key, info))
                 {
@@ -48,6 +57,13 @@ namespace Scynet.Grains.Registry
                     listener.NewItem(@ref, key, info);
                 }
             }
+
+            foreach (var staleKey in staleSubsctiprions)
+            {
+                State.Subscriptions.Remove(staleKey);
+                SubscriptionFilterCache.Remove(staleKey);
+            }
+
             return base.WriteStateAsync();
         }
 
@@ -70,11 +86,11 @@ namespace Scynet.Grains.Registry
             return Task.FromResult(result);
         }
 
-        public Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "")
+        public Task Subscribe(ExpressionNode expression, IRegistryListener<K, T> listener, String @ref = "", TimeSpan? timeout = null)
         {
             var key = Tuple.Create(listener, @ref);
             SubscriptionFilterCache.Remove(key);
-            State.Subscriptions[key] = expression;
+            State.Subscriptions[key] = Tuple.Create(expression, timeout != null ? DateTime.Now + timeout : null);
             return base.WriteStateAsync();
         }
 
