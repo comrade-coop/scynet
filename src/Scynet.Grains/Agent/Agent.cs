@@ -20,7 +20,7 @@ namespace Scynet.Grains.Agent
     public abstract class Agent<T> : Grain<T>, IAgent where T : AgentState, new()
     {
 
-        private DateTime lastRegistryUpdate = default(DateTime);
+        private DateTime? updatePendingSince = null;
         /// <summary>
         /// Start running agent
         /// </summary>
@@ -111,10 +111,12 @@ namespace Scynet.Grains.Agent
 
         protected async Task UpdateRegistryInfo(bool critical = true)
         {
-            if (critical || lastRegistryUpdate < DateTime.Now - TimeSpan.FromSeconds(30)) {
-                lastRegistryUpdate = DateTime.Now;
+            if (critical || (updatePendingSince != null && updatePendingSince < DateTime.Now - TimeSpan.FromSeconds(30))) {
                 var registry = GrainFactory.GetGrain<IRegistry<Guid, AgentInfo>>(0);
                 await registry.Register(this.GetPrimaryKey(), State.Info);
+                updatePendingSince = null;
+            } else if (updatePendingSince == null) {
+                updatePendingSince = DateTime.Now;
             }
         }
 

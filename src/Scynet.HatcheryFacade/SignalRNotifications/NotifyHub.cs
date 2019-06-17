@@ -47,11 +47,11 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
 
             this._kafkaConsumerHelper.ConsumeStream(uuid.ToString(), cancellationToken, (ConsumeResult<string, byte[]> res) =>
             {
-                var blob = Blob.Parser.ParseFrom(res.Value);
                 var dateTime = (new DateTime(1970, 1, 1)).AddSeconds(long.Parse(res.Key));
 
                 if (dateTime > fromTime)
                 {
+                    var blob = Blob.Parser.ParseFrom(res.Value);
                     channel.Writer.TryWrite(new PriceData
                     {
                         Date = dateTime.ToString(),
@@ -83,18 +83,17 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
             }
 
 
-            this._kafkaConsumerHelper.ConsumeStream(uuid.ToString() + "-evaluated", cancellationToken, (ConsumeResult<string, byte[]> res) =>
+            this._kafkaConsumerHelper.ConsumeStream(uuid.ToString(), cancellationToken, (ConsumeResult<string, byte[]> res) =>
             {
-                var blob = Blob.Parser.ParseFrom(res.Value);
                 var dateTime = (new DateTime(1970, 1, 1)).AddSeconds(long.Parse(res.Key));
 
                 if (dateTime > fromTime)
                 {
+                    var blob = Blob.Parser.ParseFrom(res.Value);
                     channel.Writer.TryWrite(new Prediction
                     {
                         Date = dateTime.ToString(),
                         Value = blob.Data[0],
-                        IsTrue = blob.Data[1] > -0.5 ? blob.Data[1] > 0.5 : (bool?)null
                     });
                 }
             });

@@ -9,6 +9,5 @@ namespace Scynet.HatcheryFacade.SignalRNotifications
     {
         public string Date { get; set; }
         public float Value { get; set; }
-        public bool? IsTrue { get; set; }
     }
 }
