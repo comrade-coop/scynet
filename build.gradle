@@ -5,14 +5,16 @@
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds
  */
 
+
+
 plugins {
 	id "idea"
+	id "org.jetbrains.dokka" version '0.9.18'
 }
 
 allprojects {
 	repositories {
 		jcenter()
-		mavenCentral()
 	}
 
 }
@@ -32,4 +34,13 @@ subprojects {
     	useJUnitPlatform()
 	}
 
+}
+
+dokka {
+	outputFormat = 'kotlin-website'
+	outputDirectory = "docs"
+
+	kotlinTasks {
+		subprojects.collectMany { project -> project.hasProperty("compileKotlin") ? [ project.compileKotlin ] : [] }
+	}
 }
