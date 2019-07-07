@@ -82,3 +82,4 @@ fabric.properties
 !.vscode/extensions.json
 
 docs
+.kotlintest
