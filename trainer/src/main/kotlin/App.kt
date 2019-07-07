@@ -1,4 +1,4 @@
-package ai.scynet.executor
+package ai.scynet.trainer
 /**
 
  * The first function to be executed

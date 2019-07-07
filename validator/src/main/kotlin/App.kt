@@ -1,4 +1,4 @@
-package ai.scynet.executor
+package ai.scynet.validator
 /**
 
  * The first function to be executed

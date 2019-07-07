@@ -1,4 +1,4 @@
-package ai.scynet.executor
+package ai.scynet.protocol
 /**
 
  * The first function to be executed
