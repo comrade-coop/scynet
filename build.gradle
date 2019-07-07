@@ -31,6 +31,11 @@ subprojects {
 
 		// https://github.com/mockk/mockk
 		testImplementation "io.mockk:mockk:1.9.3"
+
+		// https://insert-koin.io/docs/2.0/documentation/reference/index.html
+		compile 'org.koin:koin-core:2.0.1'
+
+		testCompile 'org.koin:koin-test:2.0.1'
 	} 
 
 	test {

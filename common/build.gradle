@@ -1,0 +1,8 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.7.5'
+
+}
