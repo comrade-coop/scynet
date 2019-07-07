@@ -1,5 +1,7 @@
-
+import org.apache.ignite.Ignition
 
 fun main(args: Array<String>) {
-    println("Hello kotlin world")
+    var ignite = Ignition.start()
+
+    println(ignite)
 }

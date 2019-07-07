@@ -5,6 +5,9 @@
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds
  */
 
+plugins {
+	id "idea"
+}
 
 allprojects {
 	repositories {
@@ -17,6 +20,7 @@ allprojects {
 
 subprojects {
 	apply plugin: "java"
+	apply plugin: "idea"
 
 	dependencies {
 		implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

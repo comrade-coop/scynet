@@ -5,3 +5,6 @@ plugins {
 
 mainClassName = "AppKt"
 
+dependencies {
+    compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.7.5'
+}
