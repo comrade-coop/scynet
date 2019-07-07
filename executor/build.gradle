@@ -1,2 +1,5 @@
-version 'unspecified'
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
 
+version 'unspecified'
