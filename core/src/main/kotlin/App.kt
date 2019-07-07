@@ -1,4 +1,4 @@
-package ai.scynet
+package ai.scynet.core
 
 import org.apache.ignite.Ignition
 

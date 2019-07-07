@@ -16,7 +16,6 @@ allprojects {
 	repositories {
 		jcenter()
 	}
-
 }
 
 
@@ -26,8 +25,12 @@ subprojects {
 
 	dependencies {
 		implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-		
+
+		// https://github.com/kotlintest/kotlintest
 		testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.0'
+
+		// https://github.com/mockk/mockk
+		testImplementation "io.mockk:mockk:1.9.3"
 	} 
 
 	test {
@@ -36,6 +39,7 @@ subprojects {
 
 }
 
+// https://github.com/Kotlin/dokka
 dokka {
 	outputFormat = 'kotlin-website'
 	outputDirectory = "docs"

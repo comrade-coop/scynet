@@ -3,7 +3,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm'
 }
 
-mainClassName = "AppKt"
+mainClassName = "ai.scynet.core.AppKt"
 
 dependencies {
     compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.7.5'
