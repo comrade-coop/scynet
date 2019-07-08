@@ -28,6 +28,7 @@ subprojects {
 
 		// https://github.com/kotlintest/kotlintest
 		testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.0'
+		testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.26'
 
 		// https://github.com/mockk/mockk
 		testImplementation "io.mockk:mockk:1.9.3"

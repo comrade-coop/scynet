@@ -1,9 +1,10 @@
-package registry
+package ai.scynet.common.registry
 
-import ai.scynet.common.registry.Registry
+import ai.scynet.common.LifeCycle
+import java.io.Closeable
 
-interface EngageableRegistry<K, V>: Registry<K, V> {
-    fun engage(key: K)
+interface EngageableRegistry<K, V : LifeCycle>: Registry<K, V> {
+    fun engage(key: K): Long
 
-    fun disengage(key: K)
+    fun disengage(key: K): Long
 }
