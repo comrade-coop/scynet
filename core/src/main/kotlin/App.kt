@@ -52,8 +52,7 @@ fun main(args: Array<String>) {
     var engine = mgr.getEngineByExtension("kts")
 
     engine.eval("""
-       println("Hello world") 
-        
+		println("Hello world")
     """.trimIndent())
 }
 
