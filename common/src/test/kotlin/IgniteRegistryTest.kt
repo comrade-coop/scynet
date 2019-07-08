@@ -19,16 +19,21 @@ class IgniteRegistryTest : StringSpec() {
 	lateinit var ignite: Ignite
 
 	override fun beforeSpec(spec: Spec) {
-		startKoin {
+		var koin = startKoin {
 			printLogger()
 			modules(module {
 				single<Ignite> { Ignition.start(IgniteConfiguration()) }
 			})
 		}
+
+		
+
+
 	}
 
 	override fun afterSpec(spec: Spec) {
 		stopKoin()
+		Ignition.stop(true)
 	}
 
 	init {
