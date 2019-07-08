@@ -1,5 +1,6 @@
 package ai.scynet.core
 
+import ai.scynet.common.registry.IgniteRegistry
 import ai.scynet.common.registry.Registry
 import ai.scynet.core.processors.IgniteProcessor
 import ai.scynet.core.processors.Processor
@@ -15,7 +16,6 @@ import org.koin.core.inject
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import registry.IgniteRegistry
 import javax.script.ScriptEngineManager
 
 /**
