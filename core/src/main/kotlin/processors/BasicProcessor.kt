@@ -16,7 +16,6 @@ class BasicProcessor: Processor {
 	var inputStreams: IgniteDataStreamer<String, String>? = null
 	var outputStream: ComputeTaskContinuousMapper? = null
 	var streamId: String = ""
-
 	override var engageCount: Int
 		get() = TODO("not implemented")
 		set(value) {}

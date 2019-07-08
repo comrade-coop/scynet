@@ -13,7 +13,6 @@ data class StreamDescriptor (var uri: URI) {
 		TODO: Should discuss a URI query standard and follow it. uri.query/fragment will be replaced
 	 	TODO: Discuss the semantic type stuff and serialization (Protobuf)
 	*/
-
 	var id: String = uri.query // UUID?
 	var source: String = uri.query
 	var proccessorClassName: String = uri.query // TODO: This should be an extended Processor -> Discussion
