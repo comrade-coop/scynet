@@ -23,6 +23,7 @@ class EngagableIgniteRegistryTest: StringSpec() {
 
 	override fun afterSpec(spec: Spec) {
 		stopKoin()
+		Ignition.stop(true)
 	}
 
 	init {
