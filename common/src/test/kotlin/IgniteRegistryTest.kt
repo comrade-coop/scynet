@@ -25,10 +25,6 @@ class IgniteRegistryTest : StringSpec() {
 				single<Ignite> { Ignition.start(IgniteConfiguration()) }
 			})
 		}
-
-		
-
-
 	}
 
 	override fun afterSpec(spec: Spec) {
@@ -38,18 +34,18 @@ class IgniteRegistryTest : StringSpec() {
 
 	init {
 		"create Ignite Registry consistently" {
-			IgniteRegistry<String, String>(Gen.string().random().first())
+			IgniteRegistry<String, String>(Gen.string().nextPrintableString(8))
 		}
 
 		"put/get into Ignite Registry" {
-			val registry = IgniteRegistry<String, String>(Gen.string().random().first())
+			val registry = IgniteRegistry<String, String>(Gen.string().nextPrintableString(8))
 			registry.put("hello", "world")
 			registry.get("hello") shouldBe "world"
 			println("result: ${registry.get("hello")}")
 		}
 
 		"query the Ignite Registry" {
-			val registry = IgniteRegistry<String, String>(Gen.string().random().first())
+			val registry = IgniteRegistry<String, String>(Gen.string().nextPrintableString(8))
 			registry.put("hello", "1")
 			registry.put("world", "2")
 			registry.put("people", "3")

@@ -28,11 +28,11 @@ class EngagableIgniteRegistryTest: StringSpec() {
 
 	init {
 		"create Engageable Ignite Registry consistently" {
-			EngagableIgniteRegistry<String, TestClass>(Gen.string().random().first())
+			EngagableIgniteRegistry<String, TestClass>(Gen.string().nextPrintableString(8))
 		}
 
 		"put/get into Ignite Registry" {
-			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().random().first())
+			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().nextPrintableString(8))
 
 			registry.put("hello", TestClass(12))
 			registry.get("hello")!!.id shouldBe 12
@@ -40,7 +40,7 @@ class EngagableIgniteRegistryTest: StringSpec() {
 		}
 
 		"query the Engagable Ignite Registry" {
-			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().random().first())
+			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().nextPrintableString(8))
 			registry.put("hello", TestClass(1))
 			registry.put("world", TestClass(2))
 			registry.put("people", TestClass(3))
@@ -61,7 +61,7 @@ class EngagableIgniteRegistryTest: StringSpec() {
 		}
 
 		"engage/disengage classes" {
-			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().random().first())
+			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().nextPrintableString(8))
 			registry.put("hello", TestClass(1))
 
 			registry.engage("hello")
