@@ -1,5 +1,5 @@
 package ai.scynet.core.processors
-import ai.scynet.core.descriptors.StreamDescriptor
+import ai.scynet.core.descriptors.ProcessorDescriptor
 import org.apache.ignite.compute.ComputeTaskContinuousMapper
 import java.io.Serializable
 
@@ -10,6 +10,6 @@ interface Processor: Serializable {
 	var engageCount: Int
 	// var inputStreams: PRIVATE
 	// var outputStream: PRIVATE
-	var descriptor: StreamDescriptor
+	var descriptor: ProcessorDescriptor
 	fun process(): ComputeTaskContinuousMapper // Should be seen as a producer to connect to a
 }

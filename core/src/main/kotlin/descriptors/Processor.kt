@@ -10,7 +10,7 @@ data class ProcessorDescriptor(var uri: URI) {
 	var source: String = uri.query
 	var proccessorClassName: String = uri.query // TODO: This should be an extended Processor -> Discussion
 	var problem: String = uri.query
-	var dependencies: String = uri.fragment
+	var dependencies: ArrayList<StreamDescriptor>? = null
 	var output: StreamDescriptor? = null
-	
+
 }
