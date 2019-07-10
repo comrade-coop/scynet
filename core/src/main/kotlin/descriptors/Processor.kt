@@ -27,18 +27,16 @@ fun fromUri(uri: URI): Properties {
 	return properties
 }
 
-data class ProcessorDescriptor(var uri: URI) {
+data class ProcessorDescriptor(var id: UUID, var ownerId: String, var problem: String, var properties: Properties) {
 
-	var id: UUID = UUID.fromString(uri.toString())
-	var ownerId: String = uri.authority
-	var problem: String = uri.fragment
+
 
 	/*
 		Java Properties
 		Contains a Processor extended class, and all kinds of different information
 		in order to create a working processor
 	*/
-	var properties: Properties = fromUri(uri)
+
 
 	init {
 		// TODO: Define properties file, implement the property assigning here
@@ -48,7 +46,9 @@ data class ProcessorDescriptor(var uri: URI) {
 
 	}
 
-
-
-
+	companion object {
+		fun fromURI(uri: URI) : ProcessorDescriptor {
+			return ProcessorDescriptor(UUID.nameUUIDFromBytes(uri.toString().toByteArray()), uri.authority, uri.fragment, fromUri(uri))
+		}
+	}
 }
