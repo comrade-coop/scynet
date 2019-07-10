@@ -45,7 +45,7 @@ data class ProcessorDescriptor(var id: UUID, var ownerId: String, var problem: S
 		var processorClass: Processor? = null
 
 	}
-
+	
 	companion object {
 		fun fromURI(uri: URI) : ProcessorDescriptor {
 			return ProcessorDescriptor(UUID.nameUUIDFromBytes(uri.toString().toByteArray()), uri.authority, uri.fragment, fromUri(uri))
