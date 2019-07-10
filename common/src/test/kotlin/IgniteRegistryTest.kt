@@ -9,11 +9,7 @@ import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.core.logger.Level
-import org.koin.core.logger.Logger
-import org.koin.core.logger.MESSAGE
 import org.koin.dsl.module
-import java.util.logging.LogManager
 
 class IgniteRegistryTest : StringSpec() {
 	lateinit var ignite: Ignite

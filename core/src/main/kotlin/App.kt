@@ -24,34 +24,20 @@ import javax.script.ScriptEngineManager
  * @param args The arguments we are receiving
  */
 fun main(args: Array<String>) {
-    var s = startKoin {
-        printLogger()
-        modules(module {
-            single<Ignite> { Ignition.start() }
-        })
-    }
+	var s = startKoin {
+		printLogger()
+		modules(module {
+			single<Ignite> { Ignition.start() }
+		})
+	}
 
-    var stream = IgniteRegistry<String, Processor>("StreamRegistry")
+	println("Hello world")
 
+	var mgr = ScriptEngineManager()
 
-    stream.put("hello0", IgniteProcessor())
+	var engine = mgr.getEngineByExtension("kts")
 
-    stream.query({ _,_ -> true }, { key, value -> println("$key: $value") })
-
-    stream.put("hello", IgniteProcessor())
-    stream.put("hello1", IgniteProcessor())
-    stream.put("hello2", IgniteProcessor())
-
-
-
-
-    println("Hello world")
-
-    var mgr = ScriptEngineManager()
-
-    var engine = mgr.getEngineByExtension("kts")
-
-    engine.eval("""
+	engine.eval("""
 		println("Hello world")
     """.trimIndent())
 }

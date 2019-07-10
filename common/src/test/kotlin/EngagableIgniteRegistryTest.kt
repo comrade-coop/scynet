@@ -3,6 +3,7 @@ import io.kotlintest.Spec
 import io.kotlintest.matchers.numerics.shouldBeLessThan
 import io.kotlintest.properties.Gen
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
@@ -51,7 +52,7 @@ class EngagableIgniteRegistryTest: StringSpec() {
 				println("$k: $v")
 				count shouldBeLessThan 3
 				count += 1
-				if (count == 4) {
+				if (count == 3) {
 					v.id % 2 shouldBe 1
 				}
 			})
@@ -65,7 +66,23 @@ class EngagableIgniteRegistryTest: StringSpec() {
 			registry.put("hello", TestClass(1))
 
 			registry.engage("hello")
+
 			registry.disengage("hello")
+		}
+
+		"double disengage classes" {
+			val registry = EngagableIgniteRegistry<String, TestClass>(Gen.string().nextPrintableString(8))
+			registry.put("hello", TestClass(1))
+			registry.engage("hello")
+			registry.disengage("hello")
+			shouldThrow<java.lang.Error> {
+				registry.disengage("hello")
+			}
+			registry.engage("hello")
+			registry.engage("hello")
+			registry.disengage("hello")
+			registry.disengage("hello")
+
 		}
 	}
 }

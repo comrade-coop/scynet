@@ -25,6 +25,7 @@ open class IgniteRegistry<K, V>(var name: String) : Registry<K, V>, KoinComponen
         cache.remove(key)
     }
 
+    // TODO: Make the query cancelable
     override fun query(predicate: (K, V) -> Boolean, callback: (K, V) -> Unit) {
         var query = ContinuousQuery<K, V>()
         query.localListener = CacheEntryUpdatedListener {
