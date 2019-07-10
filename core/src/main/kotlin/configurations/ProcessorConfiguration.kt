@@ -1,0 +1,12 @@
+package ai.scynet.core.configurations
+
+import ai.scynet.core.processors.Processor
+import java.util.Properties
+import kotlin.reflect.KClass
+
+data class ProcessorConfiguration(
+		var problem: String,
+		var processorClass: KClass<out Processor>,
+		var inputs: List<String>,
+		var properties: Properties
+)

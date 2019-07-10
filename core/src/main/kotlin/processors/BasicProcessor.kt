@@ -11,18 +11,15 @@ class BasicProcessor: Processor {
 		Optional constructor -> Initialize all data automatically
 	*/
 
-	constructor(descriptor: ProcessorDescriptor)
-
 	var inputStreams: IgniteDataStreamer<String, String>? = null
 	var outputStream: ComputeTaskContinuousMapper? = null
-	var streamId: String = ""
 
 	override var engageCount: Int
 		get() = TODO("not implemented")
 		set(value) {}
 
 	override var descriptor: ProcessorDescriptor
-		get() = TODO("not implemented")
+		get() = TODO("Not implemented") // ProcessorDescriptor(ID, this, ...)
 		set(value) {}
 
 	override fun process(): ComputeTaskContinuousMapper {

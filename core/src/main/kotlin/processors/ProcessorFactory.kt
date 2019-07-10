@@ -1,5 +1,6 @@
 package ai.scynet.core.processors
 
+import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.descriptors.ProcessorDescriptor
 import ai.scynet.core.descriptors.StreamDescriptor
 import org.apache.ignite.Ignite
@@ -15,11 +16,11 @@ class ProcessorFactory {
 		println("stub")
 	}
 
-	fun create(processorDescriptor: ProcessorDescriptor): Processor {
-		// TODO: Finish discussing the StreamDescriptor and then implement parsing.
+	fun create(processorDescriptor: ProcessorConfiguration): Processor {
+		// TODO: Finish discussing the ProcessorConfiguration
 		println("stub")
 
-		val created: Processor = BasicProcessor(processorDescriptor) // TODO: Create a simple processor that implements the interface
+		val created: Processor = BasicProcessor() // TODO: Create a simple processor that implements the interface
 		return created
 	}
 
