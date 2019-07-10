@@ -1,5 +1,6 @@
 package ai.scynet.common.registry
-import ai.scynet.common.*
+
+import ai.scynet.common.LifeCycle
 
 class EngagableIgniteRegistry<K, V : LifeCycle>(name: String) : IgniteRegistry<K, V>(name), EngageableRegistry<K, V> {
 

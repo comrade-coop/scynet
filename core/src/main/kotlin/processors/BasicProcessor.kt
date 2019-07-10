@@ -5,6 +5,7 @@ import ai.scynet.core.descriptors.StreamDescriptor
 import org.apache.ignite.IgniteDataStreamer
 import org.apache.ignite.compute.ComputeTaskContinuousMapper
 
+@Inputs(["Hello", "World"])
 class BasicProcessor: Processor {
 	/*
 		A very basic processor, which implements the core processor interface.
@@ -35,3 +36,8 @@ class BasicProcessor: Processor {
 	}
 
 }
+
+
+@Repeatable
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Inputs(val names: Array<String>)

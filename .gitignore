@@ -83,3 +83,8 @@ fabric.properties
 
 docs
 .kotlintest
+
+.classpath
+.project
+.settings
+bin

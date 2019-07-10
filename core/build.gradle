@@ -12,6 +12,4 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-script-util:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version"
-
-    compile project(':common')
 }
