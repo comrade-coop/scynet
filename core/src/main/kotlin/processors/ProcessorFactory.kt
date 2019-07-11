@@ -1,5 +1,7 @@
 package ai.scynet.core.processors
 
+import ai.scynet.common.registry.IgniteRegistry
+import ai.scynet.core.annotations.Inputs
 import ai.scynet.core.processors.Stream
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.descriptors.ProcessorDescriptor
@@ -10,11 +12,13 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
 
 
 class ProcessorFactory: KoinComponent {
 
 	val ignite: Ignite by inject()
+	val registry: IgniteRegistry<String, Stream> by inject()
 	lateinit var state: IgniteCache<String,String>
 
 	init {
@@ -26,29 +30,25 @@ class ProcessorFactory: KoinComponent {
 	fun create(processorConfiguration: ProcessorConfiguration): Processor {
 		// TODO: Finish discussing the ProcessorConfiguration
 		println("stub")
-		/*
-			Query all processorConfiguration.inputs from the stream registry.
-			Get their types and compare them with the annotation and assert if wrong
-
-			scratch pad:
-				findAnnotation class
-				if (processorConfiguration.processorClass::class.annotations == processorConfiguration.inputs)
-
-			Engage consumer_processor when attached
-		*/
 		val processor: Processor = processorConfiguration.processorClass.createInstance() // TODO: Create a simple processor that implements the interface
 		processor.id = UUID.randomUUID()
 
-		processor.inputStreams = listOf()
+		processor.inputStreams = mutableListOf()
 
-		var inputStreamDescriptors: List<StreamDescriptor> = listOf()
+		var inputStreamDescriptors: MutableList<StreamDescriptor> = mutableListOf()
 
-		for (input in processorConfiguration.inputs) {
-			TODO("Implement")
-			// query the input from the stream registry
-			// queriedInput
-			// processor.inputStreams.add(queriedInput)
-			// inputStreamDescriptors.add(queriedInput.descriptor)
+		for ((i, input) in processorConfiguration.inputs.withIndex()) {
+			val stream: Stream = registry.get(input)!!
+
+			//if (processorConfiguration.processorClass::class.findAnnotation<Inputs>() !== null) {
+				// TODO: Deny processor creation (Research annotation queries)
+				// To finish implementing this we need to
+				// discuss the semantics around the Type class and
+				// Typization
+			//}
+
+			processor.inputStreams.add(stream)
+			inputStreamDescriptors.add(stream.descriptor)
 		}
 
 		processor.descriptor = ProcessorDescriptor(
@@ -60,11 +60,7 @@ class ProcessorFactory: KoinComponent {
 			processor.outputStream.descriptor // Output is built runtime so this won't work 100%, but it's just pseudo-code for now
 		)
 
-		// TODO: Implement
-		// processorRegistry.add(processor.descriptor)
-		// processorRegistry.get(id).engage()
-
-
+		// processor.engage() should be invoked in processor.process()
 		return processor
 	}
 

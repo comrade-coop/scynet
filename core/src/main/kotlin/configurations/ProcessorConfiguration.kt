@@ -7,6 +7,6 @@ import kotlin.reflect.KClass
 data class ProcessorConfiguration(
 		var problem: String,
 		var processorClass: KClass<out Processor>,
-		var inputs: List<String>,
+		var inputs: MutableList<String>,
 		var properties: Properties
 )

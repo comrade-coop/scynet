@@ -2,7 +2,7 @@ package ai.scynet.core.processors
 
 import ai.scynet.core.descriptors.StreamDescriptor
 
-abstract class Stream() {
+abstract class Stream {
 	lateinit var descriptor: StreamDescriptor
 
 	abstract fun <K, V> listen(callback: (K, V) -> Unit)

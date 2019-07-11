@@ -17,14 +17,22 @@ class BasicProcessor: Processor {
 		A very basic processor, which implements the core processor interface.
 	*/
 
-
-	override lateinit var inputStreams: List<Stream>
+	override lateinit var inputStreams: MutableList<Stream>
 	override lateinit var outputStream: Stream
 	override lateinit var descriptor: ProcessorDescriptor
 	override lateinit var id: UUID
 
-	override fun process(): ComputeTaskContinuousMapper {
-		TODO("not implemented")
+	override fun stop() {
+		println("Stopping")//To change body of created functions use File | Settings | File Templates.
 	}
 
+	override fun start() {
+		println("Starting")
+	}
+
+	override fun process(): IgniteStream {
+		var output = IgniteStream("[UUID]")
+		println("Processing")
+		return output
+	}
 }
