@@ -19,7 +19,7 @@ class ProcessorFactory: KoinComponent {
 
 	val ignite: Ignite by inject()
 	val registry: IgniteRegistry<String, Stream> by inject()
-	lateinit var state: IgniteCache<String,String>
+	var state: IgniteCache<String, String> = ignite.getOrCreateCache("processorFactoryState")
 
 	init {
 		//this.state!! = ignite.getOrCreateCache("PF:${uri.query.id}")
@@ -61,6 +61,7 @@ class ProcessorFactory: KoinComponent {
 		)
 
 		// processor.engage() should be invoked in processor.process()
+		// processor.process() should initialize processor.outputStream
 		return processor
 	}
 

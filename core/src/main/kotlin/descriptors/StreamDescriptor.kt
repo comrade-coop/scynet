@@ -21,6 +21,6 @@ data class StreamDescriptor (var uri: URI) {
 	var id: UUID = UUID.nameUUIDFromBytes(uri.toString().toByteArray())// UUID?
 	var properties: Properties = propFromUri(uri) // Uses uri.query to create a java.util.Properties class
 	var ownerId: String = uri.authority
-	var host_adress: String = uri.host
+	var host_adress: String = uri.path
 	var problem: String = uri.fragment
 }

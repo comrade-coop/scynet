@@ -22,6 +22,11 @@ class BasicProcessor: Processor {
 	override lateinit var descriptor: ProcessorDescriptor
 	override lateinit var id: UUID
 
+	init {
+		id = UUID.randomUUID()
+		outputStream = IgniteStream("$id", "localhost:3343", "StockPricePrediction") //TODO: Remove hardcoding stuff
+	}
+
 	override fun stop() {
 		println("Stopping")//To change body of created functions use File | Settings | File Templates.
 	}
@@ -31,8 +36,8 @@ class BasicProcessor: Processor {
 	}
 
 	override fun process(): IgniteStream {
-		var output = IgniteStream("[UUID]")
+		//var output = IgniteStream("[UUID]",)
 		println("Processing")
-		return output
+		TODO("Implement")
 	}
 }
