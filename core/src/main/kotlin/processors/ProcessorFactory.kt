@@ -1,6 +1,6 @@
 package ai.scynet.core.processors
 
-import ai.scynet.core.common.Stream
+import ai.scynet.core.processors.Stream
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.descriptors.ProcessorDescriptor
 import ai.scynet.core.descriptors.StreamDescriptor

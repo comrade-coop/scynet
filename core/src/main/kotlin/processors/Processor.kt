@@ -1,5 +1,5 @@
 package ai.scynet.core.processors
-import ai.scynet.core.common.Stream
+import ai.scynet.core.processors.Stream
 import ai.scynet.core.descriptors.ProcessorDescriptor
 import org.apache.ignite.IgniteDataStreamer
 import org.apache.ignite.compute.ComputeTaskContinuousMapper

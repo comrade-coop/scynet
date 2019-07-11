@@ -1,16 +1,10 @@
 package ai.scynet.core.descriptors
 
-import ai.scynet.core.processors.Processor
+import ai.scynet.common.propFromUri
 import java.net.URI
 import java.util.*
 
 // TODO: Move this to ai.scynet.common or leave in core after small refactoring
-
-fun propFromUri(uri: URI): Properties {
-	val properties = Properties()
-	properties.load(uri.query.replace('&', '\n').byteInputStream())
-	return properties
-}
 
 
 data class StreamDescriptor (var uri: URI) {

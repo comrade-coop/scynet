@@ -7,25 +7,26 @@ import io.kotlintest.specs.StringSpec
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
 class IgniteRegistryTest : StringSpec() {
-	lateinit var ignite: Ignite
+	lateinit var koin: Koin
 
 	override fun beforeSpec(spec: Spec) {
-		var koin = startKoin {
+		koin = startKoin {
 			printLogger()
 			modules(module {
 				single<Ignite> { Ignition.start(IgniteConfiguration()) }
 			})
-		}
+		}.koin
 	}
 
 	override fun afterSpec(spec: Spec) {
+		koin.get<Ignite>().close()
 		stopKoin()
-		Ignition.stop(true)
 	}
 
 	init {
