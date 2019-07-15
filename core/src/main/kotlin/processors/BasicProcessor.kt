@@ -24,7 +24,7 @@ class BasicProcessor: Processor {
 
 	init {
 		id = UUID.randomUUID()
-		outputStream = IgniteStream("$id", "localhost:3343", "StockPricePrediction") //TODO: Remove hardcoding stuff
+		outputStream = IgniteStream("$id", "localhost:3343", "StockPricePrediction", Properties()) //TODO: Remove hardcoding stuff
 	}
 
 	override fun stop() {

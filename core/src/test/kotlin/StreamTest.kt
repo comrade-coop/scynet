@@ -8,6 +8,7 @@ import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import java.util.*
 
 class StreamTest : StringSpec() {
 	lateinit var koin: Koin
@@ -27,19 +28,19 @@ class StreamTest : StringSpec() {
 	}
 
 	init {
-//		"Test if the ignite stream works" {
-//			val stream = IgniteStream("slow", )
-//
-//			val l: (String, Int) -> Unit = { k,v ->
-//				println(k)
-//			}
-//
-//			stream.listen(l)
-//
-//			stream.append("Hello", 12)
-//			stream.append("World", 13)
-//			stream.append("Scynet", 14)
-//		}
+		"Test if the ignite stream works" {
+			val stream = IgniteStream("slow", "localhost:6969", "StockPrediction", Properties())
+
+			val l: (String, Int) -> Unit = { k,v ->
+				println(k)
+			}
+
+			stream.listen(l)
+
+			stream.append("Hello", 12)
+			stream.append("World", 13)
+			stream.append("Scynet", 14)
+		}
 
 	}
 

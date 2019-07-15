@@ -3,6 +3,7 @@ package ai.scynet.core.processors
 import ai.scynet.common.registry.IgniteRegistry
 import ai.scynet.core.annotations.Inputs
 import ai.scynet.core.processors.Stream
+import ai.scynet.common.registry.*
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.descriptors.ProcessorDescriptor
 import ai.scynet.core.descriptors.StreamDescriptor
@@ -10,6 +11,7 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import org.koin.core.qualifier.named
 import java.util.*
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
@@ -18,7 +20,7 @@ import kotlin.reflect.full.findAnnotation
 class ProcessorFactory: KoinComponent {
 
 	val ignite: Ignite by inject()
-	val registry: IgniteRegistry<String, Stream> by inject()
+	val registry: Registry<String, Stream> by inject(named("streamRegistry"))
 	var state: IgniteCache<String, String> = ignite.getOrCreateCache("processorFactoryState")
 
 	init {
