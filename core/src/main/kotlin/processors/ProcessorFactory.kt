@@ -13,6 +13,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.qualifier.named
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
@@ -27,6 +28,14 @@ class ProcessorFactory: KoinComponent {
 		//this.state!! = ignite.getOrCreateCache("PF:${uri.query.id}")
 		println("Initializing processor factory.")
 		println("stub")
+	}
+
+	fun create(processorConfigurations: MutableList<ProcessorConfiguration>): MutableList<Processor>{
+		val processors = ArrayList<Processor>()
+		for(configuration in processorConfigurations){
+			processors.add(create(configuration))
+		}
+		return processors
 	}
 
 	fun create(processorConfiguration: ProcessorConfiguration): Processor {
