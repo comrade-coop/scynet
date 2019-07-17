@@ -8,10 +8,18 @@ mainClassName = "ai.scynet.core.AppKt"
 dependencies {
     compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.7.5'
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-script-util:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version"
+
+//    compile "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
+//    compile "org.jetbrains.kotlin:kotlin-script-util:$kotlin_version"
+
+    compile "org.jetbrains.kotlin:kotlin-scripting-common:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlin_version"
+
+
+
+//    compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
+//    compile "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version"
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     // Use the Kotlin JUnit integration.

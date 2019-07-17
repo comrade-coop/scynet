@@ -13,10 +13,12 @@ class IgniteConfigurationBuilder {
         cacheConfigurations.add(CacheConfigurationBuilder().apply(lambda).build())
     }
 
+    var name = ""
+
     fun build(): IgniteConfiguration {
         config.apply {
             setPeerClassLoadingEnabled(true)
-
+            igniteInstanceName = name
             for (configuration in cacheConfigurations) {
                 setCacheConfiguration(configuration)
             }
