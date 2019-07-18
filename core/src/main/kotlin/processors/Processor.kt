@@ -14,5 +14,4 @@ interface Processor: Serializable, LifeCycle {
 	var inputStreams: MutableList<Stream> //For now tied with ignite. TODO: Stream class and different Stream implementations (eg. with ignite)
 	var outputStream: Stream // TODO: Research Compute task continuous mapper and research caches
 	var descriptor: ProcessorDescriptor
-	fun process(): Stream // Should be seen as a producer to connect to a
 }

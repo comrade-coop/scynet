@@ -59,8 +59,6 @@ class IgniteRegistryTest : StringSpec() {
 			})
 
 			registry.put("people", "4")
-
-
 		}
 	}
 }

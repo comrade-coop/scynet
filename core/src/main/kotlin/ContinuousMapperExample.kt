@@ -1,28 +1,45 @@
-package ai.scynet.core.processors
-
-
 import ai.scynet.core.annotations.Inputs
 import ai.scynet.core.annotations.Output
 import ai.scynet.core.annotations.Type
 import ai.scynet.core.descriptors.ProcessorDescriptor
+import ai.scynet.core.processors.IgniteStream
+import ai.scynet.core.processors.Processor
+import ai.scynet.core.processors.Stream
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
+import org.apache.ignite.cache.CacheEntryProcessor
 import org.apache.ignite.cluster.ClusterNode
 import org.apache.ignite.compute.*
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.events.EventType
-import org.apache.ignite.lang.IgniteBiPredicate
-import org.apache.ignite.resources.IgniteInstanceResource
-import org.apache.ignite.resources.JobContextResource
-import org.apache.ignite.resources.TaskContinuousMapperResource
-import org.apache.ignite.resources.TaskSessionResource
+import org.apache.ignite.lang.IgniteFuture
+import org.apache.ignite.resources.*
+import org.apache.ignite.services.Service
+import org.apache.ignite.services.ServiceContext
+
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.sql.Timestamp
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicInteger
+import javax.cache.processor.MutableEntry
+import org.apache.ignite.compute.ComputeJobContext
+import org.apache.ignite.lang.IgniteBiPredicate
+import org.apache.ignite.lang.IgniteClosure
+import org.apache.ignite.resources.JobContextResource
+
 
 
 @ComputeTaskName("BasicConsumerTask")
 @ComputeTaskMapAsync
-class BasicПроцессорTask : ComputeTaskAdapter<String, String>() {
+class BasicConsumerTask : ComputeTaskAdapter<String, String>() {
 
 	@IgniteInstanceResource
 	lateinit var ignite: Ignite
@@ -81,34 +98,33 @@ class BasicПроцессорTask : ComputeTaskAdapter<String, String>() {
 	}
 }
 
-@Inputs([Type("Int"), Type("String"), Type("String")])
-@Output(Type("Tensor"))
-class BasicProcessor: Processor {
-	/*
-		A very basic processor, which implements the core processor interface.
-	*/
+interface S {
+	fun run(it: String)
+}
 
-	override lateinit var inputStreams: MutableList<Stream>
-	override lateinit var outputStream: Stream
-	override lateinit var descriptor: ProcessorDescriptor
-	override lateinit var id: UUID
 
-	init {
-		id = UUID.randomUUID()
-		outputStream = IgniteStream("$id", "localhost:3343", "StockPricePrediction", Properties()) //TODO: Remove hardcoding stuff
-	}
+fun main() {
+	var cfg = IgniteConfiguration()
+	cfg.setPeerClassLoadingEnabled(true)
+	cfg.setIncludeEventTypes(*EventType.EVTS_ALL_MINUS_METRIC_UPDATE)
+	cfg.igniteInstanceName = "NAME"
 
-	override fun stop() {
-		println("Stopping")//To change body of created functions use File | Settings | File Templates.
-	}
+	var ignite = Ignition.start(cfg)
+	ignite.cluster().active()
 
-	override fun start() {
-		println("Starting")
-	}
+	ignite.compute().localDeployTask(BasicConsumerTask::class.java, BasicConsumerTask::class.java.classLoader)
 
-	init {
-		//var output = IgniteStream("[UUID]",)
-		println("Processing")
-		//TODO("Implement")
+	var future = ignite.compute().executeAsync<String, String>("BasicConsumerTask", "random")
+
+
+	while(true) {
+		var line = readLine()
+		if (line == "exit") {
+			future.cancel()
+
+		} else {
+			ignite.message().send("text", line)
+
+		}
 	}
 }

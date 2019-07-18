@@ -2,6 +2,7 @@ import ai.scynet.core.configurations.ConfigurationBase
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
+import ai.scynet.core.configurations.Base
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.CacheConfiguration

@@ -31,8 +31,8 @@ class StreamTest : StringSpec() {
 		"Test if the ignite stream works" {
 			val stream = IgniteStream("slow", "localhost:6969", "StockPrediction", Properties())
 
-			val l: (String, Int) -> Unit = { k,v ->
-				println(k)
+			val l: (String, Int, Int?) -> Unit = { k,v,o ->
+				println("$k: $o -> $v")
 			}
 
 			stream.listen(l)

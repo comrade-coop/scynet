@@ -1,4 +1,4 @@
-import ai.scynet.core.configurations.ConfigurationBase
+import ai.scynet.core.configurations.*
 import ai.scynet.core.processors.BasicProcessor
 import ai.scynet.core.processors.Processor
 import io.kotlintest.shouldBe
