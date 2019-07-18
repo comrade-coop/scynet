@@ -1,31 +1,49 @@
-import configurations.ignite
+import ai.scynet.core.configurations.ConfigurationBase
+import io.kotlintest.Spec
+import io.kotlintest.shouldBe
+import io.kotlintest.specs.StringSpec
+import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
+import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.ignite.configuration.IgniteConfiguration
-import kotlin.test.*
 
 
-class DSLIgniteConfigurationTest{
-    companion object {
-        val config: IgniteConfiguration = ignite {
-            cache {
-                name = "DSL"
-                backups = 1
+class DSLIgniteConfigurationTest: StringSpec(){
+    lateinit var ignite: Ignite
+    override fun beforeSpec(spec: Spec) {
+        super.beforeSpec(spec)
+        val base = ConfigurationBase()
+        val config = base.ignite {
+            igniteInstanceName = "No Name"
+            cache{
+                name = "NoDSL"
             }
         }
-
-        val ignite = Ignition.start(config)
+        ignite = Ignition.start(config)
     }
 
-    @Test fun testCacheWorks(){
-        val cache = ignite.getOrCreateCache<String,String>("GTHANG")
-        cache.put("hello", "world")
-        val result = cache.get("hello")
-        assertEquals("world", result, "Should return hello.")
-        ignite.destroyCache("GTHANG")
+    override fun afterSpec(spec: Spec) {
+        super.afterSpec(spec)
+        ignite.destroyCaches(ignite.cacheNames())
+        ignite.close()
+    }
+    //Should be taken from ConfigurationBase but for some reason is not
+    fun IgniteConfiguration.cache(lamda: CacheConfiguration<*, *>.() -> Unit){
+        this.setCacheConfiguration(CacheConfiguration<Any,Any>().apply(lamda))
     }
 
-    @Test fun testCacheExists(){
-        val DSLcacheExists = ignite.cacheNames().contains("DSL")
-        assertTrue(DSLcacheExists, "should contain cache named DSL.")
+    init {
+        "Test cache works"{
+            val cache = ignite.getOrCreateCache<String,String>("GTHANG")
+            cache.put("hello", "world")
+            val result = cache.get("hello")
+            result shouldBe "world"
+            ignite.destroyCache("GTHANG")
+        }
+
+        "Test NoDSL cache exists"{
+            val DSLcacheExists = ignite.cacheNames().contains("NoDSL")
+            DSLcacheExists shouldBe true
+        }
     }
 }

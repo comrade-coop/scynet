@@ -1,8 +1,3 @@
-package configurations
-
-import ai.scynet.core.processors.BasicProcessor
-import java.util.*
-
 processors {
     processor {
         problem = "no problem"

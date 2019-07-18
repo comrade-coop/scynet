@@ -1,4 +1,4 @@
-import configurations.processors
+import ai.scynet.core.configurations.ConfigurationBase
 import ai.scynet.core.processors.BasicProcessor
 import ai.scynet.core.processors.Processor
 import io.kotlintest.shouldBe
@@ -8,7 +8,7 @@ import kotlin.reflect.full.isSubclassOf
 
 class DSLProcessorConfigurationTest: StringSpec(){
     companion object {
-        val processorConfigurations = processors {
+        val processorConfigurations = ConfigurationBase().processors {
             processor {
                 problem = "Problem"
                 processorClass = BasicProcessor::class
@@ -50,8 +50,5 @@ class DSLProcessorConfigurationTest: StringSpec(){
             configProblem.properties shouldBe properties
             configProblem.properties shouldBe properties
         }
-
-
-
     }
 }
