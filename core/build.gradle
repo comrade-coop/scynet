@@ -10,9 +10,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-scripting-common:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlin_version"
-    // Use the Kotlin test library.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    // Use the Kotlin JUnit integration.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-scripting-jvm-host-embeddable
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-scripting-jvm-host-embeddable', version: '1.3.41'
 }
