@@ -8,18 +8,11 @@ mainClassName = "ai.scynet.core.AppKt"
 dependencies {
     compile group: 'org.apache.ignite', name: 'ignite-core', version: '2.7.5'
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    
+
     compile "org.jetbrains.kotlin:kotlin-scripting-common:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlin_version"
-<<<<<<< HEAD
+
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-scripting-jvm-host-embeddable
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-scripting-jvm-host-embeddable', version: '1.3.41'
-=======
-    compile "org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlin_version"
-    
-    // Use the Kotlin test library.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    // Use the Kotlin JUnit integration.
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
->>>>>>> Makes the processor model right, but the streams don't work consistently very well
+
 }

@@ -32,7 +32,7 @@ class IgniteStream(name: String, hostAddress: String, problem: String, propertie
 		// URI STANDARD: stream://[owner_id]@[host_address]?config=data#[problem]
 		descriptor = StreamDescriptor.fromStringURI("stream://$ownerId@$this.hostAddress?$mockConfig#$this.problem")
 
-		streamer.autoFlushFrequency()
+//		streamer.autoFlushFrequency()
 	}
 
 	override fun <K, V> listen(callback: (K, V, V?) -> Unit) : AutoCloseable {
@@ -49,8 +49,6 @@ class IgniteStream(name: String, hostAddress: String, problem: String, propertie
 		}
 
 		query.initialQuery = ScanQuery<K,V>()
-		var c: AutoCloseable = cache.query(query)
-
 		var cursor = cache.query(query)
 
 		realListener = {
@@ -69,6 +67,6 @@ class IgniteStream(name: String, hostAddress: String, problem: String, propertie
 
 	override fun <K, V> append(key: K, value: V) {
 		streamer.addData(key, value)
-//		streamer.flush()
+		streamer.flush()
 	}
 }
