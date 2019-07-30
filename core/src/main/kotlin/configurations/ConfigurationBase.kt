@@ -1,9 +1,8 @@
 package ai.scynet.core.configurations
 
-import configurations.ProcessorConfigurationBuilder
-
 import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.ignite.configuration.IgniteConfiguration
+import kotlin.collections.ArrayList
 
 //TODO: https://discuss.kotlinlang.org/t/make-auto-completion-work-in-kotlin-scripts-with-context/10185/12
 
@@ -11,14 +10,17 @@ import org.apache.ignite.configuration.IgniteConfiguration
 open class ConfigurationBase {
 	companion object {
 		var igniteConfiguration = IgniteConfiguration()
+		var processorConfigurations = ArrayList<ProcessorConfiguration>()
 	}
-	 fun processors(lambda: ProcessorConfigurationBuilder.() -> Unit): MutableList<ProcessorConfiguration> {
-		 return ProcessorConfigurationBuilder().apply(lambda).build()
+
+	fun processors(lambda: ProcessorConfigurationBuilder.() -> Unit): MutableList<ProcessorConfiguration> {
+		 processorConfigurations =  ProcessorConfigurationBuilder().apply(lambda).build()
+		 return processorConfigurations
 	 }
-	 fun ignite(lambda: IgniteConfiguration.() -> Unit): IgniteConfiguration{
+	fun ignite(lambda: IgniteConfiguration.() -> Unit): IgniteConfiguration{
 		 igniteConfiguration = IgniteConfiguration().apply(lambda)
 		 return igniteConfiguration
-	 }
+	}
 	fun IgniteConfiguration.cache(lamda: CacheConfiguration<*,*>.() -> Unit){
 		this.setCacheConfiguration(CacheConfiguration<Any,Any>().apply(lamda))
 	}

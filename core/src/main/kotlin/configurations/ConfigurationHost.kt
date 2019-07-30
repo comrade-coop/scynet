@@ -3,6 +3,7 @@ package ai.scynet.core.configurations
 import org.apache.ignite.configuration.IgniteConfiguration
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.baseClass
+import kotlin.script.experimental.api.defaultImports
 import kotlin.script.experimental.api.fileExtension
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvm.BasicJvmScriptEvaluator
@@ -18,14 +19,30 @@ class ConfigurationHost {
    private val compilationConfiguration = ScriptCompilationConfiguration {
         fileExtension("kts")
 
+       defaultImports.append(
+               "ai.scynet.core.processors.BasicProcessor",
+               "ai.scynet.core.processors.BasicConsumerProcessor",
+               "java.util.*"
+       )
         jvm {
-            baseClass(ConfigurationBase::class)
+            baseClass( ConfigurationBase::class)
             dependenciesFromCurrentContext(wholeClasspath = true)
         }
     }
 
     fun getIgniteConfiguration(scriptName: String): IgniteConfiguration{
-        host.eval(ClassLoader.getSystemClassLoader().getResourceAsStream(scriptName).reader().readText().toScriptSource(), compilationConfiguration, null)
+        val result = host.eval(ClassLoader.getSystemClassLoader().getResourceAsStream(scriptName).reader().readText().toScriptSource(), compilationConfiguration, null)
+        if(result.reports.isNotEmpty()){
+            result.reports.forEach(::println)
+        }
         return ConfigurationBase.igniteConfiguration
+    }
+
+    fun getProcessorConfigurations(scriptName: String): MutableList<ProcessorConfiguration>{
+        val result = host.eval(ClassLoader.getSystemClassLoader().getResourceAsStream(scriptName).reader().readText().toScriptSource(), compilationConfiguration, null)
+        if(result.reports.isNotEmpty()){
+            result.reports.forEach(::println)
+        }
+        return ConfigurationBase.processorConfigurations
     }
 }

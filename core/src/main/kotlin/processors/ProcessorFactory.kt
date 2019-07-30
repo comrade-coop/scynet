@@ -70,7 +70,6 @@ class ProcessorFactory: KoinComponent {
 			inputStreamDescriptors,
 			processor.outputStream.descriptor // Output is built runtime so this won't work 100%, but it's just pseudo-code for now
 		)
-
 		// processor.engage() should be invoked in processor.process()
 		// processor.process() should initialize processor.outputStream
 		return processor

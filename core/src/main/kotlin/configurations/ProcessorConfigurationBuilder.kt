@@ -1,12 +1,13 @@
-package configurations
+package ai.scynet.core.configurations
 
-import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.processors.BasicProcessor
 import ai.scynet.core.processors.Processor
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
 class ProcessorConfigurationBuilder{
+//    public ProcessorConfigurationBuilder(){}
     private val configurations = ArrayList<ProcessorConfiguration>()
 
     var problem: String = ""
@@ -16,7 +17,7 @@ class ProcessorConfigurationBuilder{
 
 
 
-    fun build(): MutableList<ProcessorConfiguration>{
+    fun build(): ArrayList<ProcessorConfiguration>{
         return configurations
     }
 

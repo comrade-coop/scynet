@@ -1,7 +1,7 @@
 import ai.scynet.common.registry.*
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.processors.*
-import configurations.ProcessorConfigurationBuilder
+import ai.scynet.core.configurations.ProcessorConfigurationBuilder
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldHave

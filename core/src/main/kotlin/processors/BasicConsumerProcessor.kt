@@ -77,7 +77,7 @@ class BasicConsumerProcessor : Processor, KoinComponent {
 	override lateinit var descriptor: ProcessorDescriptor
 	override lateinit var id: UUID
 
-	override var outputStream: Stream = IgniteStream("guz", "localhost", "wordcount", Properties())
+	override var outputStream: Stream = IgniteStream("WordCount", "localhost", "wordcount", Properties())
 
 
 	val ignite: Ignite by inject()

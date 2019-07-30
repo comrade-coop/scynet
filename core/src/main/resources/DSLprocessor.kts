@@ -1,4 +1,5 @@
-processors {
+
+processors{
     processor {
         problem = "no problem"
         processorClass = BasicProcessor::class

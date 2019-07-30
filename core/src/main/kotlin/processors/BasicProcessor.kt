@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @ComputeTaskName("BasicConsumerTask")
 @ComputeTaskMapAsync
-class BasicПроцессорTask : ComputeTaskAdapter<String, String>() {
+class BasicProcessorTask : ComputeTaskAdapter<String, String>() {
 
 	@IgniteInstanceResource
 	lateinit var ignite: Ignite
@@ -103,7 +103,10 @@ class BasicProcessor: Processor {
 	}
 
 	override fun start() {
-		println("Starting")
+		val stream = inputStreams.get(0)
+		stream.listen { key: String, value: String, old: String? ->
+			println("$key: $old -> $value")
+		}
 	}
 
 	init {
