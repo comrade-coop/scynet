@@ -50,3 +50,12 @@ if (hasProperty('buildScan')) {
 		termsOfServiceAgree = 'yes'
 	}
 }
+
+
+subprojects.findAll { it.name != 'core' }.each {
+	configure(it) {
+		dependencies {
+			implementation project(':core')
+		}
+	}
+}

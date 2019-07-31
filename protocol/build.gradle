@@ -3,3 +3,11 @@ plugins {
 }
 
 version 'unspecified'
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.tensorflow/tensorflow
+    implementation group: 'org.tensorflow', name: 'tensorflow', version: '1.14.0'
+    implementation project(':evaluator')
+    implementation project(':trainer')
+    implementation project(':executor')
+}
