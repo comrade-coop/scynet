@@ -8,10 +8,17 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    val host = ConfigurationHost()
-    val config = host.getIgniteConfiguration("DSLconfig.kts")
+	val host = ConfigurationHost()
+	val processorConfigurations = host.getProcessorConfiguration("processors.kts")
+	val config = host.getIgniteConfiguration("ignite.kts")
+
+	println(processorConfigurations)
+	println(config)
+
+	exitProcess(0);
 
     startKoin {
         printLogger()

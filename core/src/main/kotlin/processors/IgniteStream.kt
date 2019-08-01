@@ -53,7 +53,6 @@ class IgniteStream(name: String, hostAddress: String, problem: String, propertie
 
 		realListener = {
 			for (entry in it) {
-				println(it)
 				callback(entry.key, entry.value, entry.oldValue)
 			}
 		}

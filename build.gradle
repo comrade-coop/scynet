@@ -1,6 +1,9 @@
 plugins {
 	id "org.jetbrains.dokka" version '0.9.18'
+//	id "idea"
 }
+
+version '1.0.0'
 
 allprojects {
 	repositories {
@@ -10,28 +13,39 @@ allprojects {
 
 subprojects {
 	apply plugin: "java"
-	apply plugin: "idea"
+	apply plugin: "maven-publish"
+	group 'ai.scynet'
 
 	dependencies {
 		implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 		// https://github.com/kotlintest/kotlintest
 		testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.0'
 		// https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
-		testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '2.0.0-alpha0'
+        testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '2.0.0-alpha0'
 		// https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-		compile group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha0'
-		compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+		implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 		// https://github.com/mockk/mockk
 		testImplementation "io.mockk:mockk:1.9.3"
 		// https://insert-koin.io/docs/2.0/documentation/reference/index.html
-		compile 'org.koin:koin-core:2.0.1'
-		testCompile 'org.koin:koin-test:2.0.1'
+		implementation group: 'org.koin', name: 'koin-core', version: '2.0.1'
+		testImplementation 'org.koin:koin-test:2.0.1'
 	}
 
 	test {
 		useJUnitPlatform()
 	}
 
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+				afterEvaluate {
+					artifactId = jar.archiveBaseName.get()
+				}
+			}
+		}
+	}
 }
 
 // https://github.com/Kotlin/dokka
@@ -59,3 +73,4 @@ subprojects.findAll { it.name != 'core' }.each {
 		}
 	}
 }
+

@@ -7,6 +7,7 @@ import kotlin.script.experimental.api.defaultImports
 import kotlin.script.experimental.api.fileExtension
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvm.BasicJvmScriptEvaluator
+import kotlin.script.experimental.jvm.dependenciesFromClassloader
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
@@ -19,14 +20,14 @@ class ConfigurationHost {
    private val compilationConfiguration = ScriptCompilationConfiguration {
         fileExtension("kts")
 
-       defaultImports.append(
-               "ai.scynet.core.processors.BasicProcessor",
-               "ai.scynet.core.processors.BasicConsumerProcessor",
-               "java.util.*"
-       )
+        defaultImports.append(
+                "ai.scynet.core.processors.*",
+                "java.util.*"
+        )
+
         jvm {
-            baseClass( ConfigurationBase::class)
-            dependenciesFromCurrentContext(wholeClasspath = true)
+            baseClass(ConfigurationBase::class)
+            dependenciesFromClassloader(wholeClasspath = true, classLoader = ClassLoader.getSystemClassLoader())
         }
     }
 
