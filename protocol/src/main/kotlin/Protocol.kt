@@ -2,6 +2,7 @@ package ai.scynet.protocol
 
 import ai.scynet.common.registry.JobRegistry
 import ai.scynet.common.registry.Registry
+import org.tensorflow.Tensor
 
 interface Protocol {
     val jobRegistry: JobRegistry<*>

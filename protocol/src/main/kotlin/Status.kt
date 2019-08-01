@@ -1,5 +1,7 @@
 package ai.scynet.protocol
 
-enum class Status {
-    UNTRAINED, TRAINED, VALIDATED
-}
+sealed class Status
+object UNTRAINED : Status()
+data class TRAINED(val prediction: Double) : Status()
+data class VALIDATED(val loss: Double): Status()
+

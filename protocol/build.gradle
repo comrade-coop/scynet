@@ -6,6 +6,7 @@ version 'unspecified'
 
 dependencies {
     // https://mvnrepository.com/artifact/org.tensorflow/tensorflow
+    // I am not sure we need this for real?
     implementation group: 'org.tensorflow', name: 'tensorflow', version: '1.14.0'
     implementation project(':evaluator')
     implementation project(':trainer')
