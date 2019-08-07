@@ -6,7 +6,7 @@ import common.registry.exceptions.TrainingJobDoesNotExistException
 import common.registry.exceptions.TrainingJobExistsException
 import org.apache.ignite.IgniteCache
 
-class IgniteJobRegistry<K>:IgniteRegistry<K, TrainingJob<*,*>>("IgniteJobRegistry"), JobRegistry<K>{
+class IgniteJobRegistry<K>(name:String):IgniteRegistry<K, TrainingJob<*,*>>(name), JobRegistry<K>{
     var takenJobs: IgniteCache<K, Boolean>
     init {
         cache = ignite.getOrCreateCache<K,TrainingJob<*,*>>("jobRegistry")

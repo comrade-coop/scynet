@@ -1,5 +1,7 @@
 package ai.scynet.protocol
 
+import ai.scynet.protocol.exceptions.JobNotAvailableException
+
 interface IProtocol<K> {
     fun addJob(key: K, trainingJob: TrainingJob<*,*>)
 
@@ -8,4 +10,7 @@ interface IProtocol<K> {
     fun addDataset(key: K, dataset: Dataset<*,*>)
 
     fun queryDataset(predicate: (K, Dataset<*,*>) -> Boolean, callback: (K, Dataset<*,*>) -> Unit): Cursor<K,Dataset<*,*>>
+
+    @Throws(JobNotAvailableException::class)
+    fun takeJob(key: K)
 }
