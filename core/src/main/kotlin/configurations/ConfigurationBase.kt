@@ -10,11 +10,11 @@ import kotlin.collections.ArrayList
 open class ConfigurationBase {
 	companion object {
 		var igniteConfiguration = IgniteConfiguration()
-		var processorConfiguration: MutableList<ProcessorConfiguration> = mutableListOf()
+		var processorConfigurations: MutableList<ProcessorConfiguration> = mutableListOf()
 	}
 	 fun processors(lambda: ProcessorConfigurationBuilder.() -> Unit): MutableList<ProcessorConfiguration> {
-		 processorConfiguration = ProcessorConfigurationBuilder().apply(lambda).build()
-		 return processorConfiguration
+		 processorConfigurations = ProcessorConfigurationBuilder().apply(lambda).build()
+		 return processorConfigurations
 	 }
 
 	 fun ignite(lambda: IgniteConfiguration.() -> Unit): IgniteConfiguration{

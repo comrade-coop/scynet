@@ -22,7 +22,8 @@ class ConfigurationHost {
 
         defaultImports.append(
                 "ai.scynet.core.processors.*",
-                "java.util.*"
+                "java.util.*",
+                "org.apache.ignite.services.ServiceConfiguration"
         )
 
         jvm {
