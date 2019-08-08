@@ -11,20 +11,25 @@ from model_parser.keras_parser import build_model, load_json
 class Trainer():
     '''
         'data' should be a dictionary that contains x, y data
-        - data.x
-        - data.y
+            - data.x
+            - data.y
+
+        'config' should be a dictionary with the following structure
+            - environment: Environment
+            - type: Problem Type (reinforcement | classificaiton | unsupervised | semi-supervised)
     '''
 
-    def __init__(self, data, evaluator):
+    def __init__(self, data, config):
         self.data = data
-        self.evaluator = evaluator
+        self.config = config
+        self.environment = config['environment']
         pass
 
     def train(self, json_model, epochs=10, test_split=0.1, validation_split=0.1):
         
         # TODO Discuss python io - ignite process and add stdin input()
         keras_json = load_json(json_model)
-        keras_json['loss'] = self.evaluator.loss
+        keras_json['loss'] = self.environment.loss
         keras_model, input_metadata = build_model(keras_json)
 
         data_size = len(self.data["x"])

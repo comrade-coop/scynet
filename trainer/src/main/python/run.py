@@ -12,7 +12,7 @@ sys.path.append(
         "../../../../evaluator/src/main/python/"
     )
 )
-from custom_eval import CustomEvaluator
+from custom_env import CustomEvaluator
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 
@@ -24,7 +24,12 @@ if __name__ == "__main__":
 
     evaluator = CustomEvaluator
     
-    trainer = Trainer({ "x": x, "y": y }, evaluator)
+    trainer = Trainer(
+        { "x": x, "y": y },
+        {
+            "type" : "classification",
+            "environment": evaluator
+        })
 
     # trainer.train(input())
     trainer.train("./test.json")
