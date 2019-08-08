@@ -1,0 +1,12 @@
+
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace != null && requested.id.namespace.startsWith("org.jetbrains.kotlin")) {
+                useVersion kotlin_version
+            }
+        }
+    }
+}
+
+rootProject.name = 'gattakka-queen'
