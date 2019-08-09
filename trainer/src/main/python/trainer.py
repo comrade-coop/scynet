@@ -7,8 +7,12 @@ from time import sleep
 from model_parser.keras_parser import build_model, load_json
 # import custom loss from the evaluator
 
+# Tricks for the STD communication
+# real_stdout = sys.stdout
+# sys.stdout = sys.stderr
+# 
 
-class Trainer():
+class Trainer:
     '''
         'data' should be a dictionary that contains x, y data
             - data.x
@@ -16,22 +20,36 @@ class Trainer():
 
         'config' should be a dictionary with the following structure
             - environment: Environment
+            - is_executor: Boolean
             - type: Problem Type (reinforcement | classificaiton | unsupervised | semi-supervised)
+
+        'split_strategy' should be a function that does the train,test,valthe 'data' dictionary
+            - accepts validation and test coefficients (eg. 0.1 -> 10%)
+            - returns x_train, y_train, x_test, y_test, validation_split_coefficient
+        Check the source for more info
     '''
 
-    def __init__(self, data, config):
+    def __init__(self, data, config, split_strategy=None):
         self.data = data
         self.config = config
         self.environment = config['environment']
-        pass
 
-    def train(self, json_model, epochs=10, test_split=0.1, validation_split=0.1):
+        if split_strategy is not None:
+            self.split_strategy = split_strategy
+
+        # if self.config["is_executor"]:
+            
+    def predict(self, data=None):
+        if data is None:
+            return self.keras_model.predict(self.data["x_test"])
+        else:
+            return self.keras_model.predict(data)
+
+    def swap_data(self, data):
+        self.data = data
+    
+    def split_strategy(self, test_split, validation_split):
         
-        # TODO Discuss python io - ignite process and add stdin input()
-        keras_json = load_json(json_model)
-        keras_json['loss'] = self.environment.loss
-        keras_model, input_metadata = build_model(keras_json)
-
         data_size = len(self.data["x"])
         test_data_len = int(test_split * data_size)
 
@@ -41,17 +59,44 @@ class Trainer():
         x_test = self.data["x"][:test_data_len]
         y_test = self.data["y"][:test_data_len]
 
-        keras_model.summary()
-        keras_model.fit(x_train, y_train, epochs=10, validation_split=validation_split)
-        val_loss = keras_model.evaluate(x_test, y_test)
+        return x_train, y_train, x_test, y_test, validation_split
+    
+    def save_model(self):
+        # TODO Implement
+        pass
 
-        # This is if we are going to use stdin TODO Discuss
+    def restore_model(self, json, weights):
+        # TODO Implement
+        pass
+
+    def train(self, json_model, epochs, std=True):
+        
+        # TODO Discuss python io - ignite process and add stdin input()
+        if not std: # if it is not True json_model should be input()
+            keras_json = load_json(json_model)
+        else:
+            keras_json = json.loads(json_model)
+
+        keras_json['loss'] = self.environment.loss
+        self.keras_model, input_metadata = build_model(keras_json)
+        
+        x_train, y_train, x_test, y_test, validation_split = self.split_strategy(0.1, 0.1)
+
+        self.data["x_train"] = x_train
+        self.data["y_train"] = y_train 
+        self.data["x_test"] = x_test
+        self.data["y_test"] = y_test
+
+        self.keras_model.summary()
+        self.keras_model.fit(
+            self.data["x_train"],
+            self.data["y_train"],
+            epochs=epochs,
+            validation_split=validation_split
+        )
+        val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+
+        # std communication TODO Discuss
         
         # print('score = ' + str(-val_loss), file=real_stdout) 
         # print('display_score = ' + str(-val_loss), file=real_stdout)
-
-
-# NICE: Parsing works
-
-
-# print(keras_model.predict(x_test))

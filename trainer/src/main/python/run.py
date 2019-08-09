@@ -8,28 +8,34 @@ from model_parser.keras_parser import load_json
 
 sys.path.append(
     os.path.join(
-        os.path.dirname(__file__), 
+        os.path.dirname(__file__),
         "../../../../evaluator/src/main/python/"
     )
 )
+
 from custom_env import CustomEvaluator
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 
 if __name__ == "__main__":
-    print("Currently in %s" % os.getcwd())
 
     x = np.load('./mock_data/xbnc_n.npy')
     y = np.load('./mock_data/ybnc_n.npy')
 
     evaluator = CustomEvaluator
     
-    trainer = Trainer(
-        { "x": x, "y": y },
-        {
-            "type" : "classification",
-            "environment": evaluator
-        })
+    data = {
+        "x": x,
+        "y": y
+    }
+
+    config = {
+        "type" : "classification",
+        "environment": evaluator
+    }
+
+    trainer = Trainer(data, config)
 
     # trainer.train(input())
-    trainer.train("./test.json")
+    trainer.train("./test.json", epochs=3, std=False)
+    # TODO trainer.save and trainer.restore

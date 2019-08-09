@@ -1,0 +1,207 @@
+{
+    "layers": [
+        {
+            "type": "Input",
+            "inputs": [],
+            "config": {
+                "shape": [],
+                "preprocessor": {
+                    "type": "RawPreprocessor",
+                    "config": {
+                        "preprocess_window_length": 133,
+                        "normalization_constant": 0.5625
+                    }
+                },
+                "source": {
+                    "from": "cryptocompare",
+                    "name": "market"
+                }
+            }
+        },
+        {
+            "type": "Dense",
+            "inputs": [
+                0
+            ],
+            "config": {
+                "use_bias": true,
+                "kernel_constraint": null,
+                "kernel_initializer": "constant",
+                "bias_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.1015625,
+                        "l2": 0.14296875
+                    }
+                },
+                "activity_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.18515625000000002,
+                        "l2": 0.17578125
+                    }
+                },
+                "kernel_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.13203125000000002,
+                        "l2": 0.08984375
+                    }
+                },
+                "bias_constraint": null,
+                "units": 232,
+                "bias_initializer": "uniform"
+            }
+        },
+        {
+            "type": "Dense",
+            "inputs": [
+                1
+            ],
+            "config": {
+                "use_bias": false,
+                "kernel_constraint": "max_norm",
+                "kernel_initializer": "truncated_normal",
+                "bias_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.1234375,
+                        "l2": 0.06796875000000001
+                    }
+                },
+                "activity_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.12578125,
+                        "l2": 0.07500000000000001
+                    }
+                },
+                "kernel_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.109375,
+                        "l2": 0.041406250000000006
+                    }
+                },
+                "bias_constraint": "unit_norm",
+                "units": 18,
+                "bias_initializer": "constant"
+            }
+        },
+        {
+            "type": "Dense",
+            "inputs": [
+                2
+            ],
+            "config": {
+                "use_bias": false,
+                "kernel_constraint": "non_neg",
+                "kernel_initializer": "glorot_uniform",
+                "bias_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.029687500000000002,
+                        "l2": 0.1046875
+                    }
+                },
+                "activity_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.11171875,
+                        "l2": 0.045312500000000006
+                    }
+                },
+                "kernel_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.05,
+                        "l2": 0.19296875000000002
+                    }
+                },
+                "bias_constraint": "min_max_norm",
+                "units": 21,
+                "bias_initializer": "glorot_uniform"
+            }
+        },
+        {
+            "type": "Dense",
+            "inputs": [
+                3
+            ],
+            "config": {
+                "use_bias": true,
+                "kernel_constraint": null,
+                "kernel_initializer": "glorot_uniform",
+                "bias_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.10546875,
+                        "l2": 0.05
+                    }
+                },
+                "activity_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.040625,
+                        "l2": 0.10234375000000001
+                    }
+                },
+                "kernel_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.0546875,
+                        "l2": 0.05390625
+                    }
+                },
+                "bias_constraint": null,
+                "units": 228,
+                "bias_initializer": "he_uniform"
+            }
+        },
+        {
+            "type": "Dense",
+            "inputs": [
+                4
+            ],
+            "config": {
+                "use_bias": true,
+                "activation": "sigmoid",
+                "kernel_constraint": null,
+                "kernel_initializer": "uniform",
+                "bias_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.0023437500000000003,
+                        "l2": 0.015625
+                    }
+                },
+                "activity_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.1375,
+                        "l2": 0.13359375
+                    }
+                },
+                "kernel_regularizer": {
+                    "type": "l1_l2",
+                    "config": {
+                        "l1": 0.051562500000000004,
+                        "l2": 0.026562500000000003
+                    }
+                },
+                "bias_constraint": "non_neg",
+                "units": 1,
+                "bias_initializer": "glorot_normal"
+            }
+        }
+    ],
+    "optimizer": {
+        "type": "Adam",
+        "config": {
+            "lr": 1.7734375
+        }
+    },
+    "loss": "mean_squared_error",
+    "window_length": 10,
+    "batch_size": 1
+}
