@@ -3,6 +3,12 @@ import abc
 class ReinforcementEnvironment(abc.ABC):
     '''
         Based on the OpenAI GYM standard
+
+        Interface
+         - observables = {}
+         - get_observations: Observations {}
+         - Other methods for modifying state and working with the environment
+        Should implement different ways to engage and modify state and check observation data
     '''
 
     @abc.abstractmethod
@@ -16,13 +22,13 @@ class ReinforcementEnvironment(abc.ABC):
     @abc.abstractmethod
     def get_initial_observations():
         pass
-    '''
-        Interface
-         - observables = {}
-         - get_observations: Observations {}
-         - Other methods for modifying state and working with the environment
-        Should implement different ways to engage and modify state and check observation data
-    '''
+    
+    @abc.abstractmethod
+    def reward():
+        '''
+            Should return a reward based on the environment state
+        '''
+        pass
     pass
 
 class Evaluator(abc.ABC):
@@ -38,25 +44,8 @@ class Evaluator(abc.ABC):
         '''
         pass
 
-
-class REvaluator(abc.ABC):
+class Environment:
     '''
-        Evaluator interface that needs to be implemented by any reinforcement evaluator
-        ABC - Abstract Base Class
-        TODO Discuss
+        TODO Think the OOP through
     '''
-    @abc.abstractmethod
-    def environment():
-        '''
-            Should return an already implemented ReinforcementEnvironment class and set self.environment
-        '''
-        pass
-    
-
-    @abc.abstractmethod
-    def reward(self):
-        '''
-            Should return a reward based on the environment state
-        '''
-        pass
-    
+    pass
