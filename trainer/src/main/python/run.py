@@ -31,11 +31,16 @@ if __name__ == "__main__":
 
     config = {
         "type" : "classification",
-        "environment": evaluator
+        "is_executor": False,
+        "split_strategy": None,
+        "environment": evaluator,
     }
 
     trainer = Trainer(data, config)
 
     # trainer.train(input())
-    trainer.train("./test.json", epochs=3, std=False)
+    trainer.restore_model("./testmodel.h5", "./test.json")
+    #trainer.train("./test.json", epochs=2, std=False)
+    #trainer.save_model("./testmodel.h5", "./test.json")
+    print(trainer.predict(x))
     # TODO trainer.save and trainer.restore
