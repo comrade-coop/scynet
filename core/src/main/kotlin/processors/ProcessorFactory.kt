@@ -1,8 +1,5 @@
 package ai.scynet.core.processors
 
-import ai.scynet.common.registry.IgniteRegistry
-import ai.scynet.core.annotations.Inputs
-import ai.scynet.core.processors.Stream
 import ai.scynet.common.registry.*
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.descriptors.ProcessorDescriptor
@@ -68,7 +65,7 @@ class ProcessorFactory: KoinComponent {
 			processorConfiguration.problem,
 			processorConfiguration.properties,
 			inputStreamDescriptors,
-			processor.outputStream.descriptor // Output is built runtime so this won't work 100%, but it's just pseudo-code for now
+			StreamDescriptor(UUID.randomUUID(), Properties(), "", "", "")//processor.outputStream.descriptor // Output is built runtime so this won't work 100%, but it's just pseudo-code for now
 		)
 		// processor.engage() should be invoked in processor.process()
 		// processor.process() should initialize processor.outputStream

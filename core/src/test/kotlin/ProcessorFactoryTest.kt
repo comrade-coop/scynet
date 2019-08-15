@@ -1,10 +1,9 @@
 import ai.scynet.common.registry.*
+import ai.scynet.core.common.registry.IgniteRegistry
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.processors.*
-import ai.scynet.core.configurations.ProcessorConfigurationBuilder
 import io.kotlintest.Spec
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldHave
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
 import kotlinx.coroutines.delay

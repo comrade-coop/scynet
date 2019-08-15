@@ -7,7 +7,6 @@ import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
 class ProcessorConfigurationBuilder{
-//    public ProcessorConfigurationBuilder(){}
     private val configurations = ArrayList<ProcessorConfiguration>()
 
     var problem: String = ""

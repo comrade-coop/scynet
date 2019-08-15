@@ -1,7 +1,7 @@
 package ai.scynet.core
 
-import ai.scynet.common.registry.IgniteRegistry
 import ai.scynet.common.registry.Registry
+import ai.scynet.core.common.registry.IgniteRegistry
 import ai.scynet.core.configurations.ConfigurationHost
 import ai.scynet.core.processors.*
 import org.apache.ignite.Ignite

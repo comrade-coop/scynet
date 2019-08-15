@@ -2,7 +2,8 @@ package ai.scynet.protocol
 
 import ai.scynet.common.registry.Registry
 import ai.scynet.protocol.exceptions.JobNotAvailableException
-import common.registry.JobRegistry
+import JobRegistry
+import ai.scynet.core.common.registry.cursors.Cursor
 
 
 abstract class Protocol<K>(): IProtocol<K> {
@@ -29,7 +30,7 @@ abstract class Protocol<K>(): IProtocol<K> {
         }
     }
 
-    override fun queryJobs(predicate: (K, TrainingJob<*,*>) -> Boolean, callback: (K, TrainingJob<*,*>) -> Unit): Cursor<K,TrainingJob<*,*>> {
+    override fun queryJobs(predicate: (K, TrainingJob<*,*>) -> Boolean, callback: (K, TrainingJob<*,*>) -> Unit): Cursor<K, TrainingJob<*, *>> {
         return  jobRegistry.query(predicate, callback)
     }
 
