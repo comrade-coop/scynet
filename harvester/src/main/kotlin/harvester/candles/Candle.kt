@@ -38,8 +38,7 @@ enum class Candle: ICandle {
 
     override fun addTicker(ticker: Ticker) {
         val average = (ticker.bid.toDouble() + ticker.ask.toDouble()) / 2
-        if(open == null)
-            openCandidate(ticker.timestamp.time)
+        openCandidate(ticker.timestamp.time)
         if(average < low)
             low = average
         if(average > high)

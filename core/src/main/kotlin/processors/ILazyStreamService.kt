@@ -2,12 +2,10 @@ package processors
 
 import org.apache.ignite.services.Service
 
-interface IContinuousStreamService: Service{
+interface ILazyStreamService<V>: Service{
     val engagementTimeoutSeconds: Int
 
-    fun engageLiveStream() {
-        //TODO: Self cancel() after engagementTimeoutSeconds since the last engage
-    }
+    fun engageLiveStream()
 
     fun fillMissingStreamData(from: Long, to: Long)
 

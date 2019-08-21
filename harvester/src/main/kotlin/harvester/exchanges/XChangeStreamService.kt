@@ -7,10 +7,12 @@ import io.reactivex.disposables.Disposable
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.dto.marketdata.Ticker
-import processors.ContinuousStreamService
+import processors.LazyStreamService
 import java.util.*
 
-class XChangeStreamService(properties: Properties): ContinuousStreamService<Ticker>(30) {
+class XChangeStreamService(properties: Properties): LazyStreamService<Ticker>() {
+
+
 
     private val exchange = properties.get("xchange") as IExchange
     private val currencyPair = properties.get("currencyPair") as CurrencyPair
@@ -19,8 +21,9 @@ class XChangeStreamService(properties: Properties): ContinuousStreamService<Tick
     private lateinit var xChangeStream: Disposable
 
     override fun execute(ctx: ServiceContext?) {
+        super.execute(ctx)
+
         xchange = StreamingExchangeFactory.INSTANCE.createExchange(exchange.getExchangeClassName())
-        println("Starting $serviceName")
         //Some xchanges need  ProductSubscription
         val productSubscription = ProductSubscription
                 .create()
@@ -29,8 +32,7 @@ class XChangeStreamService(properties: Properties): ContinuousStreamService<Tick
 
         xchange.connect(productSubscription).blockingAwait()
         println("Exchange connected")
-        xChangeStream = xchange.streamingMarketDataService.getTicker(currencyPair).subscribe {
-            ticker -> println(ticker)
+        xChangeStream = xchange.streamingMarketDataService.getTicker(currencyPair).subscribe { ticker ->
             cache.put(ticker.timestamp.time, ticker)
         }
     }
