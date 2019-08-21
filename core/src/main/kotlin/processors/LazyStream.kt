@@ -5,15 +5,17 @@ import org.apache.ignite.IgniteCache
 import org.apache.ignite.cache.query.ContinuousQuery
 import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.cluster.ClusterGroup
+import org.apache.ignite.services.ServiceDescriptor
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
 
-abstract class LazyStream<V>(private val id: UUID, private val streamService: ILazyStreamService<V> ): KoinComponent {
+abstract class LazyStream<V>(private val id: UUID): KoinComponent {
+    protected open val streamService: ILazyStreamService<V>? = null
     private val ignite: Ignite by inject()
     private val cache: IgniteCache<Long, V>
     private val classId = this::class.java.name
-    private lateinit var serviceInstance: ILazyStreamService<V>
+    private var serviceInstance: ILazyStreamService<V>? = null
     private lateinit var  serviceEngagementTimer: ServiceEngagementTimer
 
     private inner class ServiceEngagementTimer(private val delay: Long){
@@ -42,47 +44,51 @@ abstract class LazyStream<V>(private val id: UUID, private val streamService: IL
         return "STREAM|CLASS:$classId|ID:$id"
     }
 
-    private fun getOrCreateService(): ILazyStreamService<V> {
-        if (!::serviceInstance.isInitialized) {
-            try {
-                getServiceProxy()
-                serviceInstance.engagementTimeoutSeconds
-            } catch(e: org.apache.ignite.IgniteException) {
+    protected fun getOrCreateService(): ILazyStreamService<V> {
+        if(serviceInstance == null) {
+            val serviceDescriptors = ignite.services().serviceDescriptors().filter(::descriptorContainsServiceName)
+            if (serviceDescriptors.isEmpty()) {
                 val nodes = getDeploymentNodes()
                 ignite.services().deployClusterSingleton(getCacheName(), streamService)
-                getServiceProxy()
             }
+            serviceInstance = getServiceProxy()
         }
-        return serviceInstance
+        return serviceInstance!!
     }
 
-    private fun getServiceProxy(){
-        serviceInstance = ignite.services().serviceProxy(getCacheName(), ILazyStreamService::class.java,true)
+    private fun descriptorContainsServiceName(descriptor: ServiceDescriptor): Boolean{
+        if(descriptor.name() == getCacheName())
+            return true
+        return false
+    }
+
+    private fun getServiceProxy(): ILazyStreamService<V>{
+        return ignite.services().serviceProxy(getCacheName(), ILazyStreamService::class.java,true)
     }
 
     private fun engageLiveStream(){
-        serviceInstance.engageLiveStream()
+        serviceInstance!!.engageLiveStream()
     }
 
     private  fun engageLiveStreamTimer() {
-        if(!::serviceInstance.isInitialized){
+        if(serviceInstance == null){
             getOrCreateService()
         }
         if(!::serviceEngagementTimer.isInitialized){
-            serviceEngagementTimer = ServiceEngagementTimer(serviceInstance.engagementTimeoutSeconds * 500L)
+            serviceEngagementTimer = ServiceEngagementTimer(serviceInstance!!.engagementTimeoutSeconds * 500L)
         }
         serviceEngagementTimer.start()
     }
     private fun getDeploymentNodes(): ClusterGroup? {
         return null
     }
-    open fun fillMissingStreamData(from: Long, to: Long)  = serviceInstance.fillMissingStreamData(from, to)
+    open fun fillMissingStreamData(from: Long, to: Long)  = serviceInstance!!.fillMissingStreamData(from, to)
 
-    open fun fillMissingStreamData(from: Long) = serviceInstance.fillMissingStreamData(from)
+    open fun fillMissingStreamData(from: Long) = serviceInstance!!.fillMissingStreamData(from)
 
-    open fun refreshStreamData(from: Long, to: Long) = serviceInstance.refreshStreamData(from, to)
+    open fun refreshStreamData(from: Long, to: Long) = serviceInstance!!.refreshStreamData(from, to)
 
-    open fun refreshStreamData(from: Long) = serviceInstance.refreshStreamData(from)
+    open fun refreshStreamData(from: Long) = serviceInstance!!.refreshStreamData(from)
 
     //TODO: Allow more elaborate querying interface
      fun <K, V> listen(callback: (K, V, V?) -> Unit) : AutoCloseable {
@@ -100,6 +106,7 @@ abstract class LazyStream<V>(private val id: UUID, private val streamService: IL
 
     open fun disengageStream(){
         serviceEngagementTimer.stop()
+        serviceInstance = null
         println("${getCacheName()} disengaged successfully!")
     }
 }

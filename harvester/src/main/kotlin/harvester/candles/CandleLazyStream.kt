@@ -1,8 +1,13 @@
 package harvester.candles
 
-import org.knowm.xchange.dto.marketdata.Ticker
+import processors.ILazyStreamService
 import processors.LazyStream
 import java.util.*
 
-class CandleLazyStream(inputStream: LazyStream<Ticker>, properties: Properties): LazyStream<Candle>(UUID.randomUUID(), CandleStreamService(properties, inputStream)) {
+val candleServiceProperties = Properties().apply {
+    put("candle", Candle.MINUTE)
+}
+
+class CandleLazyStream(id: UUID): LazyStream<CandleDTO>(id) {
+    override val streamService: ILazyStreamService<CandleDTO> = CandleStreamService(candleServiceProperties)
 }

@@ -11,7 +11,7 @@ import java.util.*
 
 abstract class LazyStreamService<V> : ILazyStreamService<V>, KoinComponent {
 
-    override val engagementTimeoutSeconds = 30
+    override val engagementTimeoutSeconds = 10
     private  val ignite: Ignite by inject()
     protected lateinit var context: ServiceContext
     // cache always has UNIX timestamp as key
@@ -59,28 +59,27 @@ abstract class LazyStreamService<V> : ILazyStreamService<V>, KoinComponent {
 
     }
 
-     private inner class CountDown{
+    private inner class CountDown{
         private val timer = Timer(true)
         private lateinit var task: TimerTask
         fun start(){
             task = getTimerTask()
-            println("Starting CountDown for ${serviceName}!")
+            println("Starting CountDown for $serviceName!")
             this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
         }
         fun restart(){
             stop()
             start()
         }
-        fun stop(){
+        private fun stop(){
             task.cancel()
             timer.purge()
         }
 
-         private fun getTimerTask(): TimerTask = object : TimerTask(){
-                 override fun run() {
-                     cancel(context)
-                 }
+        private fun getTimerTask(): TimerTask = object : TimerTask(){
+             override fun run() {
+                 ignite.services().cancel(serviceName)
              }
-
+        }
     }
 }

@@ -1,5 +1,6 @@
 package harvester.candles
 
+import harvester.exchanges.XChangeLazyStream
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.dto.marketdata.Ticker
 import processors.LazyStream
@@ -7,10 +8,8 @@ import processors.LazyStreamService
 import java.util.*
 import kotlin.collections.HashMap
 
-class CandleStreamService(properties: Properties, private val inputStream: LazyStream<Ticker>): LazyStreamService<Candle>(){
-
-    private var timer = Timer()
-
+class CandleStreamService(properties: Properties): LazyStreamService<CandleDTO>(){
+    private val inputStream: LazyStream<Ticker> = XChangeLazyStream(UUID.randomUUID())
     private  val candle = properties["candle"] as ICandle
     private lateinit var tickerStream: AutoCloseable
     private val buffer: HashMap<Long, Ticker> = HashMap()
@@ -66,7 +65,7 @@ class CandleStreamService(properties: Properties, private val inputStream: LazyS
     }
     private fun streamCandle(){
         val candle = candle.getCandle()
-        println("\n $candle \n")
+        cache.put(candle.timestamp, candle)
     }
     private fun emptyBuffer(){
         val toDelete = mutableListOf<Long>()

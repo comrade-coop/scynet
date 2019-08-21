@@ -12,8 +12,6 @@ import java.util.*
 
 class XChangeStreamService(properties: Properties): LazyStreamService<Ticker>() {
 
-
-
     private val exchange = properties.get("xchange") as IExchange
     private val currencyPair = properties.get("currencyPair") as CurrencyPair
 

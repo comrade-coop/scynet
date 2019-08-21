@@ -14,5 +14,4 @@ interface ILazyStreamService<V>: Service{
     fun refreshStreamData(from: Long, to: Long)
 
     fun refreshStreamData(from: Long)
-
 }

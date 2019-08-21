@@ -1,21 +1,18 @@
 package harvester
 
-import harvester.candles.Candle
+import harvester.candles.CandleDTO
 import harvester.candles.CandleLazyStream
-import harvester.exchanges.Exchange
-import harvester.exchanges.XChangeLazyStream
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
-import org.knowm.xchange.currency.CurrencyPair
-import org.knowm.xchange.dto.marketdata.Ticker
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.util.*
+import kotlin.system.exitProcess
 
 fun main(){
     val cfg = IgniteConfiguration()
-    cfg.setIgniteInstanceName("HarvesterTest")
+    cfg.igniteInstanceName = "HarvesterTest"
     val ignite = Ignition.start(cfg)
 
     startKoin {
@@ -25,22 +22,30 @@ fun main(){
         })
     }
 
-    val xChangeServiceProperties = Properties().apply {
-        put("currencyPair", CurrencyPair.BTC_USD)
-        put("xchange", Exchange.COINBASE_PRO)
-    }
+    val lazyCandleStream = CandleLazyStream(UUID.randomUUID())
 
-    val candleServiceProperties = Properties().apply {
-        put("candle", Candle.MINUTE)
+    var cursor = lazyCandleStream.listen{ k: Long, v: CandleDTO, _ ->
+        println("\nStream Output for $k  -->  $v\n")
     }
-    val lazyCandleStream = CandleLazyStream(XChangeLazyStream(UUID.randomUUID(), xChangeServiceProperties),candleServiceProperties)
-
-    var cursor = lazyCandleStream.listen{ k: Long, v: Ticker, _ ->
-        println("Stream Output for $k  -->  $v")
-    }
-    Thread.sleep(300000)
+    Thread.sleep(180000)
     cursor.close()
-    println("\n Disengaging Candle Stream \n")
+
+    println("\nDisengaging Candle Stream \n")
     lazyCandleStream.disengageStream()
 
+    Thread.sleep(30000)
+
+    println("\nRestarting stream\n")
+
+    cursor = lazyCandleStream.listen{ k: Long, v: CandleDTO, _ ->
+        println("\nStream Output for $k  -->  $v\n")
+    }
+    Thread.sleep(180000)
+    cursor.close()
+
+    println("\nDisengaging Candle Stream \n")
+    lazyCandleStream.disengageStream()
+    Thread.sleep(30000)
+
+    exitProcess(0)
 }
