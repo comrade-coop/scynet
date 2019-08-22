@@ -1,14 +1,15 @@
 import abc
 
-class ReinforcementEnvironment(abc.ABC):
+class ReinforcementEvaluator(abc.ABC):
     '''
         Based on the OpenAI GYM standard
+        Every decision behind this is exlpained https://arxiv.org/pdf/1606.01540.pdf
+
+        TODO: We could even use directly the python gym library, it is compatible with Theano, Tensorflow, Torch etc.
 
         Interface
          - observables = {}
-         - get_observations: Observations {}
-         - Other methods for modifying state and working with the environment
-        Should implement different ways to engage and modify state and check observation data
+         - metadata = {}
     '''
 
     @abc.abstractmethod
@@ -16,11 +17,11 @@ class ReinforcementEnvironment(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_observations():
+    def step():
         pass
 
     @abc.abstractmethod
-    def get_initial_observations():
+    def close():
         pass
     
     @abc.abstractmethod
@@ -43,9 +44,3 @@ class Evaluator(abc.ABC):
             Should return a tensorflow differentiable function
         '''
         pass
-
-class Environment:
-    '''
-        TODO Think the OOP through
-    '''
-    pass
