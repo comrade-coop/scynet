@@ -13,24 +13,23 @@ class ReinforcementEvaluator(abc.ABC):
     '''
 
     @abc.abstractmethod
-    def reset():
+    def reset(self):
+        '''
+            returns initial observations
+        '''
         pass
 
     @abc.abstractmethod
-    def step():
+    def step(self, action):
+        '''
+            executes each action and
+            returns observables, reward, condition, ...
+        '''
         pass
 
-    @abc.abstractmethod
-    def close():
-        pass
-    
-    @abc.abstractmethod
-    def reward():
-        '''
-            Should return a reward based on the environment state
-        '''
-        pass
-    pass
+    # @abc.abstractmethod
+    # def close():
+    #     pass
 
 class Evaluator(abc.ABC):
     '''
