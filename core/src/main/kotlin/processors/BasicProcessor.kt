@@ -91,10 +91,9 @@ class BasicProcessor: Processor {
 	override lateinit var inputStreams: MutableList<Stream>
 	override lateinit var outputStream: Stream
 	override lateinit var descriptor: ProcessorDescriptor
-	override lateinit var id: UUID
+	override var id: UUID = UUID.randomUUID()
 
 	init {
-		id = UUID.randomUUID()
 		outputStream = IgniteStream("$id", "localhost:3343", "StockPricePrediction", Properties()) //TODO: Remove hardcoding stuff
 	}
 

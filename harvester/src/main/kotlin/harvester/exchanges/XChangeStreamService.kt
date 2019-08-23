@@ -10,14 +10,19 @@ import org.knowm.xchange.dto.marketdata.Ticker
 import processors.LazyStreamService
 import java.util.*
 
-class XChangeStreamService(properties: Properties): LazyStreamService<Ticker>() {
+class XChangeStreamService: LazyStreamService<Ticker>() {
 
-    private val exchange = properties.get("xchange") as IExchange
-    private val currencyPair = properties.get("currencyPair") as CurrencyPair
+    private lateinit var exchange : IExchange
+    private lateinit var currencyPair : CurrencyPair
 
     private lateinit var xchange: StreamingExchange
     private lateinit var xChangeStream: Disposable
 
+    override fun init(ctx: ServiceContext?) {
+        super.init(ctx)
+        exchange = descriptor!!.properties["xchange"] as IExchange
+        currencyPair = descriptor!!.properties["currencyPair"] as CurrencyPair
+    }
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 

@@ -1,5 +1,6 @@
 package processors
 
+import descriptors.LazyStreamDescriptor
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.cache.query.ContinuousQuery
@@ -9,14 +10,15 @@ import org.apache.ignite.services.ServiceDescriptor
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
+import kotlin.reflect.full.createInstance
 
-abstract class LazyStream<V>(private val id: UUID): KoinComponent {
-    protected open val streamService: ILazyStreamService<V>? = null
+abstract class LazyStream<V>: ILazyStream, KoinComponent {
+    override var descriptor: LazyStreamDescriptor? = null
     private val ignite: Ignite by inject()
-    private val cache: IgniteCache<Long, V>
-    private val classId = this::class.java.name
-    private var serviceInstance: ILazyStreamService<V>? = null
+    private var cache: IgniteCache<Long, V>? = null
+    private var serviceInstance: ILazyStreamService? = null
     private lateinit var  serviceEngagementTimer: ServiceEngagementTimer
+
 
     private inner class ServiceEngagementTimer(private val delay: Long){
         private val  timer = Timer(true)
@@ -37,33 +39,16 @@ abstract class LazyStream<V>(private val id: UUID): KoinComponent {
         }
     }
 
-    init {
-        cache = ignite.getOrCreateCache(getCacheName())
-    }
-    private fun getCacheName():String {
-        return "STREAM|CLASS:$classId|ID:$id"
-    }
 
-    protected fun getOrCreateService(): ILazyStreamService<V> {
-        if(serviceInstance == null) {
-            val serviceDescriptors = ignite.services().serviceDescriptors().filter(::descriptorContainsServiceName)
-            if (serviceDescriptors.isEmpty()) {
-                val nodes = getDeploymentNodes()
-                ignite.services().deployClusterSingleton(getCacheName(), streamService)
-            }
-            serviceInstance = getServiceProxy()
-        }
-        return serviceInstance!!
-    }
 
     private fun descriptorContainsServiceName(descriptor: ServiceDescriptor): Boolean{
-        if(descriptor.name() == getCacheName())
+        if(descriptor.name() == this.descriptor!!.id.toString())
             return true
         return false
     }
 
-    private fun getServiceProxy(): ILazyStreamService<V>{
-        return ignite.services().serviceProxy(getCacheName(), ILazyStreamService::class.java,true)
+    private fun getServiceProxy(): ILazyStreamService{
+        return ignite.services().serviceProxy(descriptor!!.id.toString(), ILazyStreamService::class.java,true)
     }
 
     private fun engageLiveStream(){
@@ -82,16 +67,33 @@ abstract class LazyStream<V>(private val id: UUID): KoinComponent {
     private fun getDeploymentNodes(): ClusterGroup? {
         return null
     }
-    open fun fillMissingStreamData(from: Long, to: Long)  = serviceInstance!!.fillMissingStreamData(from, to)
 
-    open fun fillMissingStreamData(from: Long) = serviceInstance!!.fillMissingStreamData(from)
+    protected fun getOrCreateService(): ILazyStreamService {
+        if(serviceInstance == null) {
+            val serviceDescriptors = ignite.services().serviceDescriptors().filter(::descriptorContainsServiceName)
+            if (serviceDescriptors.isEmpty()) {
+                val nodes = getDeploymentNodes()
+                val streamService = descriptor!!.serviceDescriptor.streamServiceClass.createInstance()
+                streamService.descriptor = descriptor!!.serviceDescriptor
+                ignite.services().deployClusterSingleton(descriptor!!.id.toString(), streamService)
+            }
+            serviceInstance = getServiceProxy()
+        }
+        return serviceInstance!!
+    }
 
-    open fun refreshStreamData(from: Long, to: Long) = serviceInstance!!.refreshStreamData(from, to)
+    override fun fillMissingStreamData(from: Long, to: Long)  = serviceInstance!!.fillMissingStreamData(from, to)
 
-    open fun refreshStreamData(from: Long) = serviceInstance!!.refreshStreamData(from)
+    override fun fillMissingStreamData(from: Long) = serviceInstance!!.fillMissingStreamData(from)
+
+    override fun refreshStreamData(from: Long, to: Long) = serviceInstance!!.refreshStreamData(from, to)
+
+    override fun refreshStreamData(from: Long) = serviceInstance!!.refreshStreamData(from)
 
     //TODO: Allow more elaborate querying interface
-     fun <K, V> listen(callback: (K, V, V?) -> Unit) : AutoCloseable {
+    override fun <K, V> listen(callback: (K, V, V?) -> Unit) : AutoCloseable {
+        //TODO: remove cache initialization from here
+        cache = ignite.getOrCreateCache(descriptor!!.id.toString())
         engageLiveStreamTimer()
 
         val query = ContinuousQuery<K, V>()
@@ -101,12 +103,12 @@ abstract class LazyStream<V>(private val id: UUID): KoinComponent {
         }
         query.initialQuery = ScanQuery<K,V>()
 
-        return cache.query(query)
+        return cache!!.query(query)
      }
 
-    open fun disengageStream(){
+    override fun dispose(){
         serviceEngagementTimer.stop()
         serviceInstance = null
-        println("${getCacheName()} disengaged successfully!")
+        println("${descriptor!!.id} disposed successfully!")
     }
 }

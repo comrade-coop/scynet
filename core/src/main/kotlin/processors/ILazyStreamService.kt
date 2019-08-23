@@ -1,8 +1,11 @@
 package processors
 
+import descriptors.LazyStreamServiceDescriptor
 import org.apache.ignite.services.Service
+import java.util.*
 
-interface ILazyStreamService<V>: Service{
+interface ILazyStreamService: Service{
+    var descriptor: LazyStreamServiceDescriptor?
     val engagementTimeoutSeconds: Int
 
     fun engageLiveStream()
