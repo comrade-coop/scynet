@@ -5,6 +5,6 @@ import org.apache.ignite.services.Service
 import java.util.*
 
 interface ILazyStreamFactory: Service {
-    fun registerStream(streamDescriptor: LazyStreamDescriptor)
+    fun registerStream(stream: ILazyStream)
     fun getInstance(streamId: UUID): ILazyStream
 }

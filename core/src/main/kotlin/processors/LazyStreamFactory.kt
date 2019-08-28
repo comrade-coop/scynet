@@ -8,14 +8,27 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.lang.IllegalArgumentException
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class LazyStreamFactory: ILazyStreamFactory, KoinComponent {
+    
     private val ignite: Ignite by inject()
+    private val streamClasses: HashMap<String, KClass<out ILazyStream>>
+    private lateinit var streamClassIds: IgniteCache<UUID, String>
     private lateinit var streamDescriptors: IgniteCache<UUID, LazyStreamDescriptor>
+
+    constructor(){
+        streamClasses =  HashMap<String, KClass<out ILazyStream>>()
+    }
+    constructor(streamClasses:  HashMap<String, KClass<out ILazyStream>>){
+        this.streamClasses = streamClasses
+    }
 
     override fun init(ctx: ServiceContext?) {
         streamDescriptors = ignite.getOrCreateCache("streamDescriptors")
+        streamClassIds = ignite.getOrCreateCache("streamClassIds")
     }
 
     override fun cancel(ctx: ServiceContext?) {
@@ -24,19 +37,28 @@ class LazyStreamFactory: ILazyStreamFactory, KoinComponent {
     override fun execute(ctx: ServiceContext?) {
     }
 
-    override fun registerStream(streamDescriptor: LazyStreamDescriptor){
-        if(streamDescriptors.containsKey(streamDescriptor.id)){
-            throw IllegalArgumentException("Stream with id: ${streamDescriptor.id} already registerd!")
+    override fun registerStream(stream: ILazyStream){
+        val streamId = stream.descriptor!!.id
+        if(streamClassIds.containsKey(streamId)){
+            throw IllegalArgumentException("Stream with id: ${streamId} already registerd!")
         }
-        streamDescriptors.put(streamDescriptor.id, streamDescriptor)
+        streamClassIds.put(streamId, stream.classId)
+        streamDescriptors.put(streamId, stream.descriptor)
+        registerStreamClass(stream)
     }
 
     override fun getInstance(streamId: UUID): ILazyStream{
         if(!streamDescriptors.containsKey(streamId))
             throw IllegalArgumentException("Stream with id: $streamId does not exist!")
-    val streamDescriptor = streamDescriptors.get(streamId)
-    val stream = streamDescriptor.streamClass.createInstance()
-    stream.descriptor = streamDescriptor
-    return stream
+        val streamClassId = streamClassIds.get(streamId)
+        val stream = streamClasses[streamClassId]!!.createInstance()
+        val streamDescriptor = streamDescriptors.get(streamId)
+        stream.descriptor = streamDescriptor
+        return stream
+    }
+
+    private fun registerStreamClass(stream: ILazyStream){
+        if(!streamClasses.containsKey(stream.classId))
+            streamClasses.put(stream.classId, stream::class)
     }
 }

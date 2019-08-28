@@ -54,6 +54,7 @@ class CandleProcessor: Processor, KoinComponent {
             }
         }
     }
+
     override fun stop() {
         tickerStream.close()
         println("Stopping $NAME")

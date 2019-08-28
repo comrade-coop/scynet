@@ -1,5 +1,6 @@
 package harvester.candles
 
+import descriptors.LazyStreamServiceDescriptor
 import harvester.exchanges.XChangeLazyStream
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.dto.marketdata.Ticker
@@ -21,7 +22,7 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
-        candle = descriptor!!.properties["candle"] as ICandle
+        candle = descriptor!!.properties.get("candle") as ICandle
         inputStreamFactory = ignite.services().serviceProxy("lazyStreamFactory", ILazyStreamFactory::class.java, false)
         inputStream = inputStreamFactory.getInstance(descriptor!!.inputStreamId)
     }
