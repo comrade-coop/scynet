@@ -10,6 +10,7 @@ import org.koin.core.inject
 import java.lang.IllegalStateException
 import java.lang.NullPointerException
 import java.util.*
+import kotlin.collections.ArrayList
 
 abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
 
@@ -21,6 +22,8 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
     protected lateinit var cache: IgniteCache<Long,V>
     protected lateinit var serviceName: String
     private lateinit var countDown: CountDown
+    private lateinit var inputStreamFactory: ILazyStreamFactory
+    protected lateinit var inputStreams: ArrayList<ILazyStream>
 
     private inner class CountDown{
         private val timer = Timer(true)
@@ -50,6 +53,13 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
         context = ctx!!
         serviceName = context.name()
         cache = ignite.getOrCreateCache(serviceName)
+        if(descriptor!!.inputStreamIds != null){
+            inputStreamFactory = ignite.services().serviceProxy("lazyStreamFactory", ILazyStreamFactory::class.java, false)
+            inputStreams = ArrayList()
+            for(stream in descriptor!!.inputStreamIds!! ){
+                inputStreams.add(inputStreamFactory.getInstance(stream))
+            }
+        }
         if(!::countDown.isInitialized){
             countDown = CountDown()
         }

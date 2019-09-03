@@ -15,7 +15,7 @@ abstract class Protocol<K>(): IProtocol<K> {
 
     protected abstract val jobAvailabilityRegistry: Registry<K, Boolean>
 
-    override fun addJob(key: K, trainingJob: TrainingJob<*, *>) {
+    override fun addJob(key: K, trainingJob: TrainingJob) {
         when(trainingJob.status.statusID){
             StatusID.UNTRAINED -> {
                 jobRegistry.put(key, trainingJob)
@@ -30,7 +30,7 @@ abstract class Protocol<K>(): IProtocol<K> {
         }
     }
 
-    override fun queryJobs(predicate: (K, TrainingJob<*,*>) -> Boolean, callback: (K, TrainingJob<*,*>) -> Unit): Cursor<K, TrainingJob<*, *>> {
+    override fun queryJobs(predicate: (K, TrainingJob) -> Boolean, callback: (K, TrainingJob) -> Unit): Cursor<K, TrainingJob> {
         return  jobRegistry.query(predicate, callback)
     }
 

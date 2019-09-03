@@ -20,8 +20,8 @@ class XChangeStreamService: LazyStreamService<Ticker>() {
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
-        exchange = descriptor!!.properties.get("xchange") as IExchange
-        currencyPair = descriptor!!.properties.get("currencyPair") as CurrencyPair
+        exchange = descriptor!!.properties!!.get("xchange") as IExchange
+        currencyPair = descriptor!!.properties!!.get("currencyPair") as CurrencyPair
     }
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)

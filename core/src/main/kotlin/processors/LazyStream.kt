@@ -14,6 +14,7 @@ import org.apache.ignite.services.ServiceDescriptor
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -29,11 +30,11 @@ abstract class LazyStream<V>(): ILazyStream, KoinComponent {
     private lateinit var  serviceEngagementTimer: ServiceEngagementTimer
     protected abstract val streamServiceClass: KClass<out ILazyStreamService>
 
-    constructor(id: UUID, inputStreamId: UUID, serviceProperties: Properties): this(){
+    constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, serviceProperties: Properties?): this(){
         descriptor = LazyStreamDescriptor(
                 id = id,
                 serviceDescriptor = LazyStreamServiceDescriptor(
-                        inputStreamId = inputStreamId,
+                        inputStreamIds = inputStreamIds,
                         properties = serviceProperties
                 )
         )

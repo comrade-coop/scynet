@@ -3,6 +3,6 @@ package descriptors
 import java.util.*
 
 data class LazyStreamServiceDescriptor(
-    var inputStreamId: UUID,
-    var properties: Properties
+    var inputStreamIds: List<UUID>?,
+    var properties: Properties?
 )

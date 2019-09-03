@@ -2,13 +2,12 @@ package ai.scynet.protocol
 
 import ai.scynet.evaluator.Evaluator
 import ai.scynet.executor.Executor
-import ai.scynet.trainer.Trainer
 
-data class TrainingJob<X, Y>(
+data class TrainingJob(
     val executor: Executor,
-    val trainer: Trainer,
+    val trainerClusterGroupName: String,
     val evaluator: Evaluator,
     val egg: Model,
-    val dataset: Dataset<X, Y>,
+    val dataset: Dataset<*, *>,
     var status: Status
     )

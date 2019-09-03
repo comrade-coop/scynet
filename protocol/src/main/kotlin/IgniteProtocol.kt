@@ -2,6 +2,7 @@ package ai.scynet.protocol
 
 import ai.scynet.common.registry.Registry
 import JobRegistry
+import ai.scynet.core.common.registry.cursors.Cursor
 import org.apache.ignite.services.Service
 import org.apache.ignite.services.ServiceContext
 import org.koin.core.KoinComponent
@@ -9,6 +10,7 @@ import org.koin.core.inject
 import org.koin.core.qualifier.named
 
 class IgniteProtocol<K>: Protocol<K>(), Service, KoinComponent {
+
     override val jobRegistry: JobRegistry<K> by inject( named("jobRegistry"))
     override val validatedJobRegistry: JobRegistry<K> by inject(named("validatedJobRegistry"))
     override val datasetRegistry: Registry<K, Dataset<*, *>> by inject(named("datasetRegistry"))

@@ -15,6 +15,7 @@ import org.koin.dsl.module
 import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 fun main(){
     val cfg = IgniteConfiguration()
@@ -29,23 +30,23 @@ fun main(){
     }
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
 
-    ignite.services().deployClusterSingleton(LAZY_STREAM_FACTORY, LazyStreamFactory())
+
 
     val xChangeStreamId = UUID.randomUUID()
     println("\nxChangeStreamId -> $xChangeStreamId\n")
-    val xChangeStream = XChangeLazyStream(xChangeStreamId, UUID.randomUUID(), Properties().apply {
+    val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
         put("currencyPair", CurrencyPair.BTC_USD)
-        put("xchange", Exchange.COINBASE_PRO)
+        put("xchange", Exchange.BITFINEX)
     })
 
 
     val candleStreamId = UUID.randomUUID()
     println("\ncandleStreamId -> $candleStreamId\n")
-    val candleStream = CandleLazyStream(candleStreamId, xChangeStreamId,Properties().apply{
+    val candleStream = CandleLazyStream(candleStreamId, ArrayList<UUID>().apply { add(xChangeStreamId) } ,Properties().apply{
         put("candle", Candle.MINUTE)
     } )
 
-
+    ignite.services().deployClusterSingleton(LAZY_STREAM_FACTORY, LazyStreamFactory())
     //Register streams
     val factory = ignite.services().serviceProxy(LAZY_STREAM_FACTORY, ILazyStreamFactory::class.java, false)
     factory.registerStream(xChangeStream)

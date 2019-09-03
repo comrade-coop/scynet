@@ -6,13 +6,13 @@ import common.registry.exceptions.TrainingJobDoesNotExistException
 import common.registry.exceptions.TrainingJobExistsException
 import org.apache.ignite.IgniteCache
 
-class IgniteJobRegistry<K>(name:String): IgniteRegistry<K, TrainingJob<*, *>>(name), JobRegistry<K> {
+class IgniteJobRegistry<K>(name:String): IgniteRegistry<K, TrainingJob>(name), JobRegistry<K> {
     var takenJobs: IgniteCache<K, Boolean>
     init {
-        cache = ignite.getOrCreateCache<K,TrainingJob<*,*>>("jobRegistry")
+        cache = ignite.getOrCreateCache<K,TrainingJob>("jobRegistry")
         takenJobs = ignite.getOrCreateCache<K, Boolean>("takenJobs")
     }
-    override fun put(key: K, value: TrainingJob<*,*>) {
+    override fun put(key: K, value: TrainingJob) {
         if(cache.putIfAbsent(key, value)){
             println("TrainingJob with key = ${key} successfully added!")
             return
@@ -20,7 +20,7 @@ class IgniteJobRegistry<K>(name:String): IgniteRegistry<K, TrainingJob<*, *>>(na
         throw TrainingJobExistsException("Training job with key = ${key} already exists")
     }
 
-    override fun setJob(key: K, trainedJob: TrainingJob<*,*>){
+    override fun setJob(key: K, trainedJob: TrainingJob){
         checkTrainingJobExists(key)
         cache.put(key, trainedJob)
     }

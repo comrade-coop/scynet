@@ -12,8 +12,6 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class CandleStreamService: LazyStreamService<CandleDTO>(){
-    private lateinit var inputStreamFactory: ILazyStreamFactory
-    private lateinit var inputStream: ILazyStream
     private  lateinit var candle: ICandle
     private lateinit var tickerStream: AutoCloseable
     private val buffer: HashMap<Long, Ticker> = HashMap()
@@ -22,15 +20,13 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
-        candle = descriptor!!.properties.get("candle") as ICandle
-        inputStreamFactory = ignite.services().serviceProxy("lazyStreamFactory", ILazyStreamFactory::class.java, false)
-        inputStream = inputStreamFactory.getInstance(descriptor!!.inputStreamId)
+        candle = descriptor!!.properties!!.get("candle") as ICandle
     }
 
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 
-        tickerStream = inputStream.listen{
+        tickerStream = inputStreams[0].listen{
             timestamp: Long, ticker: Ticker, _ ->
             if(genensis){
                 fillGenesisBuffer(timestamp, ticker)
@@ -52,7 +48,7 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     override fun cancel(ctx: ServiceContext?) {
         tickerStream.close()
-        inputStream.dispose()
+        inputStreams[0].dispose()
         super.cancel(ctx)
     }
 

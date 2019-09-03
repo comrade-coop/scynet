@@ -37,6 +37,9 @@ dependencies {
     implementation group: 'info.bitrich.xchange-stream', name: 'xchange-okcoin', version: '4.3.16'
     // https://mvnrepository.com/artifact/info.bitrich.xchange-stream/xchange-poloniex
     implementation group: 'info.bitrich.xchange-stream', name: 'xchange-poloniex', version: '4.3.16'
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.0'
+
 }
 
 // Define the main class for the application.

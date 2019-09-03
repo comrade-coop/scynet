@@ -19,8 +19,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 if __name__ == "__main__":
 
-    x = np.load('./mock_data/xbnc_n.npy')
-    y = np.load('./mock_data/ybnc_n.npy')
+    x = np.load('./trainer/src/main/python/mock_data/xbnc_n.npy')
+    y = np.load('./trainer/src/main/python/mock_data/ybnc_n.npy')
 
     evaluator = CustomEvaluator
     
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     trainer = Trainer(data, config)
 
     # trainer.train(input())
-    trainer.restore_model("./testmodel.h5", "./test.json")
+    trainer.restore_model("./trainer/src/main/python/testmodel.h5", "./trainer/src/main/python/test.json")
     #trainer.train("./test.json", epochs=2, std=False)
     #trainer.save_model("./testmodel.h5", "./test.json")
     print(trainer.predict(x))

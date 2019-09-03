@@ -4,9 +4,9 @@ import ai.scynet.core.common.registry.cursors.Cursor
 import ai.scynet.protocol.exceptions.JobNotAvailableException
 
 interface IProtocol<K> {
-    fun addJob(key: K, trainingJob: TrainingJob<*,*>)
+    fun addJob(key: K, trainingJob: TrainingJob)
 
-    fun queryJobs(predicate: (K, TrainingJob<*,*>) -> Boolean, callback: (K, TrainingJob<*,*>) -> Unit): Cursor<K, TrainingJob<*, *>>
+    fun queryJobs(predicate: (K, TrainingJob) -> Boolean, callback: (K, TrainingJob) -> Unit): Cursor<K, TrainingJob>
 
     fun addDataset(key: K, dataset: Dataset<*,*>)
 
