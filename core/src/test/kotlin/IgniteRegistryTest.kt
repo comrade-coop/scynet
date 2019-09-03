@@ -1,4 +1,4 @@
-import ai.scynet.common.registry.IgniteRegistry
+import ai.scynet.core.common.registry.IgniteRegistry
 import io.kotlintest.Spec
 import io.kotlintest.matchers.numerics.shouldBeLessThan
 import io.kotlintest.properties.Gen

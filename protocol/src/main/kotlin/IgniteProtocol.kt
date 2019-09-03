@@ -1,9 +1,7 @@
 package ai.scynet.protocol
 
 import ai.scynet.common.registry.Registry
-import common.registry.JobRegistry
-import org.apache.ignite.Ignite
-import org.apache.ignite.IgniteCache
+import JobRegistry
 import org.apache.ignite.services.Service
 import org.apache.ignite.services.ServiceContext
 import org.koin.core.KoinComponent

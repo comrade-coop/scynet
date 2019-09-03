@@ -1,16 +1,8 @@
 package ai.scynet.core.descriptors
 
 import ai.scynet.core.processors.Processor
-import java.io.BufferedOutputStream
-import java.io.ByteArrayInputStream
-import java.io.ObjectInputStream
-import java.net.URI
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
-
 
 data class ProcessorDescriptor(
 	var id: UUID,

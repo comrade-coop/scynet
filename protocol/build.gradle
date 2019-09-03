@@ -13,5 +13,4 @@ dependencies {
     implementation project(':evaluator')
     implementation project(':trainer')
     implementation project(':executor')
-    implementation project(':core')
 }

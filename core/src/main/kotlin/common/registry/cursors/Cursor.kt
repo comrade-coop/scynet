@@ -1,4 +1,4 @@
-package ai.scynet.protocol
+package ai.scynet.core.common.registry.cursors
 
 interface Cursor<K,V>: AutoCloseable, Iterable<Pair<K,V>> {
 }

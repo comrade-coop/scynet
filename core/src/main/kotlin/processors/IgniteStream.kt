@@ -31,7 +31,7 @@ class IgniteStream(name: String, hostAddress: String, problem: String, propertie
 		// TODO: Should be user configurable
 		// URI STANDARD: stream://[owner_id]@[host_address]?config=data#[problem]
 		descriptor = StreamDescriptor.fromStringURI("stream://$ownerId@$this.hostAddress?$mockConfig#$this.problem")
-
+		descriptor.properties = properties
 //		streamer.autoFlushFrequency()
 	}
 

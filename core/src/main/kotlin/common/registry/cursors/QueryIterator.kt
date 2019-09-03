@@ -1,4 +1,4 @@
-package ai.scynet.protocol
+package ai.scynet.core.common.registry.cursors
 
 import javax.cache.Cache
 

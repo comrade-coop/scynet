@@ -1,12 +1,12 @@
-package ai.scynet.common.registry
+package ai.scynet.protocol
 
-import ai.scynet.protocol.TrainingJob
-import common.registry.JobRegistry
+import JobRegistry
+import ai.scynet.core.common.registry.IgniteRegistry
 import common.registry.exceptions.TrainingJobDoesNotExistException
 import common.registry.exceptions.TrainingJobExistsException
 import org.apache.ignite.IgniteCache
 
-class IgniteJobRegistry<K>(name:String):IgniteRegistry<K, TrainingJob<*,*>>(name), JobRegistry<K>{
+class IgniteJobRegistry<K>(name:String): IgniteRegistry<K, TrainingJob<*, *>>(name), JobRegistry<K> {
     var takenJobs: IgniteCache<K, Boolean>
     init {
         cache = ignite.getOrCreateCache<K,TrainingJob<*,*>>("jobRegistry")
