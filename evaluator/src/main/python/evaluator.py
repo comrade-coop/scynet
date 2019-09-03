@@ -1,6 +1,6 @@
 import abc
 
-class ReinforcementEnvironment(abc.ABC):
+class ReinforcementEvaluator(abc.ABC):
     '''
         Based on the OpenAI GYM standard
 
@@ -12,11 +12,36 @@ class ReinforcementEnvironment(abc.ABC):
     '''
 
     @abc.abstractmethod
+    def start_session():
+        pass
+
+    @abc.abstractmethod
+    def end_session():
+        pass
+
+    @abc.abstractmethod
     def reset():
         pass
 
     @abc.abstractmethod
     def get_observations():
+        pass
+
+    @abc.abstractmethod
+    def get_observation(x, y_pred):
+        '''
+            x is Identifier
+            y_pred is the agent action
+            
+            returns y as the environment observation
+        '''
+        pass
+
+    @abc.abstractmethod
+    def get_agent_performance():
+        '''
+            returns performance: float
+        '''
         pass
 
     @abc.abstractmethod
@@ -36,16 +61,12 @@ class Evaluator(abc.ABC):
         Evaluator interface that needs to be implemented by any custom evaluator
         ABC - Abstract Base Class
         TODO Discuss
+        TODO Think the OOP through
     '''
+
     @abc.abstractmethod
     def loss(self, y_true, y_pred):
         '''
             Should return a tensorflow differentiable function
         '''
         pass
-
-class Environment:
-    '''
-        TODO Think the OOP through
-    '''
-    pass
