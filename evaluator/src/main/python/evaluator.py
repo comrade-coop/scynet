@@ -3,58 +3,33 @@ import abc
 class ReinforcementEvaluator(abc.ABC):
     '''
         Based on the OpenAI GYM standard
+        Every decision behind this is exlpained https://arxiv.org/pdf/1606.01540.pdf
+
+        TODO: We could even use directly the python gym library, it is compatible with Theano, Tensorflow, Torch etc.
 
         Interface
          - observables = {}
-         - get_observations: Observations {}
-         - Other methods for modifying state and working with the environment
-        Should implement different ways to engage and modify state and check observation data
+         - metadata = {}
     '''
 
     @abc.abstractmethod
-    def start_session():
-        pass
-
-    @abc.abstractmethod
-    def end_session():
-        pass
-
-    @abc.abstractmethod
-    def reset():
-        pass
-
-    @abc.abstractmethod
-    def get_observations():
-        pass
-
-    @abc.abstractmethod
-    def get_observation(x, y_pred):
+    def reset(self):
         '''
-            x is Identifier
-            y_pred is the agent action
-            
-            returns y as the environment observation
+            returns initial observations
         '''
         pass
 
     @abc.abstractmethod
-    def get_agent_performance():
+    def step(self, action):
         '''
-            returns performance: float
+            executes each action and
+            returns observables, reward, condition, ...
         '''
         pass
 
-    @abc.abstractmethod
-    def get_initial_observations():
-        pass
-    
-    @abc.abstractmethod
-    def reward():
-        '''
-            Should return a reward based on the environment state
-        '''
-        pass
-    pass
+    # @abc.abstractmethod
+    # def close():
+    #     pass
 
 class Evaluator(abc.ABC):
     '''
