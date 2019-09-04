@@ -1,10 +1,7 @@
 package harvester.exchanges
 
-import ai.scynet.common.registry.Registry
-import ai.scynet.core.descriptors.ProcessorDescriptor
 import ai.scynet.core.processors.IgniteStream
 import ai.scynet.core.processors.Processor
-import ai.scynet.core.processors.Stream
 import info.bitrich.xchangestream.core.ProductSubscription
 import info.bitrich.xchangestream.core.StreamingExchange
 import info.bitrich.xchangestream.core.StreamingExchangeFactory

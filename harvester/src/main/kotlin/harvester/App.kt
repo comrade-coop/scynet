@@ -1,11 +1,8 @@
 package ai.scynet.harvester
 
-import ai.scynet.common.registry.Registry
-import ai.scynet.core.common.registry.IgniteRegistry
 import ai.scynet.core.configurations.ConfigurationBase
 import ai.scynet.core.configurations.ProcessorConfiguration
 import ai.scynet.core.processors.ProcessorFactory
-import ai.scynet.core.processors.Stream
 import harvester.candles.Candle
 import harvester.candles.CandleProcessor
 import harvester.exchanges.Exchange

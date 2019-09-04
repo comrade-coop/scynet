@@ -8,6 +8,8 @@ import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.dto.marketdata.Ticker
 import processors.LazyStreamService
+import java.lang.IllegalStateException
+import java.time.Instant
 import java.util.*
 
 class XChangeStreamService: LazyStreamService<Ticker>() {
@@ -36,7 +38,15 @@ class XChangeStreamService: LazyStreamService<Ticker>() {
         xchange.connect(productSubscription).blockingAwait()
         println("Exchange connected")
         xChangeStream = xchange.streamingMarketDataService.getTicker(currencyPair).subscribe { ticker ->
-            cache.put(ticker.timestamp.time, ticker)
+            var timestamp = 0L
+            try{
+                timestamp = ticker.timestamp.time
+                cache.put(timestamp, ticker)
+
+            }catch (e: IllegalStateException){
+                timestamp = Instant.now().toEpochMilli()
+                println("no ticker for timestamp $timestamp")
+            }
         }
     }
 

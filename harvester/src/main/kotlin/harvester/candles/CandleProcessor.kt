@@ -1,10 +1,7 @@
 package harvester.candles
 
-import ai.scynet.common.registry.Registry
-import ai.scynet.core.descriptors.ProcessorDescriptor
 import ai.scynet.core.processors.IgniteStream
 import ai.scynet.core.processors.Processor
-import ai.scynet.core.processors.Stream
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.knowm.xchange.dto.marketdata.Ticker

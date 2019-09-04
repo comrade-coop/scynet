@@ -35,8 +35,8 @@ fun main(){
     val xChangeStreamId = UUID.randomUUID()
     println("\nxChangeStreamId -> $xChangeStreamId\n")
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
-        put("currencyPair", CurrencyPair.BTC_USD)
-        put("xchange", Exchange.BITFINEX)
+        put("currencyPair", CurrencyPair.ETH_BTC)
+        put("xchange", Exchange.BINANCE)
     })
 
 

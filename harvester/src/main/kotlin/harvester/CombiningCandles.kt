@@ -39,7 +39,7 @@ fun main(){
     println("\nxChangeStreamId -> $xChangeStreamId\n")
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
         put("currencyPair", CurrencyPair.BTC_USD)
-        put("xchange", Exchange.COINBASE_PRO)
+        put("xchange", Exchange.BITMEX)
     })
 
     val candleStreamId = UUID.randomUUID()
@@ -81,5 +81,7 @@ fun main(){
         println("\nCombined Output ----> $combined\n")
     }
     Thread.sleep(720000)
+    cursor.close()
+    candleCombinerProxy.dispose()
     exitProcess(0)
 }
