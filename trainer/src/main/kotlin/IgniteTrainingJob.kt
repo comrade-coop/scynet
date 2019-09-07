@@ -4,7 +4,7 @@ import org.apache.ignite.lang.IgniteRunnable
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class IgniteTraingJob: IgniteRunnable {
+class IgniteTrainingJob: IgniteRunnable {
     override fun run() {
         initTrainer()
     }
