@@ -89,7 +89,7 @@ if __name__ == "__main__":
     if args["model"] is None and args["model-json"] is not None:
         stdInput = True
 
-    trainer.train(args["model"], epochs=2, std=stdInput)
+    trainer.train(args["model"], std=stdInput)
     trainer.save_model("./trainer/src/main/kotlin/mock/temp/results/%s_w.h5" % (args["UUID"]), args["model"])
     
     # get performance 

@@ -91,7 +91,7 @@ class Trainer:
             # After this predict
     
 
-    def train(self, json_model, epochs, std=True):
+    def train(self, json_model, std=True):
         
         # TODO Discuss python io - ignite process and add stdin input()
         if not std: # if it is not True json_model should be input()
@@ -110,12 +110,16 @@ class Trainer:
         self.data["x_test"] = x_test
         self.data["y_test"] = y_test
 
+        early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
+
         self.keras_model.summary()
         self.keras_model.fit(
             self.data["x_train"],
             self.data["y_train"],
-            epochs=epochs,
-            validation_split=validation_split
+            epochs=4000,
+            validation_split=validation_split,
+            verbose=0,
+            callbacks=[early_stopping]
         )
         
         self.val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
