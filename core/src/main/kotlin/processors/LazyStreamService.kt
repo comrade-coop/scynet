@@ -34,10 +34,12 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
             println("Starting CountDown for $serviceClassAndName!")
             this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
         }
+
         fun restart(){
             stop()
             start()
         }
+
         private fun stop(){
             task.cancel()
             timer.purge()

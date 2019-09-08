@@ -88,11 +88,8 @@ class Trainer:
             self.keras_model, input_metadata = build_model(keras_json)
             self.keras_model.load_weights(filepath)
             self.keras_model.summary()
-
             # After this predict
     
-
-            
 
     def train(self, json_model, epochs, std=True):
         
@@ -120,7 +117,8 @@ class Trainer:
             epochs=epochs,
             validation_split=validation_split
         )
-        val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+        
+        self.val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
 
         # std communication TODO Discuss
         

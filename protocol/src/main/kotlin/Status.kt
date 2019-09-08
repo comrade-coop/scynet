@@ -6,9 +6,12 @@ sealed class Status{
 class UNTRAINED: Status(){
     override val statusID: StatusID = StatusID.UNTRAINED
 }
-data class TRAINED(val prediction: Double) : Status(){
+
+data class TRAINED(val results: HashMap<String, String>) : Status(){
     override val statusID: StatusID = StatusID.TRAINED
 }
+
+// TODO: Not sure about this one. Discuss?
 data class VALIDATED(val loss: Double): Status(){
     override val statusID: StatusID = StatusID.VALIDATED
 }

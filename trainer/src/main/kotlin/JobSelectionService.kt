@@ -7,9 +7,12 @@ import processors.LazyStreamService
 class JobSelectionService: LazyStreamService<Long, TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
-        inputStreams[0].listen{timestamp: Long, trainingJob: TrainingJob, _ ->
-            if(selectJob(trainingJob))
+
+        inputStreams[0].listen{ timestamp: Long, trainingJob: TrainingJob, _ ->
+            if(selectJob(trainingJob)) {
+                println("INFO: Selecting $timestamp")
                 cache.put(timestamp, trainingJob)
+            }
         }
     }
 

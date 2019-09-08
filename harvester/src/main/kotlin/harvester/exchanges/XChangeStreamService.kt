@@ -64,6 +64,7 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
         super.execute(ctx)
         xchange = StreamingExchangeFactory.INSTANCE.createExchange(exchange.getExchangeClassName())
         //Some xchanges need  ProductSubscription
+        //Some xchanges need  ProductSubscription
         val productSubscription = ProductSubscription
                 .create()
                 .addTicker(currencyPair)

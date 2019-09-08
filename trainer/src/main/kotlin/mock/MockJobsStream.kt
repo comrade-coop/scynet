@@ -1,4 +1,4 @@
-package ai.scynet.trainer
+package ai.scynet.trainer.mock
 
 import ai.scynet.protocol.TrainingJob
 import descriptors.Properties
