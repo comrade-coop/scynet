@@ -19,7 +19,7 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
     protected  val ignite: Ignite by inject()
     protected lateinit var context: ServiceContext
     // cache always has UNIX timestamp as key
-    protected lateinit var cache: IgniteCache<Long,V>
+    protected lateinit var cache: IgniteCache<Long, V>
     protected lateinit var serviceName: String
     private lateinit var countDown: CountDown
     private lateinit var inputStreamFactory: ILazyStreamFactory
@@ -33,10 +33,12 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
             println("Starting CountDown for $serviceName!")
             this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
         }
+
         fun restart(){
             stop()
             start()
         }
+
         private fun stop(){
             task.cancel()
             timer.purge()

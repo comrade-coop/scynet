@@ -25,10 +25,12 @@ class XChangeStreamService: LazyStreamService<Ticker>() {
         exchange = descriptor!!.properties!!.get("xchange") as IExchange
         currencyPair = descriptor!!.properties!!.get("currencyPair") as CurrencyPair
     }
+
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 
         xchange = StreamingExchangeFactory.INSTANCE.createExchange(exchange.getExchangeClassName())
+        //Some xchanges need  ProductSubscription
         //Some xchanges need  ProductSubscription
         val productSubscription = ProductSubscription
                 .create()
@@ -39,11 +41,11 @@ class XChangeStreamService: LazyStreamService<Ticker>() {
         println("Exchange connected")
         xChangeStream = xchange.streamingMarketDataService.getTicker(currencyPair).subscribe { ticker ->
             var timestamp = 0L
-            try{
+            try {
                 timestamp = ticker.timestamp.time
                 cache.put(timestamp, ticker)
 
-            }catch (e: IllegalStateException){
+            } catch (e: IllegalStateException){
                 timestamp = Instant.now().toEpochMilli()
                 println("no ticker for timestamp $timestamp")
             }

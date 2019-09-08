@@ -1,10 +1,12 @@
-package ai.scynet.trainer
+package ai.scynet.trainer.mock
 
-import ai.scynet.protocol.Dataset
-import ai.scynet.protocol.Model
-import ai.scynet.protocol.TrainingJob
+import ai.scynet.protocol.*
 import org.apache.ignite.services.ServiceContext
+import org.deeplearning4j.datasets.iterator.FloatsDataSetIterator
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 import processors.LazyStreamService
+import java.io.File
 import java.lang.IllegalStateException
 import java.security.Timestamp
 import java.time.Instant
@@ -19,17 +21,29 @@ class MockService: LazyStreamService<TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 
-        println("MockJob stream connected")
+        var mockModel = File("trainer/src/main/kotlin/mock/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
 
-        for (i in 0..100) {
-            var date = Date(2019 + i, 10, 2, 10, 2, 100).time
+        // TODO: Finished Job Stream -> ExecutorStream (Parse the identifier) -> Execute
+
+        var mockExecutorID = UUID.randomUUID() // Not real, just for authenticity
+
+        var dataX = Nd4j.readNumpy("./trainer/src/main/kotlin/mock/xbnc_n.csv", ",");
+        var dataY = Nd4j.readNumpy("./trainer/src/main/kotlin/mock/ybnc_n.csv", ",");
+
+        var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
+
+        var numOfJobs = 0
+
+        for (i in 0..numOfJobs) {
+            var date = Date().time
             var job = TrainingJob(
-                    "this one",
+                    UUID.randomUUID(),
+                    mockExecutorID.toString(),
                     "trainerCluster",
-                    "this one",
-                    "nice",
-                    null,
-                    "Available"
+                    "basic",
+                    mockModel,
+                    dataDictionary,
+                    UNTRAINED()
             )
             cache.put(date, job)
         }
