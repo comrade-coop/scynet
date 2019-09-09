@@ -14,6 +14,7 @@ import java.util.*
 fun main(args: Array<String>) {
 	val cfg = IgniteConfiguration()
 	cfg.igniteInstanceName = "HarvesterTest"
+	//cfg.setPeerClassLoadingEnabled(true)
 	val ignite = Ignition.start(cfg)
 
 	startKoin {
@@ -34,7 +35,7 @@ fun main(args: Array<String>) {
 	factory.registerStream(GattakkaStream)
 
 	var streamProxy = factory.getInstance(GattakkaStreamID)
-	var cursor =  streamProxy.listen { t:Long, c: TrainingJob<*,*>, _ ->
+	var cursor =  streamProxy.listen { t:Long, c: TrainingJob, _ ->
 		println("\nStream Output for $t -> $c\n")
 	}
 

@@ -1,0 +1,511 @@
+{
+  "cryptocompare": {
+	"market": {
+		"shape": [
+		  6
+		],
+		"components": [
+		  "close",
+		  "high",
+		  "low",
+		  "open",
+		  "volumefrom",
+		  "volumeto"
+		],
+		"granularity": 3600,
+		"available_from": 1451606400,
+		"available_to": 1530144000,
+		"type": "cryptocompare",
+		"config": {
+		  "limit": 1000
+		}
+	}
+  },
+  "blockchain": {
+    "accountBalanceDistribution_log1_2": {
+      "shape": [
+        3,
+        88
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "activeAccounts": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "activeAccountsShare": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgBalOfLocal": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgBalOfRecent": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgGasByTopX": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgGasUsed": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgVal": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgValFromRecent": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgValFromTopX": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgValToNew": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "avgValToTopX": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "balanceLastSeenDistribution_log1_2": {
+      "shape": [
+        88,
+        92
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "blockDifficulty": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "blockSize": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "closePrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "contractBalanceLastSeenDistribution_log1_2_v2": {
+      "shape": [
+        88,
+        92
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "contractVolumeInERC20Distribution_log1_2_v2_stateless": {
+      "shape": [
+        88,
+        68
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "gasLimit": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "gasPrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "gasUsed": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "gasUsedByNew": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "highPrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "lowPrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "networkHashrate": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "openPrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "recentAccounts": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "shareTracesFromRecent": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "stickPrice": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "topXCount": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "traceBl": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "traceTx": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "tracesFromRecent": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "volumeEnteringTopX": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "volumeFrom": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "volumeLeavingTopX": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    },
+    "volumeTo": {
+      "shape": [
+        1
+      ],
+      "granularity": 3600,
+      "available_from": 1439017200,
+      "available_to": 1510876800,
+      "type": "dataserver",
+      "config": {
+        "server_url": "http://127.0.0.1:8000",
+        "limit": 1000
+      }
+    }
+  }
+}

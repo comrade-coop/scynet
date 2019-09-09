@@ -96,7 +96,9 @@ object Descriptors {
 
   import DefaultJsonProtocol._
   import Converter.AnyJsonProtocol._
-  val repositories_text = scala.io.Source.fromFile("../repositories.json").mkString
+  val whereami = System.getProperty("user.dir")
+  println("->"*50 + whereami)
+  val repositories_text = scala.io.Source.fromFile("repositories.json").mkString
   val repositories = repositories_text.asJson.convertTo[Map[Any, Any]]
 
 

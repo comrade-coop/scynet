@@ -1,0 +1,6 @@
+fitness = 0.4197358112434971
+score = 0.2
+iterations = 10
+time = 1s
+hash = 1f9e4792fe
+chromosome = {"layers":[],"optimizer":{"type":"Adam","config":{"lr":0.9609375}},"loss":"mean_squared_error","window_length":10,"batch_size":1}
