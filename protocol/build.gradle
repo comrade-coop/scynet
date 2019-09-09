@@ -4,12 +4,10 @@ plugins {
 }
 mainClassName = "ai.scynet.protocol.AppKt"
 
-version 'unspecified'
+version '1.0.0'
 
 dependencies {
     // https://mvnrepository.com/artifact/org.tensorflow/tensorflow
     // I am not sure we need this for real?
     implementation group: 'org.tensorflow', name: 'tensorflow', version: '1.14.0'
-    implementation project(':evaluator')
-    implementation project(':executor')
 }

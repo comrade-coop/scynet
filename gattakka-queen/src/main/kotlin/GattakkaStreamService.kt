@@ -13,10 +13,8 @@ import java.lang.IllegalStateException
 import java.time.Instant
 import java.util.*
 
-class GattakkaStreamService: LazyStreamService<TrainingJob<*,*>>() {
+class GattakkaStreamService: LazyStreamService<TrainingJob>() {
 
-    val system = ActorSystem.apply("gattakka")
-    val helper = GattakaQueenHelper()
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
@@ -24,6 +22,8 @@ class GattakkaStreamService: LazyStreamService<TrainingJob<*,*>>() {
     }
 
     override fun execute(ctx: ServiceContext?) {
+        val system = ActorSystem.apply("gattakka")
+        val helper = GattakaQueenHelper()
         super.execute(ctx)
 
         val pipelineActor = system.actorOf(Pipeline.props(helper.pipelineOperators()), "pipeline")
