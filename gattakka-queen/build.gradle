@@ -24,6 +24,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation group: 'ai.scynet', name: 'core', version: '1.0.0'
+    implementation group: 'ai.scynet', name: 'protocol', version: '1.0.0'
 
     implementation group: 'com.obecto', name: 'gattakka', version: '1.0.0'
 }
