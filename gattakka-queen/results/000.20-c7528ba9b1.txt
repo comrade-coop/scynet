@@ -1,0 +1,6 @@
+fitness = 0.6069192847998252
+score = 0.2
+iterations = 10
+time = 1s
+hash = c7528ba9b1
+chromosome = {"layers":[{"type":"Input","inputs":[],"config":{"shape":[],"preprocessor":{"type":"MeanStdevPreprocessor","config":{"preprocess_window_length":153,"normalization_constant":0.5875}},"source":{"from":"blockchain","name":"contractVolumeInERC20Distribution_log1_2_v2_stateless"}}},{"type":"Dense","inputs":[0],"config":{"use_bias":false,"kernel_constraint":null,"kernel_initializer":"glorot_normal","bias_regularizer":{"type":"l1_l2","config":{"l1":0.05859375,"l2":0.15546875000000002}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.178125,"l2":0.18515625000000002}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.13203125000000002,"l2":0.13125}},"bias_constraint":"non_neg","units":145,"bias_initializer":"lecun_uniform"}},{"type":"Dropout","inputs":[1],"config":{"rate":0.0859375}}],"optimizer":{"type":"Adam","config":{"lr":1.1328125}},"loss":"mean_squared_error","window_length":10,"batch_size":1}
