@@ -6,9 +6,14 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.lang.IgniteFuture
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 import scala.Option
 import java.lang.Exception
+import java.util.*
 import java.util.concurrent.CompletableFuture
+import ai.scynet.protocol.*
+import java.io.File
 
 fun Any.f(): Unit {
 
@@ -31,16 +36,40 @@ fun <V> IgniteFuture<V>.toCompletableFuture(): CompletableFuture<V> {
 class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(genome), KoinComponent {
     val ignite: Ignite by inject()
 
-    val tempJobCache = ignite.getOrCreateCache<String, Gene>("Jobs")
+    val tempJobCache = ignite.getOrCreateCache<Long, TrainingJob>("Jobs")
 
     override fun startProcess() {
 //        println(ignite)
-//        val gene = genome!!.chromosomes().head().toGene()
-//
-//        tempJobCache.putAsync("name", gene).toCompletableFuture().get()
-//
-//        println(gene)
-//        return Option.empty()
+////        val gene = genome!!.chromosomes().head().toGene()
+////
+////        tempJobCache.putAsync("name", gene).toCompletableFuture().get()
+////
+////        println(gene)
+////        return Option.empty()
+
+        var mockModel = File("src/main/kotlin/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
+
+        var dataX = Nd4j.readNumpy("src/main/kotlin/xbnc_n.csv", ",")
+        var dataY = Nd4j.readNumpy("src/main/kotlin/ybnc_n.csv", ",")
+
+        var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
+
+
+
+
+        var date = Date().time
+        var job = TrainingJob(
+                UUID.randomUUID(),
+                "jJASDJnKLkmkLMkMLKML",
+                "trainerCluster",
+                "basic",
+                mockModel,
+                dataDictionary,
+                UNTRAINED() // scynet protocol
+        )
+        tempJobCache.put(date, job)
+
+
         this.dispatchFitness(.5, .5, 100)
     }
 

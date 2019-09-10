@@ -32,7 +32,7 @@ class GattakaQueenHelper {
   val generateRandomNonInputLayer: () => Chromosome = generateRandomChromosome(Descriptors.NonInputLayers)
   val generateRandomOutputLayer: () => Chromosome = generateRandomChromosome(Descriptors.OutputLayers)
 
-  val initialChromosomes: List[Genome] = (1 to 20).map((i: Int) => {
+  val initialChromosomes: List[Genome] = (1 to 1).map((i: Int) => {
     new Genome(List(
       Descriptors.AdamConfig.createChromosome(),
       generateRandomInput()
