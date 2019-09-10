@@ -19,12 +19,12 @@ pluginManagement {
 
 rootProject.name = 'scynet'
 include 'core'
+include 'protocol'
 include 'queen'
 include 'trainer'
 include 'evaluator'
 include 'validator'
 include 'executor'
-include 'protocol'
 include 'gattakka-queen'
 include 'harvester'
 

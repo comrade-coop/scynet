@@ -30,10 +30,12 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
     constructor(tJob: TrainingJob, func: (t: Long, tJob: TrainingJob) -> Unit){
         this.trainingJob = tJob
         this.addToFinishedJobsStream = func
+
         println("INFO: Starting to train a job")
     }
 
     private fun initTrainer(){
+
         println("WARNING: Initializing Trainer...")
 
         val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
@@ -61,6 +63,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
         val output  = BufferedReader(InputStreamReader(p.inputStream))
 
         for(out in output.lines()) {
+
             println("Python[OUT]: ${out}")
 
             if (out.split("=")[0] == "DONE") {
@@ -77,7 +80,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
                 var timestamp = Date().time
                 addToFinishedJobsStream(timestamp, trainingJob)
                 // Add the job to the finished jobs registry/stream or something
-
+                p.destroy()
             }
         }
     }

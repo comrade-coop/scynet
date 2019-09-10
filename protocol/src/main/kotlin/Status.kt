@@ -1,18 +1,23 @@
 package ai.scynet.protocol
 
 sealed class Status{
-   abstract val statusID: StatusID
-}
-class UNTRAINED: Status(){
-    override val statusID: StatusID = StatusID.UNTRAINED
+    abstract val statusID: StatusID
+    abstract val results: HashMap<String, String>
 }
 
-data class TRAINED(val results: HashMap<String, String>) : Status(){
+data class UNTRAINED(val res: HashMap<String, String>): Status(){
+    override val statusID: StatusID = StatusID.UNTRAINED
+    override val results = res
+}
+
+data class TRAINED(val res: HashMap<String, String>) : Status(){
     override val statusID: StatusID = StatusID.TRAINED
+    override val results = res
 }
 
 // TODO: Not sure about this one. Discuss?
-data class VALIDATED(val loss: Double): Status(){
+data class VALIDATED(val res: HashMap<String, String>): Status(){
     override val statusID: StatusID = StatusID.VALIDATED
+    override val results = res
 }
 

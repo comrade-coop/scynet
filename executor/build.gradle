@@ -1,5 +1,13 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id 'application'
 }
 
+mainClassName = "ai.scynet.executor.AppKt"
+
 version 'unspecified'
+
+dependencies {
+    implementation project(':trainer')
+    implementation project(':protocol')
+}

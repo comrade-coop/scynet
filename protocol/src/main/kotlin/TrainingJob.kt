@@ -1,7 +1,5 @@
 package ai.scynet.protocol
 
-import ai.scynet.evaluator.Evaluator
-import ai.scynet.executor.Executor
 import org.nd4j.linalg.api.ndarray.INDArray
 import java.util.*
 

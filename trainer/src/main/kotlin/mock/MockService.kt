@@ -43,7 +43,7 @@ class MockService: LazyStreamService<TrainingJob>() {
                     "basic",
                     mockModel,
                     dataDictionary,
-                    UNTRAINED()
+                    UNTRAINED(hashMapOf<String, String>("performance" to "", "weights" to ""))
             )
             cache.put(date, job)
         }

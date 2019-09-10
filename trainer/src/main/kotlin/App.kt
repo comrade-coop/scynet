@@ -1,5 +1,6 @@
 package ai.scynet.trainer
 
+
 import ai.scynet.protocol.TrainingJob
 import ai.scynet.trainer.mock.MockJobsStream
 import descriptors.Properties
@@ -12,6 +13,7 @@ import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 /**
 
