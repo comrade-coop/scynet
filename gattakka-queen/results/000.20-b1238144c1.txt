@@ -1,4 +1,4 @@
-fitness = 0.13714863518400267
+fitness = 0.5799548675533488
 score = 0.2
 iterations = 10
 time = 1s

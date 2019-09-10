@@ -18,10 +18,11 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   val shortHash = MessageDigest.getInstance("MD5").digest(strategy.getBytes()).map("%02x".format(_)).mkString.substring(0, 10)
   var startTime = 0l
 
-  override def customReceive = {
-    case Initialize(data) =>
-      startProcess()
-  }
+   override def customReceive = {
+     case Initialize(data) => {
+        startProcess()
+     }
+   }
 
   override def postStop(): Unit = {
     if (process != null) {
@@ -32,6 +33,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
 
   def dispatchFitness(fitness: Double, displayScore: Double, iterations: Int): Unit = {
     super.dispatchFitness(fitness)
+    println("fitness is " + "->" * 20 + " " + fitness)
     if (!fitness.isNaN && fitness != 0.0) {
       val endTime = System.currentTimeMillis / 1000
       val sign = if (displayScore > 0) 1 else 0
@@ -51,7 +53,7 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
     try { op(p) } finally { p.close() }
   }
 
-  private def startProcess(): Unit = {
+  def startProcess(): Unit = {
     import scala.sys.process._
     var errorText = ""
     var shouldPrintError = false

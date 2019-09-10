@@ -1,0 +1,6 @@
+fitness = 0.5
+score = 0.5
+iterations = 100
+time = 1568108015s
+hash = b3e410d805
+chromosome = {"layers":[{"type":"Input","inputs":[],"config":{"shape":[],"preprocessor":{"type":"RawPreprocessor","config":{"preprocess_window_length":137,"normalization_constant":0.36250000000000004}},"source":{"from":"blockchain","name":"contractVolumeInERC20Distribution_log1_2_v2_stateless"}}},{"type":"Dense","inputs":[0],"config":{"use_bias":true,"kernel_constraint":"non_neg","kernel_initializer":"normal","bias_regularizer":{"type":"l1_l2","config":{"l1":0.07968750000000001,"l2":0.1046875}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.0734375,"l2":0.12187500000000001}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.08046875,"l2":0.146875}},"bias_constraint":null,"units":86,"bias_initializer":"zero"}},{"type":"Dense","inputs":[1],"config":{"use_bias":true,"activation":"sigmoid","kernel_constraint":null,"kernel_initializer":"glorot_uniform","bias_regularizer":{"type":"l1_l2","config":{"l1":0.065625,"l2":0.08515625}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.0625,"l2":0.0484375}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.09609375,"l2":0.06484375}},"bias_constraint":"unit_norm","units":1,"bias_initializer":"constant"}}],"optimizer":{"type":"Adam","config":{"lr":0.421875}},"loss":"mean_squared_error","window_length":10,"batch_size":1}

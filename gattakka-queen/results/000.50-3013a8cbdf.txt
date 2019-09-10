@@ -1,0 +1,6 @@
+fitness = 0.5
+score = 0.5
+iterations = 100
+time = 1568107878s
+hash = 3013a8cbdf
+chromosome = {"layers":[{"type":"Input","inputs":[],"config":{"shape":[],"preprocessor":{"type":"MeanStdevPreprocessor","config":{"preprocess_window_length":156,"normalization_constant":0.65625}},"source":{"from":"cryptocompare","name":"market"}}}],"optimizer":{"type":"Adam","config":{"lr":1.828125}},"loss":"mean_squared_error","window_length":10,"batch_size":1}
