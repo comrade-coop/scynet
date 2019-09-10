@@ -8,5 +8,10 @@ mainClassName = "ai.scynet.trainer.AppKt"
 version 'unspecified'
 
 dependencies {
+
     implementation project(':protocol')
+    implementation group: 'io.ktor', name: 'ktor-server-netty', version: '1.2.4'
+    implementation group: 'io.ktor', name: 'ktor-websockets', version: '1.2.4'
+
+
 }

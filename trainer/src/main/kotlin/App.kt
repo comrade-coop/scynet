@@ -3,6 +3,13 @@ package ai.scynet.trainer
 import ai.scynet.protocol.TrainingJob
 import ai.scynet.trainer.mock.MockJobsStream
 import descriptors.Properties
+import io.ktor.application.call
+import io.ktor.http.ContentType
+import io.ktor.response.respondText
+import io.ktor.routing.get
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
@@ -69,6 +76,13 @@ fun main(args: Array<String>) {
         println("INFO: Job $t Finished $j")
     }
 
-    Thread.sleep(10000)
+    // TODO: Move to an external file.
+	embeddedServer(Netty, 8080) {
+		routing {
+			get("/") {
+				call.respondText("<h1>Hello ScyNet</h1>", ContentType.Text.Html)
+			}
+		}
+	}.start(wait = true)
 }
 
