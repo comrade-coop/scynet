@@ -21,6 +21,7 @@ class MockService: LazyStreamService<TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 
+        // TODO: Use: ClassLoader.getSystemResourceAsStream("")
         var mockModel = File("trainer/src/main/kotlin/mock/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
 
         // TODO: Finished Job Stream -> ExecutorStream (Parse the identifier) -> Execute

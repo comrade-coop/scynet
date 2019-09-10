@@ -116,7 +116,7 @@ class Trainer:
         self.keras_model.fit(
             self.data["x_train"],
             self.data["y_train"],
-            epochs=4000,
+            epochs=1, // TODO: Return to normal
             validation_split=validation_split,
             verbose=0,
             callbacks=[early_stopping]
