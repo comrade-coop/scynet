@@ -11,6 +11,8 @@ import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
 import ai.scynet.trainer.*
+import org.apache.ignite.cache.query.ContinuousQuery
+import org.apache.ignite.cache.query.ScanQuery
 
 fun main(args: Array<String>) {
 	val cfg = IgniteConfiguration()
@@ -47,6 +49,13 @@ fun main(args: Array<String>) {
 	streamManager.registerStream(selectedJobsStream)
 	streamManager.registerStream(finishedJobsStream)
 
+
+
+
+
+
+
+
 	var streamProxy = streamManager.getInstance(finishedJobsStreamID)
 	var cursor =  streamProxy.listen { t:Long, c: TrainingJob, _ ->
 		println("\nStream Output for **************************************************************** $t -> $c\n")
@@ -54,8 +63,8 @@ fun main(args: Array<String>) {
 
 	System.`in`.reader().read()
 
-	cursor.close()
-	streamProxy.dispose() // TODO: It would be nice if it is possible to close all the cursor from the proxy, when disposing
+//	cursor.close()
+//	streamProxy.dispose() // TODO: It would be nice if it is possible to close all the cursor from the proxy, when disposing
 
 
 }

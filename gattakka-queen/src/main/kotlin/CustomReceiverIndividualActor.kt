@@ -36,7 +36,7 @@ fun <V> IgniteFuture<V>.toCompletableFuture(): CompletableFuture<V> {
 class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(genome), KoinComponent {
     val ignite: Ignite by inject()
 
-    val tempJobCache = ignite.getOrCreateCache<Long, TrainingJob>("Jobs")
+    val tempJobCache = ignite.getOrCreateCache<Long, TrainingJob>("tmp_jobs")
 
     override fun startProcess() {
 //        println(ignite)
@@ -47,14 +47,13 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
 ////        println(gene)
 ////        return Option.empty()
 
-        var mockModel = File("src/main/kotlin/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
+//        var mockModel = File("src/main/kotlin/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
+        var genome = strategy()
 
-        var dataX = Nd4j.readNumpy("src/main/kotlin/xbnc_n.csv", ",")
-        var dataY = Nd4j.readNumpy("src/main/kotlin/ybnc_n.csv", ",")
+        var dataX = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/xbnc_n.csv", ",")
+        var dataY = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/ybnc_n.csv", ",")
 
         var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
-
-
 
 
         var date = Date().time
@@ -63,14 +62,13 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
                 "jJASDJnKLkmkLMkMLKML",
                 "trainerCluster",
                 "basic",
-                mockModel,
+                genome,
                 dataDictionary,
                 UNTRAINED() // scynet protocol
         )
         tempJobCache.put(date, job)
 
-
-        this.dispatchFitness(.5, .5, 100)
+        //this.dispatchFitness(.5, .5, 100)
     }
 
 
