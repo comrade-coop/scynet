@@ -12,15 +12,16 @@ import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.ArrayList
 
-abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
+abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
 
     override val engagementTimeoutSeconds = 10
     override var descriptor: LazyStreamServiceDescriptor? = null
     protected  val ignite: Ignite by inject()
     protected lateinit var context: ServiceContext
     // cache always has UNIX timestamp as key
-    protected lateinit var cache: IgniteCache<Long,V>
+    protected lateinit var cache: IgniteCache<K,V>
     protected lateinit var serviceName: String
+    protected lateinit var serviceClassAndName: String
     private lateinit var countDown: CountDown
     private lateinit var inputStreamFactory: ILazyStreamFactory
     protected lateinit var inputStreams: ArrayList<ILazyStream>
@@ -30,7 +31,7 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
         private lateinit var task: TimerTask
         fun start(){
             task = getTimerTask()
-            println("Starting CountDown for $serviceName!")
+            println("Starting CountDown for $serviceClassAndName!")
             this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
         }
         fun restart(){
@@ -52,6 +53,7 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
     override fun init(ctx: ServiceContext?) {
         context = ctx!!
         serviceName = context.name()
+        serviceClassAndName = "${this::class.simpleName} - $serviceName"
         cache = ignite.getOrCreateCache(serviceName)
         if(descriptor!!.inputStreamIds != null){
             inputStreamFactory = ignite.services().serviceProxy("lazyStreamFactory", ILazyStreamFactory::class.java, false)
@@ -63,16 +65,20 @@ abstract class LazyStreamService<V> : ILazyStreamService, KoinComponent {
         if(!::countDown.isInitialized){
             countDown = CountDown()
         }
-        println("Service for $serviceName is initialized successfully!")
+        countDown.start()
+        println("Service for $serviceClassAndName is initialized successfully!")
     }
 
     override fun execute(ctx: ServiceContext?) {
-        println("Starting service for $serviceName")
-
-        countDown.start()
+        println("Starting service for $serviceClassAndName")
     }
     override fun cancel(ctx: ServiceContext?) {
-        println("Service for $serviceName successfully cancelled!")
+        if(descriptor!!.inputStreamIds != null){
+            for(stream in inputStreams){
+                stream.dispose()
+            }
+        }
+        println("Service for $serviceClassAndName successfully cancelled!")
     }
 
     override fun engageLiveStream() {

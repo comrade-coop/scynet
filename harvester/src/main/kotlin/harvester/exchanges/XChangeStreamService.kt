@@ -4,6 +4,7 @@ import info.bitrich.xchangestream.core.ProductSubscription
 import info.bitrich.xchangestream.core.StreamingExchange
 import info.bitrich.xchangestream.core.StreamingExchangeFactory
 import io.reactivex.disposables.Disposable
+import org.apache.ignite.cache.affinity.AffinityKey
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.dto.marketdata.Ticker
@@ -12,7 +13,7 @@ import java.lang.IllegalStateException
 import java.time.Instant
 import java.util.*
 
-class XChangeStreamService: LazyStreamService<Ticker>() {
+class XChangeStreamService: LazyStreamService<Long, Ticker>() {
 
     private lateinit var exchange : IExchange
     private lateinit var currencyPair : CurrencyPair
@@ -42,11 +43,27 @@ class XChangeStreamService: LazyStreamService<Ticker>() {
             try{
                 timestamp = ticker.timestamp.time
                 cache.put(timestamp, ticker)
-
             }catch (e: IllegalStateException){
-                timestamp = Instant.now().toEpochMilli()
-                println("no ticker for timestamp $timestamp")
+                val time = Instant.now()
+                timestamp = time.toEpochMilli()
+                val newTicker = Ticker.Builder().apply {
+                    currencyPair(ticker.currencyPair)
+                    open(ticker.open)
+                    last(ticker.last)
+                    bid(ticker.bid)
+                    ask(ticker.ask)
+                    high(ticker.high)
+                    low(ticker.low)
+                    volume(ticker.volume)
+                    quoteVolume(ticker.quoteVolume)
+                    bidSize(ticker.bidSize)
+                    askSize(ticker.askSize)
+                    timestamp(Date.from(time))
+                }.build()
+                cache.put(timestamp, newTicker)
+
             }
+
         }
     }
 

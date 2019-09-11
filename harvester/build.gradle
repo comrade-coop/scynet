@@ -38,8 +38,9 @@ dependencies {
     // https://mvnrepository.com/artifact/info.bitrich.xchange-stream/xchange-poloniex
     implementation group: 'info.bitrich.xchange-stream', name: 'xchange-poloniex', version: '4.3.16'
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
-    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.0'
-
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.0'
+    // https://mvnrepository.com/artifact/org.nd4j/nd4j-native-platform
+    implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-alpha'
 }
 
 // Define the main class for the application.

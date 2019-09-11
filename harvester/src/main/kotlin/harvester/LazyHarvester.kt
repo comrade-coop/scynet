@@ -1,7 +1,7 @@
 package harvester
 
 import descriptors.Properties
-import harvester.candles.Candle
+import harvester.candles.CandleDuration
 import harvester.candles.CandleDTO
 import harvester.candles.CandleLazyStream
 import harvester.exchanges.Exchange
@@ -26,26 +26,25 @@ fun main(){
         printLogger()
         modules(module {
             single<Ignite> { ignite }
+
         })
     }
-    val LAZY_STREAM_FACTORY = "lazyStreamFactory"
-
-
 
     val xChangeStreamId = UUID.randomUUID()
     println("\nxChangeStreamId -> $xChangeStreamId\n")
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
-        put("currencyPair", CurrencyPair.ETH_BTC)
-        put("xchange", Exchange.BINANCE)
+        put("currencyPair", CurrencyPair.ETH_USD)
+        put("xchange", Exchange.BITMEX)
     })
 
 
     val candleStreamId = UUID.randomUUID()
     println("\ncandleStreamId -> $candleStreamId\n")
     val candleStream = CandleLazyStream(candleStreamId, ArrayList<UUID>().apply { add(xChangeStreamId) } ,Properties().apply{
-        put("candle", Candle.MINUTE)
+        put("candle", CandleDuration.MINUTE)
     } )
 
+    val LAZY_STREAM_FACTORY = "lazyStreamFactory"
     ignite.services().deployClusterSingleton(LAZY_STREAM_FACTORY, LazyStreamFactory())
     //Register streams
     val factory = ignite.services().serviceProxy(LAZY_STREAM_FACTORY, ILazyStreamFactory::class.java, false)
@@ -64,7 +63,7 @@ fun main(){
     candleStreamProxy.dispose()
     Thread.sleep(30000)
 
-    println("\nRestarting Candle Stream!\n")
+    println("\nRestarting CandleDuration Stream!\n")
     candleStreamProxy = factory.getInstance(candleStreamId)
     cursor =  candleStreamProxy.listen { t:Long, c: CandleDTO, _ ->
         println("\nStream Output for $t -> $c\n")

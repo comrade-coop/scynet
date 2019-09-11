@@ -7,7 +7,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class CandleLazyStream: LazyStream<CandleDTO>{
+class CandleLazyStream: LazyStream<Long, CandleDTO>{
     override val classId: String = "candleStream"
     override val streamServiceClass: KClass<out ILazyStreamService> = CandleStreamService::class
     constructor(): super()

@@ -7,6 +7,7 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.cache.CacheEntryEventSerializableFilter
 import org.apache.ignite.cache.query.ContinuousQuery
+import org.apache.ignite.cache.query.QueryCursor
 import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.cluster.ClusterGroup
 import org.apache.ignite.services.ServiceDeploymentException
@@ -14,11 +15,12 @@ import org.apache.ignite.services.ServiceDescriptor
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
+import javax.cache.Cache
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-abstract class LazyStream<V>(): ILazyStream, KoinComponent {
+abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     override var descriptor: LazyStreamDescriptor? = null
         set(value) {
             field = value
@@ -112,7 +114,7 @@ abstract class LazyStream<V>(): ILazyStream, KoinComponent {
 
     override fun refreshStreamData(from: Long) = serviceInstance!!.refreshStreamData(from)
 
-    override fun <K, V> listen(callback: (K, V, V?) -> Unit) : AutoCloseable {
+    override fun <K, V> listen(callback: (K, V, V?) -> Unit) : QueryCursor<Cache.Entry<K,V>> {
         engageLiveStreamTimer()
 
         val query = ContinuousQuery<K, V>()
@@ -145,5 +147,9 @@ abstract class LazyStream<V>(): ILazyStream, KoinComponent {
         serviceEngagementTimer.stop()
         serviceInstance = null
         println("${descriptor!!.id} disposed successfully!")
+    }
+
+    override fun getCachee(): IgniteCache<Any, Any> {
+        return cache as IgniteCache<Any, Any>
     }
 }

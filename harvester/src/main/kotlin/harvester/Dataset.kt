@@ -1,9 +1,15 @@
 package harvester
 
 import descriptors.Properties
-import harvester.candles.*
+import harvester.candles.CandleCombinerStream
+import harvester.candles.CandleDuration
+import harvester.candles.CandleLazyStream
+import harvester.datasets.DatasetStream
 import harvester.exchanges.Exchange
 import harvester.exchanges.XChangeLazyStream
+import harvester.labels.CandleLabelStream
+import harvester.normalization.NormalizingStream
+import harvester.pairs.PairingStream
 import harvester.windows.WindowingStream
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
@@ -11,19 +17,16 @@ import org.apache.ignite.configuration.IgniteConfiguration
 import org.knowm.xchange.currency.CurrencyPair
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.nd4j.linalg.api.ndarray.INDArray
 import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
 import kotlin.collections.ArrayList
-import org.nd4j.linalg.api.ndarray.INDArray
-import java.time.Instant
-
 import kotlin.system.exitProcess
 
 fun main(){
-
     val cfg = IgniteConfiguration()
-    cfg.igniteInstanceName = "HarvesterTest"
+    cfg.igniteInstanceName = "DatasetTest"
     val ignite = Ignition.start(cfg)
 
     startKoin {
@@ -33,30 +36,25 @@ fun main(){
         })
     }
 
-
     val xChangeStreamId = UUID.randomUUID()
-    println("\nxChangeStreamId -> $xChangeStreamId\n")
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
         put("currencyPair", CurrencyPair.ETH_USD)
         put("xchange", Exchange.BITMEX)
     })
 
     val candleStreamId = UUID.randomUUID()
-    println("\ncandleStreamId -> $candleStreamId\n")
-    val candleStream = CandleLazyStream(candleStreamId, ArrayList<UUID>().apply { add( xChangeStreamId)} ,Properties().apply{
+    val candleStream = CandleLazyStream(candleStreamId, ArrayList<UUID>().apply { add( xChangeStreamId)} , Properties().apply{
         put("candle", CandleDuration.MINUTE)
     } )
 
     val xChangeStreamId2 = UUID.randomUUID()
-    println("\nxChangeStreamId -> $xChangeStreamId2\n")
     val xChangeStream2 = XChangeLazyStream(xChangeStreamId2, null, Properties().apply {
         put("currencyPair", CurrencyPair.ETH_USD)
         put("xchange", Exchange.COINBASE_PRO)
     })
 
     val candleStreamId2 = UUID.randomUUID()
-    println("\ncandleStreamId -> $candleStreamId2\n")
-    val candleStream2 = CandleLazyStream(candleStreamId2, ArrayList<UUID>().apply { add( xChangeStreamId2)} ,Properties().apply{
+    val candleStream2 = CandleLazyStream(candleStreamId2, ArrayList<UUID>().apply { add( xChangeStreamId2)} , Properties().apply{
         put("candle", CandleDuration.MINUTE)
     } )
 
@@ -67,8 +65,26 @@ fun main(){
         add(candleStreamId2)
     })
 
+
     val windowingStreamId = UUID.randomUUID()
     val windowingStream = WindowingStream(windowingStreamId, candleCombinerId, Properties().apply { put("windowSize", 2) })
+
+    val normalizingStreamId = UUID.randomUUID()
+    val normalizingStream = NormalizingStream(normalizingStreamId, windowingStreamId)
+
+    val labelStreamId = UUID.randomUUID()
+    val labelProperties = Properties().apply {
+        put("upperTresholdPercentage", 10.0)
+        put("lowerTresholdPercentage", 5.0)
+        put("periodInMinutes", 2)
+    }
+    val labelStream = CandleLabelStream(labelStreamId, candleStreamId,labelProperties)
+
+    val pairingStreamId = UUID.randomUUID()
+    val pairingStream = PairingStream(pairingStreamId, arrayListOf(labelStreamId, normalizingStreamId))
+
+    val datasetStreamId = UUID.randomUUID()
+    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 2) })
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
@@ -80,23 +96,18 @@ fun main(){
     factory.registerStream(candleStream2)
     factory.registerStream(candleCombinerStream)
     factory.registerStream(windowingStream)
+    factory.registerStream(normalizingStream)
+    factory.registerStream(labelStream)
+    factory.registerStream(pairingStream)
+    factory.registerStream(datasetStream)
 
-    val windowingStreamProxy = factory.getInstance(windowingStreamId)
-    val cursor = windowingStreamProxy.listen{ timestamp: Long, windowed: INDArray, _ ->
-        println("\nWindowed Output at ${Date.from(Instant.ofEpochMilli(timestamp))} ----> \n$windowed\n")
-    }
-    Thread.sleep(15000)
-    println("Deployed Services:")
-    for(sd in ignite.services().serviceDescriptors()){
-        println(sd.name())
+    val datasetStreamProxy = factory.getInstance(datasetStreamId)
+    val cursor = datasetStreamProxy.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
+        println("\n\nDataset $datasetName ----> \n${dataset.first}   \n${dataset.second}\n\n")
     }
 
-    Thread.sleep(720000)
-    println("Deployed Services:")
-    for(sd in ignite.services().serviceDescriptors()){
-        println(sd.name())
-    }
+    Thread.sleep(1440000)
     cursor.close()
-    windowingStreamProxy.dispose()
+    datasetStreamProxy.dispose()
     exitProcess(0)
 }
