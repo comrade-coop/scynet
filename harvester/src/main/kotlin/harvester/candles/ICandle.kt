@@ -7,7 +7,7 @@ interface ICandle {
     fun setInitialCandleTimestamp(genesisTickerTimestamp: Long)
     fun getDuration(): Long
     fun addTicker(ticker: Ticker)
-    fun getCandle(): CandleDTO
+    fun getCandle(): CandleDTO?
     var endOfTick: Instant
     var beginningOfTick: Instant
 }

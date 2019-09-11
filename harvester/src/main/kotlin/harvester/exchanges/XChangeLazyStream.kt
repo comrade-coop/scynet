@@ -9,7 +9,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
-class XChangeLazyStream: LazyStream<Ticker>{
+class XChangeLazyStream: LazyStream<Long, Ticker>{
     override val classId: String = "xchangeStream"
     override val streamServiceClass: KClass<out ILazyStreamService> = XChangeStreamService::class
     constructor(): super()

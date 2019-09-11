@@ -5,7 +5,7 @@ import org.apache.ignite.services.ServiceContext
 import processors.LazyStreamService
 
 
-class TrainerService: LazyStreamService<TrainingJob>() {
+class TrainerService: LazyStreamService<Long, TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
         val compute = ignite.compute().withAsync()
