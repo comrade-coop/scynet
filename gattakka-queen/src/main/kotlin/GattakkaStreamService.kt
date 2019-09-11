@@ -7,7 +7,13 @@ import akka.actor.ActorSystem
 import com.obecto.gattakka.Evaluator
 import com.obecto.gattakka.Pipeline
 import com.obecto.gattakka.Population
+import org.apache.ignite.Ignite
+import org.apache.ignite.IgniteCache
+import org.apache.ignite.cache.query.ContinuousQuery
+import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.services.ServiceContext
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import processors.LazyStreamService
 import java.lang.IllegalStateException
 import java.time.Instant
@@ -15,10 +21,12 @@ import java.util.*
 
 class GattakkaStreamService: LazyStreamService<TrainingJob>() {
 
+    lateinit var tempJobCache: IgniteCache<Long, TrainingJob>
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
 
+        tempJobCache = ignite.getOrCreateCache<Long, TrainingJob>("tmp_jobs")
     }
 
     override fun execute(ctx: ServiceContext?) {
@@ -35,6 +43,17 @@ class GattakkaStreamService: LazyStreamService<TrainingJob>() {
                 pipelineActor,
                 null
         ), "population")
+
+        val query = ContinuousQuery<Long, TrainingJob>()
+
+        query.setLocalListener{ evts ->
+            evts.forEach{ e -> this@GattakkaStreamService.cache.put(e.key, e.value) }
+        }
+
+        query.initialQuery = ScanQuery<Long,TrainingJob>()
+
+        tempJobCache!!.query(query)
+
 
         helper.refreshPopulation(populationActor)
 
