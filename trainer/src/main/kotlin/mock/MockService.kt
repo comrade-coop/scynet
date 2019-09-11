@@ -21,6 +21,7 @@ class MockService: LazyStreamService<TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 
+        // TODO: Use: ClassLoader.getSystemResourceAsStream("")
         var mockModel = File("trainer/src/main/kotlin/mock/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
 
         // TODO: Finished Job Stream -> ExecutorStream (Parse the identifier) -> Execute
@@ -32,7 +33,7 @@ class MockService: LazyStreamService<TrainingJob>() {
 
         var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
 
-        var numOfJobs = 0
+        var numOfJobs = 5
 
         for (i in 0..numOfJobs) {
             var date = Date().time
