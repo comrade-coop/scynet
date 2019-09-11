@@ -5,7 +5,7 @@ plugins {
 
 mainClassName = "ai.scynet.trainer.AppKt"
 
-version 'unspecified'
+version '1.0.0'
 
 dependencies {
 
