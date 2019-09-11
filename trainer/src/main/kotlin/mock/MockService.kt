@@ -33,7 +33,7 @@ class MockService: LazyStreamService<TrainingJob>() {
 
         var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
 
-        var numOfJobs = 0
+        var numOfJobs = 5
 
         for (i in 0..numOfJobs) {
             var date = Date().time
