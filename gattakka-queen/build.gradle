@@ -24,7 +24,12 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation group: 'ai.scynet', name: 'core', version: '1.0.0'
-    implementation group: 'ai.scynet', name: 'protocol', version: '1.0.0'
+    
+    // causing the build to fail, I'm not sure even why the need to specify it so specifically
+    // implementation group: 'ai.scynet', name: 'protocol', version: '1.0.0' 
+    // This is better?
+    implementation project(':protocol')
+
 
     implementation group: 'com.obecto', name: 'gattakka', version: '1.0.0'
 }
