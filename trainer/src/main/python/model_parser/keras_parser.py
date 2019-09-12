@@ -130,7 +130,7 @@ def build_model(structure):
     model = Model(inputs=model_inputs, outputs=model_outputs)
     optimizer = structure['optimizer']
     optimizer_obj = keras_object(optimizer['type'], optimizer['config'])  # TODO: Don't rely on keras's optimizer namings
-    model.compile(optimizer_obj, loss=structure['loss'])  # TODO: Don't rely on keras's loss namings
+    model.compile(optimizer_obj, loss=structure['loss'], metrics=['accuracy'])  # TODO: Don't rely on keras's loss namings
 
     return model, input_metadata
 

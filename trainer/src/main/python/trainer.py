@@ -6,6 +6,9 @@ import tensorflow as tf
 from time import sleep
 from model_parser.keras_parser import build_model, load_json
 import tensorflow.keras as keras
+from sklearn.model_selection import RepeatedKFold, cross_val_score
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
+
 # import custom loss from the evaluator
 
 # Tricks for the STD communication
@@ -69,7 +72,7 @@ class Trainer:
 
     def save_model(self, filepath, json_model, deep_copy=False):
         if deep_copy:
-            self.keras_model.compile(optimizer=self.environment.optimizer, loss='mean_squared_error')
+            self.keras_model.compile(optimizer=self.environment.optimizer, loss='mean_squared_error', metrics=['accuracy'])
             self.keras_model.save(filepath)
         else:
             self.keras_model.save_weights(filepath)
@@ -79,7 +82,7 @@ class Trainer:
 
         if from_deep_copy:
             self.keras_model = keras.models.load_model(filepath)
-            self.keras_model.compile(optimizer=self.config.optimizer, loss='mean_squared_error')
+            self.keras_model.compile(optimizer=self.config.optimizer, loss='mean_squared_error', metrics=['accuracy'])
             self.keras_model.summary()
         else:
             # Reinitialize keras model
@@ -116,13 +119,13 @@ class Trainer:
         self.keras_model.fit(
             self.data["x_train"],
             self.data["y_train"],
-            epochs=4000,
+            epochs=4000, # For development purposes you can put this at 1
             validation_split=validation_split,
             verbose=0,
             callbacks=[early_stopping]
         )
         
-        self.val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+        self.val_loss, self.accuracy = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
 
         # std communication TODO Discuss
         

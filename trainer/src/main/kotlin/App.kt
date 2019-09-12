@@ -42,7 +42,6 @@ fun main(args: Array<String>) {
     // Creating job streams
     val mockJobsStreamID = UUID.randomUUID()
     val mockJobsStream = MockJobsStream(mockJobsStreamID, null, Properties().apply {
-        // Test config
         put("configSelectedJobStream", true)
     })
 

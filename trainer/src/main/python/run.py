@@ -96,5 +96,5 @@ if __name__ == "__main__":
     # get weights and save them
     # Write to file and read from ignite
     print(trainer.predict(x))
-    print("DONE=%s" % (trainer.val_loss)) # This is used as a signal to the ProcessBuilder to stop and gather stuff
+    print("DONE=%s" % (trainer.accuracy)) # This is used as a signal to the ProcessBuilder to stop and gather stuff
     print("Saving results to ./trainer/src/main/kotlin/mock/temp/results/%s_w.h5" % (args["UUID"]))

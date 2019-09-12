@@ -1,12 +1,13 @@
 package ai.scynet.executor
 
 import ai.scynet.protocol.*
+import ai.scynet.executor.IgniteExecuteJob
 import org.apache.ignite.services.ServiceContext
 import processors.LazyStreamService
 
 class ExecutorService: LazyStreamService<Any>() {
 
-    protected lateinit var currentTrainingJob: TrainingJob
+    protected var currentTrainingJob: TrainingJob? = null
     protected var running: Boolean = false
     protected var initializing: Boolean = false
 
@@ -20,11 +21,12 @@ class ExecutorService: LazyStreamService<Any>() {
         inputStreams[0].listen { timestamp: Long, trainingJob: TrainingJob, _ ->
             if (isBetter(trainingJob)) {
                 println("Initializing executor for $trainingJob")
+                this.currentTrainingJob = trainingJob;
                 initExecutor(trainingJob)
             }
         }
 
-        //inputStreams[1] this should be dataX
+        // inputStreams[1] this should be dataX
         // TODO: Get results from the executor and cache.put them, or just send the executor the cache name or a callback to a function here
     }
 
@@ -35,22 +37,32 @@ class ExecutorService: LazyStreamService<Any>() {
     }
 
     private fun initExecutor(tJob: TrainingJob) {
+
+        val compute = ignite.compute().withAsync()
+
         if (running) {
             // TODO: init, store stuff via cacheID from cache.name or something, this.listen {} process.D
         } else if (initializing) {
             // TODO: Stop the process and init from the begining, or just wait to initialize
         } else {
+            compute.run(IgniteExecuteJob(tJob, cache.name))
+
+            this.running = true
             // TODO: init via magic process communication
         }
     }
 
     private fun isBetter(trainingJob: TrainingJob) : Boolean {
 
-        var lossCurrent: Float = currentTrainingJob.status.results["performance"] as Float
-        var lossCandidate: Float = trainingJob.status.results["performance"] as Float
-
-        if (lossCandidate < lossCurrent) {
+        if (!running) {
             return true
+        } else {
+            val accuracyCurrent: Float = currentTrainingJob!!.status.results["performance"] as Float
+            val accuracyCandidate: Float = trainingJob.status.results["performance"] as Float
+
+            if (accuracyCandidate > accuracyCurrent) {
+                return true
+            }
         }
 
         return false

@@ -39,6 +39,7 @@ fun main(args: Array<String>) {
     ignite.services().deployClusterSingleton(LAZY_STREAM_FACTORY, LazyStreamFactory())
     val streamManager = ignite.services().serviceProxy(LAZY_STREAM_FACTORY, ILazyStreamFactory::class.java, false)
 
+    // TODO: This produces only untrained jobs -> Think of a way to mock the executor without waiting for the trainer.
     val mockJobsStreamID = UUID.randomUUID()
 
     val mockJobsStream = MockJobsStream(mockJobsStreamID, null, Properties())
@@ -48,14 +49,16 @@ fun main(args: Array<String>) {
     val queryStream = QueryStream(queryStreamID, ArrayList<UUID>().apply { add(mockJobsStreamID) }, Properties())
 
     val dataXStreamID = UUID.randomUUID()
-    //  val dataXStream = DataStream() // Десо data stream here?
+    //val dataXStream = DataStream() // Десо data stream here?
 
     val outputStreamID = UUID.randomUUID()
-    val outputResultStream = OutputStream(outputStreamID, ArrayList<UUID>().apply { add(queryStreamID); add(dataXStreamID) }, Properties())
+    val outputResultStream = OutputStream(outputStreamID, ArrayList<UUID>().apply { add(queryStreamID); /*add(dataXStreamID)*/ }, Properties())
 
     streamManager.registerStream(mockJobsStream)
     streamManager.registerStream(queryStream)
     streamManager.registerStream(outputResultStream)
+
+    println("")
 
     var outputResultsStreamProxy = streamManager.getInstance(outputStreamID)
 

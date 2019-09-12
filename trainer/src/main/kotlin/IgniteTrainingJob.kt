@@ -80,7 +80,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
                 var timestamp = Date().time
                 addToFinishedJobsStream(timestamp, trainingJob)
                 // Add the job to the finished jobs registry/stream or something
-                p.destroy()
+//                p.destroy()
             }
         }
     }
