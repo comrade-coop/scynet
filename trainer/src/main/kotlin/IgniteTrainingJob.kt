@@ -58,6 +58,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
             trainingJob.UUID.toString()
         )
 
+
         pb.redirectErrorStream(true)
         val p = pb.start()
         val output  = BufferedReader(InputStreamReader(p.inputStream))

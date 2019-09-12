@@ -1,0 +1,6 @@
+fitness = 0.7806269019193063
+score = 0.2
+iterations = 10
+time = 1s
+hash = 9a63e7784d
+chromosome = {"layers":[{"type":"Input","inputs":[],"config":{"shape":[],"preprocessor":{"type":"MeanStdevPreprocessor","config":{"preprocess_window_length":155,"normalization_constant":0.80625}},"source":{"from":"cryptocompare","name":"market"}}},{"type":"Dense","inputs":[0],"config":{"use_bias":true,"kernel_constraint":"unit_norm","kernel_initializer":"truncated_normal","bias_regularizer":{"type":"l1_l2","config":{"l1":0.17890625000000002,"l2":0.08046875}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.14453125,"l2":0.18203125}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.140625,"l2":0.0578125}},"bias_constraint":"unit_norm","units":94,"bias_initializer":"zero"}},{"type":"Dense","inputs":[1],"config":{"use_bias":false,"activation":"sigmoid","kernel_constraint":null,"kernel_initializer":"he_normal","bias_regularizer":{"type":"l1_l2","config":{"l1":0.10546875,"l2":0.0625}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.19609375,"l2":0.13593750000000002}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.03515625,"l2":0.1078125}},"bias_constraint":null,"units":1,"bias_initializer":"glorot_normal"}}],"optimizer":{"type":"Adam","config":{"lr":1.9765625}},"loss":"mean_squared_error","window_length":10,"batch_size":1}

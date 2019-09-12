@@ -8,6 +8,7 @@ version '1.0.0'
 allprojects {
     repositories {
         jcenter()
+        mavenCentral()
     }
 }
 
@@ -15,6 +16,8 @@ subprojects {
     apply plugin: "java"
     apply plugin: "maven-publish"
     group 'ai.scynet'
+
+
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
