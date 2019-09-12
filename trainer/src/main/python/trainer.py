@@ -6,8 +6,6 @@ import tensorflow as tf
 from time import sleep
 from model_parser.keras_parser import build_model, load_json
 import tensorflow.keras as keras
-from sklearn.model_selection import RepeatedKFold, cross_val_score
-from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 
 # import custom loss from the evaluator
 

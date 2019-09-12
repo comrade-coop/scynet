@@ -40,7 +40,6 @@ class IgniteExecuteJob: IgniteRunnable, KoinComponent {
 //        // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
 //        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
 
-
         // In order to use caches carefree as intermediary (shared with the thin client) inputs you need to use only primary types
         ignite.getOrCreateCache<String, TrainingJob>("executorJobs").put(trainingJob.UUID.toString(), trainingJob)
 

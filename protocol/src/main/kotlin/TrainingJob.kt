@@ -1,9 +1,5 @@
 package ai.scynet.protocol
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 7b4c2b61dabe3fb51d23c3f4c924a2ef85f57e21
 import org.nd4j.linalg.api.ndarray.INDArray
 import java.util.*
 import kotlin.collections.HashMap
