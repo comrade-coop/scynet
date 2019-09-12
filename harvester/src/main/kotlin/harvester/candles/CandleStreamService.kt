@@ -62,7 +62,7 @@ class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
     }
 
     private fun fillCandle(timestamp: Long, ticker: Ticker){
-        println("Ticker as received from XChangeStream $ticker")
+        //println("Ticker as received from XChangeStream $ticker")
         val candleTimestamp = candle.endOfTick.toEpochMilli()
 
         if(buffer.size > 20){

@@ -40,6 +40,7 @@ fun main(){
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
         put("currencyPair", CurrencyPair.ETH_USD)
         put("xchange", Exchange.BITMEX)
+        put("fromFile", true)
     })
 
     val candleStreamId = UUID.randomUUID()
@@ -51,6 +52,7 @@ fun main(){
     val xChangeStream2 = XChangeLazyStream(xChangeStreamId2, null, Properties().apply {
         put("currencyPair", CurrencyPair.ETH_USD)
         put("xchange", Exchange.COINBASE_PRO)
+        put("fromFile", true)
     })
 
     val candleStreamId2 = UUID.randomUUID()
@@ -84,7 +86,7 @@ fun main(){
     val pairingStream = PairingStream(pairingStreamId, arrayListOf(labelStreamId, normalizingStreamId))
 
     val datasetStreamId = UUID.randomUUID()
-    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 2) })
+    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 10) })
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
