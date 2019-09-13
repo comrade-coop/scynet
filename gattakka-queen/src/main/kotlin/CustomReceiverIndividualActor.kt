@@ -13,6 +13,12 @@ import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import ai.scynet.protocol.*
+import ai.scynet.trainer.TrainingJobsStream
+import descriptors.Properties
+import org.apache.ignite.cache.query.ContinuousQuery
+import org.apache.ignite.cache.query.ScanQuery
+import processors.ILazyStreamFactory
+import processors.LazyStreamFactory
 import java.io.File
 
 fun Any.f(): Unit {
@@ -37,17 +43,10 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
     val ignite: Ignite by inject()
 
     val tempJobCache = ignite.getOrCreateCache<Long, TrainingJob>("tmp_jobs")
+    val tempJobCacheIn = ignite.getOrCreateCache<String, Double>("tmp_perf")
 
     override fun startProcess() {
-//        println(ignite)
-////        val gene = genome!!.chromosomes().head().toGene()
-////
-////        tempJobCache.putAsync("name", gene).toCompletableFuture().get()
-////
-////        println(gene)
-////        return Option.empty()
 
-//        var mockModel = File("src/main/kotlin/mockModel.json").inputStream().readBytes().toString(Charsets.UTF_8)
         var genome = strategy()
 
         var dataX = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/xbnc_n.csv", ",")
@@ -55,10 +54,11 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
 
         var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
 
+        val jobId = UUID.randomUUID()
 
         var date = Date().time
         var job = TrainingJob(
-                UUID.randomUUID(),
+                jobId,
                 "jJASDJnKLkmkLMkMLKML",
                 "trainerCluster",
                 "basic",
@@ -67,6 +67,25 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
                 UNTRAINED() // scynet protocol
         )
         tempJobCache.put(date, job)
+
+        val query = ContinuousQuery<String, Double>()
+
+        query.setLocalListener { evts ->
+            run {
+                evts.forEach { e ->
+                    run {
+                        if (e.key == jobId.toString()){
+                            this@CustomReceiverIndividualActor.dispatchFitness(e.value, .5, 100)
+                        }
+                    }
+                }
+            }
+        }
+
+        query.initialQuery = ScanQuery<String,Double>()
+
+        tempJobCacheIn!!.query(query)
+
 
         //this.dispatchFitness(.5, .5, 100)
     }

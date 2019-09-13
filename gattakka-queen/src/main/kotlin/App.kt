@@ -11,6 +11,8 @@ import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
 import ai.scynet.trainer.*
+import ai.scynet.protocol.StatusID
+import ai.scynet.protocol.TRAINED
 import org.apache.ignite.cache.query.ContinuousQuery
 import org.apache.ignite.cache.query.ScanQuery
 
@@ -52,13 +54,18 @@ fun main(args: Array<String>) {
 
 
 
-
-
+	val tempJobCache_in = ignite.getOrCreateCache<String, Double>("tmp_perf")
 
 
 	var streamProxy = streamManager.getInstance(finishedJobsStreamID)
 	var cursor =  streamProxy.listen { t:Long, c: TrainingJob, _ ->
 		println("\nStream Output for **************************************************************** $t -> $c\n")
+
+		if(c.status.statusID == StatusID.TRAINED) {
+			var perf = (c.status as TRAINED).results.getValue("performance")
+			tempJobCache_in.put(c.UUID.toString(), perf.toDouble())
+
+		}
 	}
 
 	System.`in`.reader().read()
