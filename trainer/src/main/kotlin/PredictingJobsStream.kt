@@ -8,9 +8,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class SelectedJobsStream : LazyStream<Long, TrainingJob>{
-    override val streamServiceClass: KClass<out ILazyStreamService> = JobSelectionService::class
-    override val classId: String = "selectedJobsStream"
+class PredictingJobsStream : LazyStream<TrainingJob> {
+    override val streamServiceClass: KClass<out ILazyStreamService> = PredicterService::class
+    override val classId: String = "predictingJobsStream"
 
     constructor(): super()
     constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, properties: Properties): super(id, inputStreamIds, properties)

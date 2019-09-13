@@ -49,6 +49,11 @@ if __name__ == "__main__":
     # x = np.load('./trainer/src/main/python/mock_data/xbnc_n.npy')
     # y = np.load('./trainer/src/main/python/mock_data/ybnc_n.npy')
 
+    #If evaluate command line switch is active, if branch
+
+
+    # else
+
     x = np.load(args['data_x'])
     y = np.load(args['data_y'])
 
