@@ -5,13 +5,14 @@ import harvester.candles.CandleDuration
 import harvester.candles.CandleLazyStream
 import harvester.exchanges.Exchange
 import harvester.exchanges.XChangeLazyStream
-import harvester.indicators.SimpleMovingAverageStream
+import harvester.indicators.CompositeLengthIndicatorStream
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.knowm.xchange.currency.CurrencyPair
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.nd4j.linalg.api.ndarray.INDArray
 import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.time.Instant
@@ -43,7 +44,18 @@ fun main(){
     } )
 
     val smaId = UUID.randomUUID()
-    val smaStream = SimpleMovingAverageStream(smaId, candleStreamId, Properties().apply { put("averagingPeriod", 30) })
+    val indicators = arrayListOf(
+            Pair("adx", 30),
+            Pair("adxr", 30),
+            Pair("sma",30),
+            Pair("ar",30),
+            Pair("dx",30),
+            Pair("mdi",30),
+            Pair("pdi",30),
+            Pair("rsi",3),
+            Pair("willr",30)
+    )
+    val smaStream = CompositeLengthIndicatorStream(smaId, candleStreamId, Properties().apply { put("indicators", indicators) })
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
@@ -55,7 +67,7 @@ fun main(){
 
 
     val smaProxy = factory.getInstance(smaId)
-    val cursor = smaProxy.listen{ timestamp: Long, sma: Double, _ ->
+    val cursor = smaProxy.listen{ timestamp: Long, sma: INDArray, _ ->
         println("SMA at ${Date.from(Instant.ofEpochMilli(timestamp))} ---> $sma")
     }
 

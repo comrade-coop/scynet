@@ -18,7 +18,6 @@ class CandleCombiner: LazyStreamService<Long, INDArray>() {
         runBlocking {
             launch {
                 inputStreams[0].listen { timestamp: Long, candle: CandleDTO, _ ->
-                    println("\nCandleOne at ${Date.from(Instant.ofEpochMilli(timestamp))}-> $candle\n")
                     firstMap.put(timestamp, candle)
                     if (secondMap.containsKey(timestamp))
                         streamCombined(timestamp)
@@ -26,7 +25,6 @@ class CandleCombiner: LazyStreamService<Long, INDArray>() {
             }
             launch {
                 inputStreams[1].listen { timestamp: Long, candle: CandleDTO, _ ->
-                    println("\n CandleTwo  at ${Date.from(Instant.ofEpochMilli(timestamp))} -> $candle\n")
                     secondMap.put(timestamp, candle)
                     if (firstMap.containsKey(timestamp))
                         streamCombined(timestamp)

@@ -7,7 +7,7 @@ import processors.LazyStreamService
 import java.util.*
 
 class WindowingService: LazyStreamService<Long, INDArray>() {
-    private val combinedCandles: LinkedList<Pair<Long, INDArray>> = LinkedList()
+    private val window: LinkedList<Pair<Long, INDArray>> = LinkedList()
     private var windowSize: Int? = null
 
     override fun init(ctx: ServiceContext?) {
@@ -17,17 +17,17 @@ class WindowingService: LazyStreamService<Long, INDArray>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
         inputStreams[0].listen{ timestamp: Long, combinedCandle: INDArray, _ ->
-            combinedCandles.addLast(Pair(timestamp,combinedCandle))
-            if(combinedCandles.size == windowSize!!){
+            window.addLast(Pair(timestamp,combinedCandle))
+            if(window.size == windowSize!!){
                 val windowed = getWindowed()
-                cache.put(combinedCandles.last.first, windowed)
-                combinedCandles.removeFirst()
+                cache.put(window.last.first, windowed)
+                window.removeFirst()
             }
         }
     }
     private fun getWindowed(): INDArray{
         var vstack: INDArray? = null
-        for(timestampCandle in combinedCandles){
+        for(timestampCandle in window){
             if(vstack == null){
                 vstack = timestampCandle.second
             }else{

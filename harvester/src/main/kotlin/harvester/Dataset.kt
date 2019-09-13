@@ -4,13 +4,18 @@ import descriptors.Properties
 import harvester.candles.CandleCombinerStream
 import harvester.candles.CandleDuration
 import harvester.candles.CandleLazyStream
+import harvester.combiners.INDArrayCombinerStream
 import harvester.datasets.DatasetStream
 import harvester.exchanges.Exchange
+import harvester.exchanges.TickerSaver
 import harvester.exchanges.XChangeLazyStream
+import harvester.indicators.CompositeLengthIndicatorStream
 import harvester.labels.CandleLabelStream
 import harvester.normalization.NormalizingStream
 import harvester.pairs.PairingStream
 import harvester.windows.WindowingStream
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
@@ -25,6 +30,24 @@ import kotlin.collections.ArrayList
 import kotlin.system.exitProcess
 
 fun main(){
+
+    GlobalScope.launch {
+        val tickerWriter = TickerSaver(CurrencyPair.ETH_USD)
+
+        Runtime.getRuntime().addShutdownHook(object : Thread() {
+            override fun run() {
+                tickerWriter.stop()
+            }
+        })
+        GlobalScope.launch {
+            while(readLine() != "stop"){
+                println("Only stop command accepted!")
+            }
+            exitProcess(0)
+        }
+
+        tickerWriter.start()
+    }
     val cfg = IgniteConfiguration()
     cfg.igniteInstanceName = "DatasetTest"
     val ignite = Ignition.start(cfg)
@@ -67,18 +90,25 @@ fun main(){
         add(candleStreamId2)
     })
 
+    val indicatorsId = UUID.randomUUID()
+    val indicators = getIndicatorPeriodPairs(arrayOf("adx", "adxr", "sma", "sma", "ar", "dx","mdi","pdi","rsi","willr"))
+
+    val indicatorsStream = CompositeLengthIndicatorStream(indicatorsId, candleStreamId, Properties().apply { put("indicators", indicators) })
+
+    val iNDCombinerId = UUID.randomUUID()
+    val iNDcombinerStream = INDArrayCombinerStream(iNDCombinerId, arrayListOf(candleCombinerId, indicatorsId))
 
     val windowingStreamId = UUID.randomUUID()
-    val windowingStream = WindowingStream(windowingStreamId, candleCombinerId, Properties().apply { put("windowSize", 2) })
+    val windowingStream = WindowingStream(windowingStreamId, iNDCombinerId, Properties().apply { put("windowSize", 10) })
 
     val normalizingStreamId = UUID.randomUUID()
     val normalizingStream = NormalizingStream(normalizingStreamId, windowingStreamId)
 
     val labelStreamId = UUID.randomUUID()
     val labelProperties = Properties().apply {
-        put("upperTresholdPercentage", 10.0)
-        put("lowerTresholdPercentage", 5.0)
-        put("periodInMinutes", 2)
+        put("upperTresholdPercentage", 1.0)
+        put("lowerTresholdPercentage", 0.5)
+        put("periodInMinutes", 30)
     }
     val labelStream = CandleLabelStream(labelStreamId, candleStreamId,labelProperties)
 
@@ -86,7 +116,7 @@ fun main(){
     val pairingStream = PairingStream(pairingStreamId, arrayListOf(labelStreamId, normalizingStreamId))
 
     val datasetStreamId = UUID.randomUUID()
-    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 10) })
+    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 50) })
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
@@ -97,6 +127,8 @@ fun main(){
     factory.registerStream(xChangeStream2)
     factory.registerStream(candleStream2)
     factory.registerStream(candleCombinerStream)
+    factory.registerStream(indicatorsStream)
+    factory.registerStream(iNDcombinerStream)
     factory.registerStream(windowingStream)
     factory.registerStream(normalizingStream)
     factory.registerStream(labelStream)
@@ -112,4 +144,15 @@ fun main(){
     cursor.close()
     datasetStreamProxy.dispose()
     exitProcess(0)
+}
+
+fun getIndicatorPeriodPairs(indicators: Array<String>): ArrayList<Pair<String, Int>>{
+    val periods = arrayListOf(5,10,20,25,30,35,40,50,75,100)
+    val indicatorPeriodPairs = ArrayList<Pair<String, Int>>()
+    for(indicator in indicators){
+        for (period in periods){
+            indicatorPeriodPairs.add(Pair(indicator, period))
+        }
+    }
+    return indicatorPeriodPairs
 }

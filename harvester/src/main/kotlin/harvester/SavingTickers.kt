@@ -14,6 +14,12 @@ fun main(){
             tickerWriter.stop()
         }
     })
+    GlobalScope.launch {
+        while(readLine() != "stop"){
+            println("Only stop command accepted!")
+        }
+        exitProcess(0)
+    }
 
     tickerWriter.start()
 }

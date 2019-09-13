@@ -5,10 +5,11 @@ import processors.LazyStream
 import java.util.*
 import kotlin.reflect.KClass
 import descriptors.Properties
+import org.nd4j.linalg.api.ndarray.INDArray
 
-class SimpleMovingAverageStream: LazyStream<Long, Double> {
-    override val classId: String = "simpleMovingAverageStream"
-    override val streamServiceClass: KClass<out ILazyStreamService> = SimpleMovingAverageService::class
+class CompositeLengthIndicatorStream: LazyStream<Long, INDArray> {
+    override val classId: String = "compositeLengthIndicatorStream"
+    override val streamServiceClass: KClass<out ILazyStreamService> = CompositeLengthIndicatorService::class
     constructor(): super()
     constructor(id: UUID, inputStreamId: UUID, properties: Properties): super(id, arrayListOf(inputStreamId), properties)
 }
