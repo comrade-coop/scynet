@@ -81,36 +81,47 @@ class CompositeLengthIndicatorService: LazyStreamService<Long, INDArray>(){
             }
             "adx" -> {
                 initializePricesArrays()
-                val retCode = TALibCore.adx(0, length - 1, highPrices!!, lowPrices!!, closePrices!!, length, begin, mutableLength, out)
+                TALibCore.adx(0, length - 1, highPrices!!, lowPrices!!, closePrices!!, length, begin, mutableLength, out)
+                out[0] = out[0] / 100
             }
             "adxr" -> {
                 initializePricesArrays()
                 TALibCore.adxr(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                out[0] = out[0] / 100
             }
             "ar" -> {
                 initializeHighPricesArray()
                 initializeLowPricesArray()
                 TALibCore.aroonOsc(0, length - 1, highPrices, lowPrices, length, begin, mutableLength, out)
+                out[0] = out[0] / 200 + 0.5
+
             }
             "dx" -> {
                 initializePricesArrays()
                 TALibCore.dx(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                out[0] = out[0] / 100
             }
             "mdi" ->{
                 initializeClosePricesArray()
                 TALibCore.minusDI(0,length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength,out)
+                out[0] = out[0] / 100
             }
             "pdi" -> {
                 initializePricesArrays()
                 TALibCore.plusDI(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                out[0] = out[0] / 100
             }
             "rsi" -> {
                 initializeClosePricesArray()
                 TALibCore.rsi(0, length - 1, closePrices, length, begin, mutableLength, out)
+                out[0] = out[0] / 100
+
             }
             "willr" -> {
                 initializePricesArrays()
                 TALibCore.willR(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                out[0] = out[0] / -100
+
             }
 
 

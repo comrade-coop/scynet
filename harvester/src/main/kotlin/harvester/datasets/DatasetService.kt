@@ -10,6 +10,8 @@ import java.util.*
 class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
     private lateinit var outputInputCache: IgniteCache<String, LinkedList<Pair<INDArray,INDArray>>>
     private  var datasetSize: Int? = null
+    // window slide; 1<= slide <= datasetSize; if slide = datasetSize --> tumbling window
+    private var slide: Int? = null
     private val OUTPUT_INPUT: String = "outputInputLinkedList"
     private val LATEST_DATASET: String = "latestDataset"
 
@@ -17,6 +19,7 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
         super.init(ctx)
         outputInputCache = ignite.getOrCreateCache("outputInput")
         datasetSize = descriptor!!.properties!!.get("datasetSize") as Int
+        slide = descriptor!!.properties!!.get("slide") as Int
     }
 
     override fun execute(ctx: ServiceContext?) {
@@ -43,7 +46,10 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
 
             if(inputOutputs.size == datasetSize){
                 updateDataset(inputOutputs)
-                inputOutputs.removeFirst()
+                repeat(slide!!){
+                    inputOutputs.removeFirst()
+                }
+
             }
 
             outputInputCache.put(OUTPUT_INPUT, inputOutputs)

@@ -90,19 +90,22 @@ fun main(){
         add(candleStreamId2)
     })
 
-    val indicatorsId = UUID.randomUUID()
-    val indicators = getIndicatorPeriodPairs(arrayOf("adx", "adxr", "sma", "sma", "ar", "dx","mdi","pdi","rsi","willr"))
-
-    val indicatorsStream = CompositeLengthIndicatorStream(indicatorsId, candleStreamId, Properties().apply { put("indicators", indicators) })
-
-    val iNDCombinerId = UUID.randomUUID()
-    val iNDcombinerStream = INDArrayCombinerStream(iNDCombinerId, arrayListOf(candleCombinerId, indicatorsId))
-
     val windowingStreamId = UUID.randomUUID()
-    val windowingStream = WindowingStream(windowingStreamId, iNDCombinerId, Properties().apply { put("windowSize", 10) })
+    val windowingStream = WindowingStream(windowingStreamId, candleCombinerId, Properties().apply { put("windowSize", 10) })
 
     val normalizingStreamId = UUID.randomUUID()
     val normalizingStream = NormalizingStream(normalizingStreamId, windowingStreamId)
+
+    val indicatorsId = UUID.randomUUID()
+    val indicators = getIndicatorPeriodPairs(arrayOf("adx", "adxr", "sma", "sma", "ar", "dx","mdi","pdi","rsi","willr"))
+    val indicatorsStream = CompositeLengthIndicatorStream(indicatorsId, candleStreamId, Properties().apply { put("indicators", indicators) })
+
+    val windowedIndicatorsStreamId = UUID.randomUUID()
+    val windowedIndicatorsStream = WindowingStream(windowedIndicatorsStreamId, indicatorsId, Properties().apply { put("windowSize", 10) })
+
+    val iNDCombinerId = UUID.randomUUID()
+    val iNDcombinerStream = INDArrayCombinerStream(iNDCombinerId, arrayListOf(normalizingStreamId, windowedIndicatorsStreamId))
+
 
     val labelStreamId = UUID.randomUUID()
     val labelProperties = Properties().apply {
@@ -116,7 +119,9 @@ fun main(){
     val pairingStream = PairingStream(pairingStreamId, arrayListOf(labelStreamId, normalizingStreamId))
 
     val datasetStreamId = UUID.randomUUID()
-    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply { put("datasetSize", 50) })
+    val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply {
+        put("datasetSize", 50)
+        put("slide", 25)})
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
@@ -134,6 +139,7 @@ fun main(){
     factory.registerStream(labelStream)
     factory.registerStream(pairingStream)
     factory.registerStream(datasetStream)
+    factory.registerStream(windowedIndicatorsStream)
 
     val datasetStreamProxy = factory.getInstance(datasetStreamId)
     val cursor = datasetStreamProxy.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
