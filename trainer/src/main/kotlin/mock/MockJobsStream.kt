@@ -8,7 +8,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class MockJobsStream : LazyStream<TrainingJob>{
+class MockJobsStream : LazyStream<Long, TrainingJob>{
     override val streamServiceClass: KClass<out ILazyStreamService> = MockService::class
     override val classId: String = "mockJobsStream"
 

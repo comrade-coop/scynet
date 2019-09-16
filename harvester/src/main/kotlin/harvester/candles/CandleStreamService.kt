@@ -2,6 +2,7 @@ package harvester.candles
 
 import descriptors.LazyStreamServiceDescriptor
 import harvester.exchanges.XChangeLazyStream
+import org.apache.ignite.cache.affinity.AffinityKey
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.dto.marketdata.Ticker
 import processors.ILazyStream
@@ -11,7 +12,7 @@ import processors.LazyStreamService
 import java.util.*
 import kotlin.collections.HashMap
 
-class CandleStreamService: LazyStreamService<CandleDTO>(){
+class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
     private  lateinit var candle: ICandle
     private lateinit var tickerStream: AutoCloseable
     private val buffer: HashMap<Long, Ticker> = HashMap()
@@ -20,7 +21,7 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
-        candle = descriptor!!.properties!!.get("candle") as ICandle
+        candle = Candle(descriptor!!.properties!!.get("candle") as ICandleDuration)
     }
 
     override fun execute(ctx: ServiceContext?) {
@@ -48,7 +49,6 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     override fun cancel(ctx: ServiceContext?) {
         tickerStream.close()
-        inputStreams[0].dispose()
         super.cancel(ctx)
     }
 
@@ -62,7 +62,7 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
     }
 
     private fun fillCandle(timestamp: Long, ticker: Ticker){
-        println("Ticker as received from XChangeStream $ticker")
+        //println("Ticker as received from XChangeStream $ticker")
         val candleTimestamp = candle.endOfTick.toEpochMilli()
 
         if(buffer.size > 20){
@@ -81,7 +81,9 @@ class CandleStreamService: LazyStreamService<CandleDTO>(){
 
     private fun streamCandle(){
         val candle = candle.getCandle()
-        cache.put(candle.timestamp, candle)
+        if(candle != null){
+            cache.put(candle.timestamp, candle)
+        }
     }
     private fun emptyBuffer(){
         val toDelete = mutableListOf<Long>()

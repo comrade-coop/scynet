@@ -12,7 +12,7 @@ import java.security.Timestamp
 import java.time.Instant
 import java.util.*
 
-class MockService: LazyStreamService<TrainingJob>() {
+class MockService: LazyStreamService<Long, TrainingJob>() {
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)

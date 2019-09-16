@@ -5,7 +5,7 @@ import org.apache.ignite.services.ServiceContext
 import processors.LazyStreamService
 
 
-class PredicterService: LazyStreamService<TrainingJob>() {
+class PredicterService: LazyStreamService<Long, TrainingJob>() {
 
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)

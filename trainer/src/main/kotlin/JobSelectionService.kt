@@ -4,7 +4,7 @@ import ai.scynet.protocol.TrainingJob
 import org.apache.ignite.services.ServiceContext
 import processors.LazyStreamService
 
-class JobSelectionService: LazyStreamService<TrainingJob>() {
+class JobSelectionService: LazyStreamService<Long, TrainingJob>() {
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
 

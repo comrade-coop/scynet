@@ -3,20 +3,11 @@ package harvester.candles
 import org.knowm.xchange.dto.marketdata.Ticker
 import java.time.Instant
 
-enum class Candle: ICandle {
-    MINUTE{
-        override fun getDuration(): Long = 60000
-    },
-    QUARTER{
-        override fun getDuration(): Long = 900000
-
-    },
-    HALF{
-        override fun getDuration(): Long = 1800000
-    },
-    HOUR{
-        override fun getDuration(): Long = 3600000
-    };
+class Candle(candleDuration: ICandleDuration): ICandle {
+    private val duration: Long = candleDuration.getDuration()
+    override fun getDuration(): Long {
+        return duration
+    }
 
     override lateinit var beginningOfTick: Instant
     override lateinit var endOfTick: Instant
@@ -47,9 +38,14 @@ enum class Candle: ICandle {
         tickers.add(ticker)
     }
 
-    override fun getCandle(): CandleDTO {
-        bidAskAvg /= tickers.size
-        val candle = CandleDTO(calculateOpen(), bidAskAvg, high, low, beginningOfTick.toEpochMilli())
+    override fun getCandle(): CandleDTO? {
+        var candle: CandleDTO?
+        if(tickers.size == 0){
+            candle =  null
+        }else{
+            bidAskAvg /= tickers.size
+            candle = CandleDTO(calculateOpen(), bidAskAvg, high, low, beginningOfTick.toEpochMilli())
+        }
         reset()
         return candle
     }
@@ -70,8 +66,9 @@ enum class Candle: ICandle {
     }
 
     private fun calculateOpen(): Double{
-        if(open == null)
-            open = if (tickers.size == 0)  null else (tickers.get(openTickerIndex).ask.toDouble() + tickers.get(openTickerIndex).bid.toDouble()) / 2
+        if(open == null && tickers.size != 0){
+            open = (tickers.get(openTickerIndex).ask.toDouble() + tickers.get(openTickerIndex).bid.toDouble()) / 2
+        }
         return open as Double
     }
 

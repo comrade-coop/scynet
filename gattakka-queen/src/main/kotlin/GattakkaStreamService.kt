@@ -19,7 +19,7 @@ import java.lang.IllegalStateException
 import java.time.Instant
 import java.util.*
 
-class GattakkaStreamService: LazyStreamService<TrainingJob>() {
+class GattakkaStreamService: LazyStreamService<Long, TrainingJob>() {
 
     lateinit var tempJobCache: IgniteCache<Long, TrainingJob>
 
