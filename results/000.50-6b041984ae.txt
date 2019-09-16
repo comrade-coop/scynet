@@ -1,0 +1,6 @@
+fitness = 3.2202208204376195
+score = 0.5
+iterations = 100
+time = 1568371027s
+hash = 6b041984ae
+chromosome = {"layers":[{"type":"Input","inputs":[],"config":{"shape":[],"preprocessor":{"type":"RawPreprocessor","config":{"preprocess_window_length":48,"normalization_constant":0.865625}},"source":{"from":"cryptocompare","name":"market"}}},{"type":"Dropout","inputs":[0],"config":{"rate":0.7578125}},{"type":"Dense","inputs":[1],"config":{"use_bias":false,"kernel_constraint":null,"kernel_initializer":"normal","bias_regularizer":{"type":"l1_l2","config":{"l1":0.18515625000000002,"l2":0.0734375}},"activity_regularizer":{"type":"l1_l2","config":{"l1":0.078125,"l2":0.13515625}},"kernel_regularizer":{"type":"l1_l2","config":{"l1":0.1296875,"l2":0.19765625}},"bias_constraint":null,"units":14,"bias_initializer":"uniform"}}],"optimizer":{"type":"Adam","config":{"lr":1.921875}},"loss":"mean_squared_error","window_length":10,"batch_size":1}

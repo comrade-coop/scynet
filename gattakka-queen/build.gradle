@@ -28,6 +28,9 @@ dependencies {
     implementation group: 'ai.scynet', name: 'trainer', version: '1.0.0'
 
     implementation group: 'com.obecto', name: 'gattakka', version: '1.0.0'
+
+    implementation group: 'io.ktor', name: 'ktor-server-netty', version: '1.2.4'
+    implementation group: 'io.ktor', name: 'ktor-websockets', version: '1.2.4'
 }
 
 compileKotlin {
@@ -54,3 +57,7 @@ compileScala.dependsOn.remove("compileJava")
 compileKotlin.dependsOn compileScala
 
 compileKotlin.classpath += files(compileScala.destinationDir)
+
+run {
+    workingDir = rootProject.projectDir
+}

@@ -7,6 +7,10 @@ import processors.LazyStreamService
 
 class PredicterService: LazyStreamService<TrainingJob>() {
 
+    override fun init(ctx: ServiceContext?) {
+        super.init(ctx)
+    }
+
     override fun execute(ctx: ServiceContext?) {
         super.execute(ctx)
         val compute = ignite.compute().withAsync()

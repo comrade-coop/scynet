@@ -1,17 +1,15 @@
-package ai.scynet.trainer
-
+package ai.scynet.queen
 import ai.scynet.protocol.TrainingJob
-import descriptors.Properties
+import ai.scynet.trainer.PredicterService
 import processors.ILazyStreamService
 import processors.LazyStream
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class PredictingJobsStream : LazyStream<TrainingJob> {
+class PredictingJobsStream: LazyStream<TrainingJob> { // TODO: These definitions should be in the script file
+    override val classId: String = "PredictingLazyStream"
     override val streamServiceClass: KClass<out ILazyStreamService> = PredicterService::class
-    override val classId: String = "predictingJobsStream"
-
     constructor(): super()
-    constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, properties: Properties): super(id, inputStreamIds, properties)
+    constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, properties: descriptors.Properties) : super(id, inputStreamIds, properties)
 }
