@@ -74,7 +74,7 @@ if (hasProperty('buildScan')) {
 subprojects.findAll { it.name != 'core' }.each {
     configure(it) {
         dependencies {
-            implementation project(':core')
+            implementation project(path: ':core', configuration: 'default')
         }
     }
 }
