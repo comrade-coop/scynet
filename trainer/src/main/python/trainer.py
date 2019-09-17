@@ -69,7 +69,7 @@ class Trainer:
 
     def save_model(self, filepath, json_model, deep_copy=False):
         if deep_copy:
-            self.keras_model.compile(optimizer=self.environment.optimizer, loss='mean_squared_error')
+            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error')
             self.keras_model.save(filepath)
         else:
             self.keras_model.save_weights(filepath)
@@ -79,7 +79,7 @@ class Trainer:
 
         if from_deep_copy:
             self.keras_model = keras.models.load_model(filepath)
-            self.keras_model.compile(optimizer=self.config.optimizer, loss='mean_squared_error')
+            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error')
             self.keras_model.summary()
         else:
             # Reinitialize keras model

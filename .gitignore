@@ -89,3 +89,4 @@ docs
 .project
 .settings
 bin
+temp/

@@ -122,7 +122,7 @@ if __name__ == "__main__":
             stdInput = True
 
         trainer.train(args["model"], std=stdInput)
-        trainer.save_model("../../../../trainer/src/main/kotlin/mock/temp/results/%s_w.h5" % (args["UUID"]), args["model"])
+        trainer.save_model("../../../../trainer/src/main/kotlin/mock/temp/results/%s_w.h5" % (args["UUID"]), args["model"], deep_copy=True)
 
         # get performance
         # get weights and save them
