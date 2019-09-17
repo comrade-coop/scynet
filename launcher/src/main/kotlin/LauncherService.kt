@@ -57,7 +57,6 @@ class LauncherService : Service, KoinComponent {
         val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
             put("currencyPair", CurrencyPair.ETH_USD)
             put("xchange", Exchange.BITMEX)
-            put("fromFile", false)
         })
         factory.registerStream(xChangeStream)
 
@@ -142,6 +141,9 @@ class LauncherService : Service, KoinComponent {
                             "timestamp" to (System.currentTimeMillis() / 1000L).toString(),
                             "accuracy" to bestAgentTrainingScore.toString()
                     ))
+                    if (historyOfBestAccuracy.count() > 100) {
+                        historyOfBestAccuracy.removeAt(0)
+                    }
 
                     bestAgentPredictionStream?.dispose()
 
@@ -172,15 +174,29 @@ class LauncherService : Service, KoinComponent {
                 }
             }
             routing {
-                get("/snippets") {
+                get("/test") {
                     call.respond(mapOf("OK" to true))
                 }
 
-                get("/") {
+                get("/all") {
                     call.respond(mapOf(
                             "bestAgentId" to bestAgentId,
                             "bestAgentTrainingScore" to bestAgentTrainingScore,
                             "bestAgentLastPrediction" to bestAgentLastPrediction,
+                            "historyOfBestAccuracy" to historyOfBestAccuracy
+                    ))
+                }
+
+                get("/agent") {
+                    call.respond(mapOf(
+                            "bestAgentId" to bestAgentId,
+                            "bestAgentTrainingScore" to bestAgentTrainingScore,
+                            "bestAgentLastPrediction" to bestAgentLastPrediction
+                    ))
+                }
+
+                get("/history") {
+                    call.respond(mapOf(
                             "historyOfBestAccuracy" to historyOfBestAccuracy
                     ))
                 }

@@ -9,6 +9,7 @@ import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.dto.marketdata.Ticker
 import processors.LazyStreamService
 import java.io.BufferedReader
+import java.io.FileNotFoundException
 import java.io.FileReader
 import java.lang.IllegalStateException
 import java.math.BigDecimal
@@ -18,7 +19,6 @@ import java.util.*
 class XChangeStreamService: LazyStreamService<Long, Ticker>() {
     private lateinit var exchange : IExchange
     private lateinit var currencyPair : CurrencyPair
-    private var fromFile: Boolean? = null
 
     private lateinit var xchange: StreamingExchange
     private lateinit var xChangeStream: Disposable
@@ -56,7 +56,6 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
         super.init(ctx)
         exchange = descriptor!!.properties!!.get("xchange") as IExchange
         currencyPair = descriptor!!.properties!!.get("currencyPair") as CurrencyPair
-        fromFile = descriptor!!.properties!!.get("fromFile") as Boolean
     }
 
     override fun execute(ctx: ServiceContext?) {
@@ -72,8 +71,10 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
         xchange.connect(productSubscription).blockingAwait()
         println("Exchange connected")
 
-        if(fromFile!!){
+        try{
             readTickersFromFile()
+        }
+        catch (e: FileNotFoundException) {
         }
 
         println("\nnew tickers from exchange\n")

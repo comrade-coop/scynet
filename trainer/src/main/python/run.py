@@ -16,11 +16,8 @@ ap.add_argument("-m", "--model", required=False,
 ap.add_argument("-j", "--model_json", required=False,
    help="JSON Gattakka Model")
 
-ap.add_argument("-dx", "--data_x", required=False,
+ap.add_argument("-dx", "--data", required=False,
    help="CSV Training Data path to be parsed to numpy array")
-
-ap.add_argument("-dy", "--data_y", required=False,
-   help="CSV GT Data path to be parsed to numpy array")
 
 ap.add_argument("-e", "--evaluator", required=False,
    help="CSV GT Data path to be parsed to numpy array")
@@ -52,7 +49,7 @@ if __name__ == "__main__":
 
 
     if args['predict']:
-        x = np.load(args['data_x'])
+        x = np.load(args['data'])
 
         evaluatorMap = {
             'basic': CustomEvaluator
@@ -81,8 +78,8 @@ if __name__ == "__main__":
 
     else:
 
-        x = np.load(args['data_x'])
-        y = np.load(args['data_y'])
+        x = np.load(args['data'])[:,:-1]
+        y = np.load(args['data'])[:,-1]
 
         evaluatorMap = {
             'basic': CustomEvaluator
