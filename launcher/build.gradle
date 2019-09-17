@@ -37,4 +37,5 @@ compileTestKotlin {
 
 run {
     workingDir = rootProject.projectDir
+    standardInput = System.in
 }
