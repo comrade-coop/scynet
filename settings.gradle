@@ -27,5 +27,5 @@ include 'executor'
 include 'protocol'
 include 'gattakka-queen'
 include 'harvester'
-
+include 'launcher'
 

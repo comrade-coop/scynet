@@ -19,6 +19,11 @@ import java.util.*
 
 class IgnitePredictingJob: IgniteRunnable, KoinComponent {
 
+    private lateinit var agentId: String
+    private lateinit var agentEgg: String
+    private lateinit var x: INDArray
+    private lateinit var callback: (y: Double) -> Unit
+
     lateinit var trainingJob: TrainingJob;
     lateinit var addToFinishedJobsStream : (t: Long, tJob: TrainingJob) -> Unit;
     protected val ignite: Ignite by inject()
@@ -27,35 +32,23 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
         initTrainer()
     }
 
-    constructor(tJob: TrainingJob, func: (t: Long, tJob: TrainingJob) -> Unit){
-        this.trainingJob = tJob
-        this.addToFinishedJobsStream = func
-        println("INFO: Starting to predict a job")
+    constructor(agentId: String, agentEgg: String, x: INDArray, func: (y: Double) -> Unit){
+        this.agentId = agentId
+        this.agentEgg = agentEgg
+        this.x = x
+        this.callback = func
     }
 
     private fun initTrainer(){
         println("WARNING: Initializing Predictor... <--------------------------------------#-------------#-------#----#---#--#-##")
 
-        val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
-//        val file = File(filePath)
-//        file.writeText(trainingJob.egg)
-
-        val dataXPath = "./trainer/src/main/kotlin/mock/temp/data/xbnc_n_TEMP${trainingJob.UUID}.npy"
-        val dataYPath = "./trainer/src/main/kotlin/mock/temp/data/ybnc_n_TEMP${trainingJob.UUID}.npy"
+        val xPath = "./trainer/src/main/kotlin/mock/temp/data/xTEMP${agentId}.npy"
 
         // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
-        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
-        Nd4j.writeAsNumpy(trainingJob.dataset?.get("y"), File(dataYPath))
+        Nd4j.writeAsNumpy(x, File(xPath))
 
-        // The arguments are as follows --model --data_x --data_y --evaluator
-        // NOTE: Currently only basic evaluator is implemented
-        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startTrainer.sh", "$filePath",
-            dataXPath,
-            dataYPath,
-            "basic",
-            trainingJob.UUID.toString()
-        )
-
+        // The arguments are as follows --agentId -x
+        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startPrediction.sh", agentId, xPath)
 
         pb.redirectErrorStream(true)
         val p = pb.start()
@@ -64,22 +57,11 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
         for(out in output.lines()) {
             println("Python[OUT]: ${out}")
 
-//            if (out.split("=")[0] == "DONE") {
-//
-//                var perf = out.split("=")[1] // Parse the performance here
-//                var weights: ByteArray = File("./trainer/src/main/kotlin/mock/temp/results/${trainingJob.UUID}_w.h5").readBytes() // Get the weights here or something (Maybe buffer array)
-//
-//                val jobId: String = trainingJob.UUID.toString()
-//                var cache = ignite.getOrCreateCache<String, ByteArray>("weights")
-//
-//                cache.put(jobId, weights)
-//                trainingJob.status = TRAINED(hashMapOf("performance" to perf, "weights" to jobId))
-//
-//                var timestamp = Date().time
-//                addToFinishedJobsStream(timestamp, trainingJob)
-//                // Add the job to the finished jobs registry/stream or something
-//
-//            }
+            if (out.split("=")[0] == "PREDICTION_DONE") {
+
+                var prediction = out.split("=")[1] // Parse the performance here
+                callback(if (prediction.toDoubleOrNull() != null) prediction.toDouble() else -1.0)
+            }
         }
     }
 }

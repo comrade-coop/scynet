@@ -49,10 +49,10 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
 
         var genome = strategy()
 
-        var dataX = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/xbnc_n.csv", ",")
-        var dataY = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/ybnc_n.csv", ",")
+//        var dataX = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/xbnc_n.csv", ",")
+//        var dataY = Nd4j.readNumpy("gattakka-queen/src/main/kotlin/ybnc_n.csv", ",")
 
-        var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
+//        var dataDictionary: HashMap<String, INDArray> = hashMapOf("x" to dataX, "y" to dataY)
 
         val jobId = UUID.randomUUID()
 
@@ -63,7 +63,7 @@ class CustomReceiverIndividualActor(genome: Genome?) : CustomIndividualActor(gen
                 "trainerCluster",
                 "basic",
                 genome,
-                dataDictionary,
+                hashMapOf(),
                 UNTRAINED() // scynet protocol
         )
         tempJobCache.put(date, job)

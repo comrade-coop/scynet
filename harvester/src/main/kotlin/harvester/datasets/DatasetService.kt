@@ -77,7 +77,7 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
             sb.append("${dataset.first.getDouble(i)}\n")
         }
 
-        val writer = BufferedWriter(FileWriter("dataset"))
+        val writer = BufferedWriter(FileWriter("dataset.csv"))
         writer.use {
             it.write(sb.toString())
         }

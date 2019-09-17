@@ -79,7 +79,7 @@ class Trainer:
 
         if from_deep_copy:
             self.keras_model = keras.models.load_model(filepath)
-            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error')
+            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error', metrics=['accuracy'])
             self.keras_model.summary()
         else:
             # Reinitialize keras model
@@ -122,7 +122,7 @@ class Trainer:
             callbacks=[early_stopping]
         )
         
-        self.val_loss = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+        self.val_loss, self.val_accuracy = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
 
         # std communication TODO Discuss
         

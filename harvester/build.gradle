@@ -24,7 +24,7 @@ dependencies {
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation group: 'info.bitrich.xchange-stream', name: 'xchange-stream-core', version: '4.3.16'
+    compile group: 'info.bitrich.xchange-stream', name: 'xchange-stream-core', version: '4.3.16'
     // https://mvnrepository.com/artifact/info.bitrich.xchange-stream/xchange-binance
     implementation group: 'info.bitrich.xchange-stream', name: 'xchange-binance', version: '4.3.16'
     // https://mvnrepository.com/artifact/info.bitrich.xchange-stream/xchange-bitfinex

@@ -7,7 +7,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class PredictingJobsStream: LazyStream<Long, TrainingJob> { // TODO: These definitions should be in the script file
+class PredictingJobsStream: LazyStream<Long, String> { // TODO: These definitions should be in the script file
     override val classId: String = "PredictingLazyStream"
     override val streamServiceClass: KClass<out ILazyStreamService> = PredicterService::class
     constructor(): super()

@@ -23,7 +23,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation project(':protocol')
     implementation project(':trainer')
-    implementation group: 'com.obecto', name: 'gattakka', version: '1.0.0'
+    compile group: 'com.obecto', name: 'gattakka', version: '1.0.0'
     implementation group: 'io.ktor', name: 'ktor-server-netty', version: '1.2.4'
     implementation group: 'io.ktor', name: 'ktor-websockets', version: '1.2.4'
 }

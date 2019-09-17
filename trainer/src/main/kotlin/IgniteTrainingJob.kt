@@ -40,18 +40,17 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
         val file = File(filePath)
         file.writeText(trainingJob.egg)
 
-        val dataXPath = "./trainer/src/main/kotlin/mock/temp/data/xbnc_n_TEMP${trainingJob.UUID}.npy"
-        val dataYPath = "./trainer/src/main/kotlin/mock/temp/data/ybnc_n_TEMP${trainingJob.UUID}.npy"
+//        val dataXPath = "./trainer/src/main/kotlin/mock/temp/data/xbnc_n_TEMP${trainingJob.UUID}.npy"
+//        val dataYPath = "./trainer/src/main/kotlin/mock/temp/data/ybnc_n_TEMP${trainingJob.UUID}.npy"
 
         // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
-        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
-        Nd4j.writeAsNumpy(trainingJob.dataset?.get("y"), File(dataYPath))
+//        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
+//        Nd4j.writeAsNumpy(trainingJob.dataset?.get("y"), File(dataYPath))
 
         // The arguments are as follows --model --data_x --data_y --evaluator
         // NOTE: Currently only basic evaluator is implemented
-        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startTrainer.sh", "$filePath",
-            dataXPath,
-            dataYPath,
+        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startTrainer.sh", filePath,
+            "dataset.csv",
             "basic",
             trainingJob.UUID.toString()
         )
