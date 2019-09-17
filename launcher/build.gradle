@@ -4,6 +4,8 @@ plugins {
     id 'application'
 }
 
+mainClassName = "ai.scynet.launcher.AppKt"
+
 version '1.0.0'
 
 sourceCompatibility = 1.8
