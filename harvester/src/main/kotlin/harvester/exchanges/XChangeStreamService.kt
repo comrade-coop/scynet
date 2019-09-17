@@ -4,7 +4,6 @@ import info.bitrich.xchangestream.core.ProductSubscription
 import info.bitrich.xchangestream.core.StreamingExchange
 import info.bitrich.xchangestream.core.StreamingExchangeFactory
 import io.reactivex.disposables.Disposable
-import org.apache.ignite.cache.affinity.AffinityKey
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.dto.marketdata.Ticker
@@ -106,7 +105,12 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
             val time = Instant.now()
             timestamp = time.toEpochMilli()
             val newTicker = Ticker.Builder().apply {
-                currencyPair(ticker.currencyPair)
+                if(ticker.currencyPair == null){
+                    currencyPair(currencyPair)
+                }else{
+                    currencyPair(ticker.currencyPair)
+
+                }
                 open(ticker.open)
                 last(ticker.last)
                 bid(ticker.bid)

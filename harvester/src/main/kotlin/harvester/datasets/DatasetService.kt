@@ -1,10 +1,14 @@
 package harvester.datasets
 
+import kotlinx.coroutines.runBlocking
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.services.ServiceContext
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 import processors.LazyStreamService
+import java.io.BufferedWriter
+import java.io.FileWriter
+import java.lang.StringBuilder
 import java.util.*
 
 class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
@@ -26,45 +30,56 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
         super.execute(ctx)
         if(!outputInputCache.containsKey(OUTPUT_INPUT))
             outputInputCache.put(OUTPUT_INPUT, LinkedList())
-        inputStreams[0].listen{ timestamp: Long, pair: Pair<Boolean, INDArray>, _ ->
-            var label: INDArray
-            if(pair.first){
-                label = Nd4j.ones(1)
-            }else{
-                label = Nd4j.zeros(1)
-            }
-
-            val inputShape = pair.second.shape()
-            for(s in inputShape){
-                println(s)
-            }
-            val input = pair.second.reshape(1, inputShape[0], inputShape[1])
-            println("\n --------- after ------ \n $input \n")
-
-            val inputOutputs = outputInputCache.get(OUTPUT_INPUT)
-            inputOutputs.addLast(Pair(label,input))
-
-            if(inputOutputs.size == datasetSize){
-                updateDataset(inputOutputs)
-                repeat(slide!!){
-                    inputOutputs.removeFirst()
+        inputStreams[0].listen{ _: Long, pair: Pair<Boolean, INDArray>, _ ->
+                var label: INDArray
+                if(pair.first){
+                    label = Nd4j.ones(1,1)
+                }else{
+                    label = Nd4j.zeros(1,1)
                 }
+                val input = pair.second
+                val outputInputs = outputInputCache.get(OUTPUT_INPUT)
+                outputInputs.addLast(Pair(label,input))
 
-            }
+                if(outputInputs.size == datasetSize){
+                    updateDataset(outputInputs)
+                    repeat(slide!!){
+                        outputInputs.removeFirst()
+                    }
 
-            outputInputCache.put(OUTPUT_INPUT, inputOutputs)
+                }
+                outputInputCache.put(OUTPUT_INPUT, outputInputs)
         }
+
     }
 
     private fun updateDataset(inputOutputs: LinkedList<Pair<INDArray,INDArray>>){
         var inputs = inputOutputs.first.second
         var labels = inputOutputs.first.first
-        for((i,inputOutput) in inputOutputs.withIndex()){
+        for((i,outputInput) in inputOutputs.withIndex()){
             if(i == 0)
                 continue
-            labels = Nd4j.vstack(labels, inputOutput.first)
-            inputs = Nd4j.vstack(inputs,inputOutput.second)
+            labels = Nd4j.vstack( labels, outputInput.first)
+            inputs = Nd4j.vstack(inputs,outputInput.second)
         }
-        cache.put(LATEST_DATASET, Pair(labels, inputs))
+        val dataset = Pair(labels, inputs)
+        saveCSV(dataset)
+        cache.put(LATEST_DATASET, dataset)
+    }
+
+    private fun saveCSV(dataset: Pair<INDArray, INDArray>){
+        val sb = StringBuilder()
+        for (i in 0 until dataset.second.rows()){
+            val row = dataset.second.getRow(i.toLong())
+            for(j in 0 until row.columns()){
+                sb.append(" ${row.getDouble(j)},")
+            }
+            sb.append("${dataset.first.getDouble(i)}\n")
+        }
+
+        val writer = BufferedWriter(FileWriter("dataset"))
+        writer.use {
+            it.write(sb.toString())
+        }
     }
 }
