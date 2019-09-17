@@ -1,0 +1,28 @@
+<table id="agents" class="responsive-table agents-list">
+    <thead>
+        <tr>
+            <th>Key</th>
+            <th>Performance</th>
+            <th>TruePositive</th>
+            <th>TrueNegative</th>
+            <th>FalsePositive</th>
+            <th>FalseNegative</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let agent of agents" 
+            (click)="showPredictions(agent.key)">
+            <td>{{agent.key}}</td>
+            <td>{{agent.value.performance}}</td>
+            <td>{{agent.value.metadata.TruePositive}}</td>
+            <td>{{agent.value.metadata.TrueNegative}}</td>
+            <td>{{agent.value.metadata.FalsePositive}}</td>
+            <td>{{agent.value.metadata.FalseNegative}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- <div *ngFor="let agent of agents" (click)="showPredictions(agent.key)">
+        <span *ngIf="agent.value.outputShapes[0][0] == 1">{{agent | json}}</span>
+</div> -->
+

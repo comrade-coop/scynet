@@ -1,0 +1,174 @@
+/* You can add global styles to this file, and also import other style files */
+tr {
+  cursor: pointer;
+}
+
+#candlesticks
+path.candle {
+  stroke: #000000;
+}
+
+path.candle.body {
+  stroke-width: 0;
+}
+
+path.candle.up {
+  fill: #00AA00;
+  stroke: #00AA00;
+}
+
+path.candle.down {
+  fill: #FF0000;
+  stroke: #FF0000;
+}
+
+rect.pane {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+
+body {
+  background-color: #233758;
+}
+
+.content {
+  margin: auto;
+  width: 80%;
+}
+
+
+/*bar chart*/
+/*fury-bar-chart {
+  width:920px;
+  margin: 0 auto 1em;
+  border: 1px solid grey;
+  box-shadow: 3px 3px 3px lightgrey;
+}*/
+
+.bar.positive {
+  fill: #00AA00;
+}
+
+.bar.negative {
+  fill: darkred;
+}
+
+g.infowin {
+  fill: grey;
+}
+
+g.infowin text,
+.axis text {
+  font: 11px sans-serif;
+  fill:grey;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+path.domain {
+  stroke:none;
+}
+
+div.tooltip {	
+  position: absolute;			
+  text-align: center;			
+  width: auto;					
+  height: auto;					
+  padding: 2px;				
+  font: 12px sans-serif;		
+  background: rgba(0,0,0,0.8);	
+  color: #fff;
+  border: 0px;		
+  border-radius: 8px;			
+  pointer-events: none;			
+}  
+
+.indicatorTrue path.candle.body {
+  stroke-width: 0;
+  stroke-linejoin: miter;
+}
+
+.indicatorFalse path.candle.body {
+  fill-opacity: 0;
+  stroke-width: 1;
+  stroke-linejoin: miter;
+}
+
+.indicatorUnknown path.candle.body {
+  stroke-width: 0;
+  stroke-linejoin: miter;
+  fill-opacity: 0.3;
+  stroke-opacity: 0.3;
+}
+
+
+/* LOADER */
+.loader {
+  font-size: 10px;
+  margin: 50px auto;
+  text-indent: -9999em;
+  width: 11em;
+  height: 11em;
+  border-radius: 50%;
+  background: #ffffff;
+  background: -moz-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+  background: -webkit-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+  background: -o-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+  background: -ms-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+  background: linear-gradient(to right, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+  position: relative;
+  -webkit-animation: load3 1.4s infinite linear;
+  animation: load3 1.4s infinite linear;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+}
+.loader:before {
+  width: 50%;
+  height: 50%;
+  background: #ffffff;
+  border-radius: 100% 0 0 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+}
+.loader:after {
+  background: #233758;
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  content: '';
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+@-webkit-keyframes load3 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load3 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}

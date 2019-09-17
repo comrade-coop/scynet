@@ -1,0 +1,25 @@
+<!-- <p *ngFor="let msg of msgs">
+  {{msg}}
+</p> -->
+
+<!-- <p *ngFor="let agent of agents">
+  {{agent | json}}
+</p> -->
+
+<!-- <button (click)="subscribeForPredictions()">Predictions</button> -->
+<!-- <button (click)="showEthPrices()">Show ETH prices</button> -->
+<!--<button (click)="StopPredictions()">StopPredictions</button>
+
+<button (click)="subscribeForETHPrice()">ETH Price</button>
+<button (click)="StopETHPrice()">ETH Price</button>
+
+<p *ngFor="let data of customData">
+  {{data | json}}
+</p> -->
+<!-- <div class="priceinfo" *ngIf="prediction != null">
+  <div class="pricedate">({{prediction.date}})</div>
+  <div *ngIf="prediction.value == 1" class="pricetext">ETH price will increase with at least 1% in the next 48 hours</div>
+  <div *ngIf="prediction.value == 0" class="pricetext">ETH price will not increase in the next 48 hours</div>
+</div> -->
+
+<app-candlestick-chart [agentid]="agentid"></app-candlestick-chart>

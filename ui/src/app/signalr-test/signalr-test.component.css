@@ -1,0 +1,14 @@
+.pricetext {
+    display: inline-block;
+}
+
+.pricedate {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.priceinfo {
+    margin: auto;
+    width: 50%;
+    color: white;
+}
