@@ -36,34 +36,34 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
     private fun initTrainer(){
         println("WARNING: Initializing Predictor... <--------------------------------------#-------------#-------#----#---#--#-##")
 
-//        val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
+        val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
 //        val file = File(filePath)
 //        file.writeText(trainingJob.egg)
-//
-//        val dataXPath = "./trainer/src/main/kotlin/mock/temp/data/xbnc_n_TEMP${trainingJob.UUID}.npy"
-//        val dataYPath = "./trainer/src/main/kotlin/mock/temp/data/ybnc_n_TEMP${trainingJob.UUID}.npy"
-//
-//        // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
-//        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
-//        Nd4j.writeAsNumpy(trainingJob.dataset?.get("y"), File(dataYPath))
-//
-//        // The arguments are as follows --model --data_x --data_y --evaluator
-//        // NOTE: Currently only basic evaluator is implemented
-//        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startTrainer.sh", "$filePath",
-//            dataXPath,
-//            dataYPath,
-//            "basic",
-//            trainingJob.UUID.toString()
-//        )
-//
-//
-//        pb.redirectErrorStream(true)
-//        val p = pb.start()
-//        val output  = BufferedReader(InputStreamReader(p.inputStream))
-//
-//        for(out in output.lines()) {
-//            println("Python[OUT]: ${out}")
-//
+
+        val dataXPath = "./trainer/src/main/kotlin/mock/temp/data/xbnc_n_TEMP${trainingJob.UUID}.npy"
+        val dataYPath = "./trainer/src/main/kotlin/mock/temp/data/ybnc_n_TEMP${trainingJob.UUID}.npy"
+
+        // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
+        Nd4j.writeAsNumpy(trainingJob.dataset?.get("x"), File(dataXPath))
+        Nd4j.writeAsNumpy(trainingJob.dataset?.get("y"), File(dataYPath))
+
+        // The arguments are as follows --model --data_x --data_y --evaluator
+        // NOTE: Currently only basic evaluator is implemented
+        val pb = ProcessBuilder("bash", "./trainer/src/main/python/startTrainer.sh", "$filePath",
+            dataXPath,
+            dataYPath,
+            "basic",
+            trainingJob.UUID.toString()
+        )
+
+
+        pb.redirectErrorStream(true)
+        val p = pb.start()
+        val output  = BufferedReader(InputStreamReader(p.inputStream))
+
+        for(out in output.lines()) {
+            println("Python[OUT]: ${out}")
+
 //            if (out.split("=")[0] == "DONE") {
 //
 //                var perf = out.split("=")[1] // Parse the performance here
@@ -80,6 +80,6 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
 //                // Add the job to the finished jobs registry/stream or something
 //
 //            }
-//        }
+        }
     }
 }
