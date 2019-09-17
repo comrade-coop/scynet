@@ -9,7 +9,7 @@ version '1.0.0'
 
 dependencies {
 
-    implementation project(':protocol')
+    implementation project(path: ':protocol', configuration: 'default')
     implementation group: 'io.ktor', name: 'ktor-server-netty', version: '1.2.4'
     implementation group: 'io.ktor', name: 'ktor-websockets', version: '1.2.4'
 

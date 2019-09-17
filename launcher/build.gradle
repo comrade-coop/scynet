@@ -19,10 +19,8 @@ dependencies {
 
     compile("ch.qos.logback:logback-classic:1+")
 
-    implementation project (':trainer')
-    implementation project (':protocol')
-    implementation project (':harvester')
-    implementation project (':gattakka-queen')
+    implementation project (path: ':harvester', configuration: 'default')
+    compile project(path: ':gattakka-queen', configuration: 'default')
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

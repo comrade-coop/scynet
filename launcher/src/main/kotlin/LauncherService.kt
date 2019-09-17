@@ -75,7 +75,7 @@ class LauncherService : Service, KoinComponent {
         val labelProperties = Properties().apply {
             put("upperTresholdPercentage", 1.0)
             put("lowerTresholdPercentage", 0.5)
-            put("periodInMinutes", 30)
+            put("periodInMinutes", 60)
         }
         val labelStream = CandleLabelStream(labelStreamId, candleStreamId,labelProperties)
         factory.registerStream(labelStream)
