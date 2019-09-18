@@ -114,6 +114,8 @@ class LauncherService : Service, KoinComponent {
 
         // --- Business Logic Listeners
 
+        var lastAgents = mutableListOf<Double>(Double.MIN_VALUE)
+
         var historyOfBestAccuracy = mutableListOf<Map<String, String>>()
         var bestAgentId: String = ""
         var bestAgentEgg: String = ""
@@ -131,7 +133,14 @@ class LauncherService : Service, KoinComponent {
             if(c.status.statusID == StatusID.TRAINED) {
                 val perf = (c.status as TRAINED).results.getValue("performance")
                 val perfDouble = if (perf.toDoubleOrNull() != null) perf.toDouble() else 0.0
+
                 performanceFeedbackCache.put(c.UUID.toString(), perfDouble)
+
+                if(lastAgents.count() > 100) {
+                    lastAgents.removeAt(0)
+                }
+                bestAgentTrainingScore = lastAgents.max()!!
+                lastAgents.add(perfDouble)
 
                 if (perfDouble > bestAgentTrainingScore) {
                     bestAgentTrainingScore = perfDouble

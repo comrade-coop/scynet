@@ -74,12 +74,13 @@ if __name__ == "__main__":
         trainer.restore_model(args['model_path'], None, from_deep_copy=True) # TODO use UUID
 
         res = trainer.predict([x])
-        print("PREDICTION_DONE=%s" % res)
+        print("PREDICTION_DONE=%s" % res[0][0])
 
     else:
 
-        x = np.load(args['data'])[:,:-1]
-        y = np.load(args['data'])[:,-1]
+        d = np.genfromtxt(args['data'], delimiter=",")
+        x = d[:,:-1]
+        y = d[:,-1]
 
         evaluatorMap = {
             'basic': CustomEvaluator

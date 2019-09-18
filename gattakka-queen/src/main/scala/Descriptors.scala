@@ -332,7 +332,7 @@ object Descriptors {
     ),
     "batch_size" -> EnumGeneDescriptor(List(1)),
     "loss" -> EnumGeneDescriptor(List("mean_squared_error")),
-    "window_length" -> LongGeneDescriptor(10, 10) // WHY IS THIS RESPONSIBLE FOR INPUT SHAPE???
+    "window_length" -> LongGeneDescriptor(80, 80) // WHY IS THIS RESPONSIBLE FOR INPUT SHAPE???
   )
 
   /// Configs
