@@ -19,6 +19,7 @@ import harvester.labels.CandleLabelStream
 import harvester.pairs.PairingStream
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
@@ -147,8 +148,8 @@ class LauncherService : Service, KoinComponent {
                     bestAgentEgg = c.egg
                     bestAgentId = c.UUID.toString()
                     historyOfBestAccuracy.add(mapOf(
-                            "timestamp" to (System.currentTimeMillis() / 1000L).toString(),
-                            "accuracy" to bestAgentTrainingScore.toString()
+                            "t" to (System.currentTimeMillis() / 1000L).toString(),
+                            "y" to bestAgentTrainingScore.toString()
                     ))
                     if (historyOfBestAccuracy.count() > 100) {
                         historyOfBestAccuracy.removeAt(0)
@@ -181,6 +182,10 @@ class LauncherService : Service, KoinComponent {
                 jackson {
                     enable(SerializationFeature.INDENT_OUTPUT) // Pretty Prints the JSON
                 }
+            }
+            install(CORS)
+            {
+                anyHost()
             }
             routing {
                 get("/test") {
