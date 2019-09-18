@@ -14,7 +14,7 @@ class QueenEvaluator extends Evaluator {
   var requiredAmount = 10
   var refreshed = false
   var scheduled = false
-  val requiredRatio = 1.0
+  val requiredRatio = 0.5
 
   def tryRefresh() = {
     if (!scheduled) {
