@@ -79,7 +79,7 @@ class Trainer:
 
         if from_deep_copy:
             self.keras_model = keras.models.load_model(filepath)
-            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error', metrics=['accuracy'])
+            self.keras_model.compile(optimizer=self.keras_model.optimizer, loss='mean_squared_error')
             self.keras_model.summary()
         else:
             # Reinitialize keras model
@@ -122,7 +122,34 @@ class Trainer:
             callbacks=[early_stopping]
         )
         
-        self.val_loss, self.val_accuracy = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+        self.val_loss, _ = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+        y_predicted = self.predict(self.data['x_test'])
+        y_predicted = np.transpose(y_predicted)[0]
+        y_test = self.data['y_test']
+
+        y_predicted[y_predicted > 0.5]  = 1
+        y_predicted[y_predicted <= 0.5] = 0
+
+        tp = 0
+        fp = 0
+        tn = 0
+        fn = 0
+
+        for i in range(len(y_test)):
+            if y_test[i] == 1 and y_predicted[i] == 1:
+                tp += 1
+            elif y_test[i] == 1 and y_predicted[i] == 0:
+                fn += 1
+            elif y_test[i] == 0 and y_predicted[i] == 1:
+                fp += 1
+            elif y_test[i] == 0 and y_predicted[i] == 0:
+                tn += 1
+
+        precission = tp / (tp + fp + .000001)
+        
+        self.val_accuracy = precission
+
+
 
         # std communication TODO Discuss
         
