@@ -86,8 +86,8 @@ class LauncherService : Service, KoinComponent {
 
         val datasetStreamId = UUID.randomUUID()
         val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply {
-            put("datasetSize", 500)
-            put("slide", 250)})
+            put("datasetSize", 2000)
+            put("slide", 30)})
         factory.registerStream(datasetStream)
 
         // ------ Gattakka streams
