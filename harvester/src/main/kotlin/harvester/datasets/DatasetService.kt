@@ -18,7 +18,6 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
     private var slide: Int? = null
     private val OUTPUT_INPUT: String = "outputInputLinkedList"
     private val LATEST_DATASET: String = "latestDataset"
-
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
         outputInputCache = ignite.getOrCreateCache("outputInput")

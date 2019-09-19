@@ -33,7 +33,7 @@ class CompositeLengthIndicatorService: LazyStreamService<Long, INDArray>(){
         inputStreams[0].listen{ timestamp: Long, candle: CandleDTO, _ ->
             candles.addLast(candle)
             if(candles.size == maxLenght){
-                val out = getIndicatorsValue(toCandlArray(candles))
+                val out = getIndicatorsValue(toCandleINDArray(candles))
                 cache.put(timestamp, out)
                 candles.removeFirst()
             }
@@ -42,15 +42,30 @@ class CompositeLengthIndicatorService: LazyStreamService<Long, INDArray>(){
 
     private fun getIndicatorsValue(candles: Array<CandleDTO?>): INDArray {
         val combinedIndicators = DoubleArray(indicators.size)
+        val pricesInGivenLength = HashMap<String, DoubleArray>()
+        for(indicator in indicators){
+            val length = indicator.second
+            val currentCandles = candles.copyOfRange(candles.size - length , candles.size)
+            if(pricesInGivenLength.containsKey("closePrices$length")){
+                break
+            }
+            val closePrices =  currentCandles.map { it!!.close }.toDoubleArray()
+            pricesInGivenLength["closePrices$length"] = closePrices
+
+            val highPrices = currentCandles.map { it!!.high }.toDoubleArray()
+            pricesInGivenLength["highPrices$length"] = highPrices
+
+            val lowPrices = currentCandles.map { it!!.low }.toDoubleArray()
+            pricesInGivenLength["lowPrices$length"] = lowPrices
+        }
         for((i,indicator) in indicators.withIndex()){
-            combinedIndicators[i] = getIndicatorValue(candles, indicator)
+            combinedIndicators[i] = getIndicatorValue(pricesInGivenLength, indicator)
         }
         return Nd4j.create(combinedIndicators, intArrayOf(1, combinedIndicators.size))
     }
 
-    private fun getIndicatorValue(candles: Array<CandleDTO?>, indicatorTypeAndLength: Pair<String, Int>): Double {
+    private fun getIndicatorValue(pricesInGivenLength: HashMap<String, DoubleArray>, indicatorTypeAndLength: Pair<String, Int>): Double {
         val length = indicatorTypeAndLength.second
-        val currentCandles = candles.copyOfRange(candles.size - length , candles.size)
         val out = DoubleArray(length)
         val begin = MInteger()
         val mutableLength = MInteger()
@@ -60,13 +75,13 @@ class CompositeLengthIndicatorService: LazyStreamService<Long, INDArray>(){
         var lowPrices: DoubleArray? = null
 
         fun initializeClosePricesArray(){
-            closePrices =  currentCandles.map { it!!.close }.toDoubleArray()
+            closePrices =  pricesInGivenLength["closePrices$length"]
         }
         fun initializeHighPricesArray(){
-            highPrices = currentCandles.map { it!!.high }.toDoubleArray()
+            highPrices = pricesInGivenLength["highPrices$length"]
         }
         fun initializeLowPricesArray(){
-            lowPrices = currentCandles.map { it!!.high }.toDoubleArray()
+            lowPrices = pricesInGivenLength["lowPrices$length"]
         }
         fun initializePricesArrays(){
             initializeHighPricesArray()
@@ -81,56 +96,57 @@ class CompositeLengthIndicatorService: LazyStreamService<Long, INDArray>(){
             }
             "adx" -> {
                 initializePricesArrays()
-                TALibCore.adx(0, length - 1, highPrices!!, lowPrices!!, closePrices!!, length, begin, mutableLength, out)
+                TALibCore.adx(0, length - 1, highPrices!!, lowPrices!!, closePrices!!, length / 2, begin, mutableLength, out)
                 out[0] = out[0] / 100
             }
             "adxr" -> {
                 initializePricesArrays()
-                TALibCore.adxr(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
-                out[0] = out[0] / 100
+                TALibCore.adxr(0, length - 1, highPrices, lowPrices, closePrices, length / 3, begin, mutableLength, out)
+                if(mutableLength.value != 0){
+                    out[0] = out[mutableLength.value - 1] / 100
+                }
+                else{
+                    out[0] = out[0] / 100
+                }
             }
             "ar" -> {
                 initializeHighPricesArray()
                 initializeLowPricesArray()
-                TALibCore.aroonOsc(0, length - 1, highPrices, lowPrices, length, begin, mutableLength, out)
+                TALibCore.aroonOsc(0, length - 1, highPrices, lowPrices, length - 1, begin, mutableLength, out)
                 out[0] = out[0] / 200 + 0.5
 
             }
             "dx" -> {
                 initializePricesArrays()
-                TALibCore.dx(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                TALibCore.dx(0, length - 1, highPrices, lowPrices, closePrices, length - 1 , begin, mutableLength, out)
                 out[0] = out[0] / 100
             }
             "mdi" ->{
-                initializeClosePricesArray()
-                TALibCore.minusDI(0,length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength,out)
+                initializePricesArrays()
+                TALibCore.minusDI(0,length - 1, highPrices, lowPrices, closePrices, length - 1, begin, mutableLength,out)
                 out[0] = out[0] / 100
             }
             "pdi" -> {
                 initializePricesArrays()
-                TALibCore.plusDI(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
+                TALibCore.plusDI(0, length - 1, highPrices, lowPrices, closePrices, length - 1, begin, mutableLength, out)
                 out[0] = out[0] / 100
             }
             "rsi" -> {
                 initializeClosePricesArray()
-                TALibCore.rsi(0, length - 1, closePrices, length, begin, mutableLength, out)
+                TALibCore.rsi(0, length - 1, closePrices, length - 1, begin, mutableLength, out)
                 out[0] = out[0] / 100
 
             }
             "willr" -> {
                 initializePricesArrays()
                 TALibCore.willR(0, length - 1, highPrices, lowPrices, closePrices, length, begin, mutableLength, out)
-                out[0] = out[0] / -100
-
+                out[0] =  out[0] / - 100
             }
-
-
-
         }
         return out[0]
     }
 
-    private fun toCandlArray(candles: LinkedList<CandleDTO>): Array<CandleDTO?>{
+    private fun toCandleINDArray(candles: LinkedList<CandleDTO>): Array<CandleDTO?>{
         val candleArray = Array<CandleDTO?>(candles.size, {i -> null})
         for((i,candle) in candles.withIndex())
             candleArray[i] = candle

@@ -75,7 +75,7 @@ class LauncherService : Service, KoinComponent {
         val labelProperties = Properties().apply {
             put("upperTresholdPercentage", 1.0)
             put("lowerTresholdPercentage", 0.5)
-            put("periodInMinutes", 60)
+            put("periodInMinutes", 210)
         }
         val labelStream = CandleLabelStream(labelStreamId, candleStreamId,labelProperties)
         factory.registerStream(labelStream)
@@ -214,7 +214,7 @@ class LauncherService : Service, KoinComponent {
     }
 
     private fun getIndicatorPeriodPairs(indicators: Array<String>): ArrayList<Pair<String, Int>>{
-        val periods = arrayListOf(5,10,20,25,30,35,40,50,75,100)
+        val periods = arrayListOf(6,10,20,30,40,50,70,100,150,200)
         val indicatorPeriodPairs = ArrayList<Pair<String, Int>>()
         for(indicator in indicators){
             for (period in periods){

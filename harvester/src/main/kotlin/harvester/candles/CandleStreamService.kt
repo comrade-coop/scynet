@@ -1,22 +1,15 @@
 package harvester.candles
 
-import descriptors.LazyStreamServiceDescriptor
-import harvester.exchanges.XChangeLazyStream
-import org.apache.ignite.cache.affinity.AffinityKey
 import org.apache.ignite.services.ServiceContext
 import org.knowm.xchange.dto.marketdata.Ticker
-import processors.ILazyStream
-import processors.ILazyStreamFactory
-import processors.LazyStream
 import processors.LazyStreamService
-import java.util.*
 import kotlin.collections.HashMap
 
 class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
     private  lateinit var candle: ICandle
     private lateinit var tickerStream: AutoCloseable
     private val buffer: HashMap<Long, Ticker> = HashMap()
-    private var genensis: Boolean = true
+    private var genesis: Boolean = true
     private val genesisBuffer: HashMap<Long, Ticker> = HashMap()
 
     override fun init(ctx: ServiceContext?) {
@@ -29,7 +22,7 @@ class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
 
         tickerStream = inputStreams[0].listen{
             timestamp: Long, ticker: Ticker, _ ->
-            if(genensis){
+            if(genesis){
                 fillGenesisBuffer(timestamp, ticker)
             }else{
                 fillCandle(timestamp, ticker)
@@ -42,7 +35,7 @@ class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
         if(genesisBuffer.size > 10){
             candle.setInitialCandleTimestamp(choseFirstTimestamp())
             genesisBuffer.forEach{ (timestamp, ticker) -> fillCandle(timestamp, ticker)}
-            genensis = false
+            genesis = false
             genesisBuffer.clear()
         }
     }

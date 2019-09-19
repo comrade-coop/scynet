@@ -41,7 +41,7 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
         private fun parseTicker(line: String){
             val bid = BigDecimal( bidRegex.find(line)!!.value.split('=').get(1))
             val ask = BigDecimal(askRegex.find(line)!!.value.split('=').get(1))
-            val timestamp =Date.from(Instant.ofEpochMilli((timestampRegex.find(line)!!.value.split('=').get(1)).toLong()))
+            val timestamp = Date.from(Instant.ofEpochMilli((timestampRegex.find(line)!!.value.split('=').get(1)).toLong()))
 
             val ticker = Ticker.Builder().apply {
                 bid(bid)

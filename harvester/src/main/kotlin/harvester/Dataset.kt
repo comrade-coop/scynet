@@ -1,19 +1,15 @@
 package harvester
 
 import descriptors.Properties
-import harvester.candles.CandleCombinerStream
 import harvester.candles.CandleDuration
 import harvester.candles.CandleLazyStream
-import harvester.combiners.INDArrayCombinerStream
 import harvester.datasets.DatasetStream
 import harvester.exchanges.Exchange
 import harvester.exchanges.TickerSaver
 import harvester.exchanges.XChangeLazyStream
 import harvester.indicators.CompositeLengthIndicatorStream
 import harvester.labels.CandleLabelStream
-import harvester.normalization.NormalizingStream
 import harvester.pairs.PairingStream
-import harvester.windows.WindowingStream
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.ignite.Ignite
@@ -47,7 +43,6 @@ fun main(){
     val xChangeStream = XChangeLazyStream(xChangeStreamId, null, Properties().apply {
         put("currencyPair", CurrencyPair.ETH_USD)
         put("xchange", Exchange.BITMEX)
-        put("fromFile", true)
     })
 
     val candleStreamId = UUID.randomUUID()
@@ -65,7 +60,7 @@ fun main(){
     val labelProperties = Properties().apply {
         put("upperTresholdPercentage", 1.0)
         put("lowerTresholdPercentage", 0.5)
-        put("periodInMinutes", 30)
+        put("periodInMinutes", 210)
     }
     val labelStream = CandleLabelStream(labelStreamId, candleStreamId,labelProperties)
 
@@ -74,8 +69,8 @@ fun main(){
 
     val datasetStreamId = UUID.randomUUID()
     val datasetStream = DatasetStream(datasetStreamId, pairingStreamId, Properties().apply {
-        put("datasetSize", 500)
-        put("slide", 250)})
+        put("datasetSize", 2000)
+        put("slide", 30)})
 
     //Register streams
     val LAZY_STREAM_FACTORY = "lazyStreamFactory"
@@ -118,7 +113,7 @@ fun main(){
 }
 
 fun getIndicatorPeriodPairs(indicators: Array<String>): ArrayList<Pair<String, Int>>{
-    val periods = arrayListOf(5,10,20,25,30,35,40,50,75,100)
+    val periods = arrayListOf(6,10,20,30,40,50,70,100,150,200)
     val indicatorPeriodPairs = ArrayList<Pair<String, Int>>()
     for(indicator in indicators){
         for (period in periods){
