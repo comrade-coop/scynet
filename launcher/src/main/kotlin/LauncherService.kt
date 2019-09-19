@@ -115,12 +115,12 @@ class LauncherService : Service, KoinComponent {
 
         // --- Business Logic Listeners
 
-        var lastAgents = mutableListOf<Double>(Double.MIN_VALUE)
+        var lastAgents = mutableListOf<Double>()
 
         var historyOfBestAccuracy = mutableListOf<Map<String, String>>()
         var bestAgentId: String = ""
         var bestAgentEgg: String = ""
-        var bestAgentTrainingScore: Double = Double.MIN_VALUE
+        var bestAgentTrainingScore: Double = -1.0
 
         var bestAgentPredictionStream: PredictingJobsStream? = null
         var bestAgentLastPrediction: String = ""
@@ -140,7 +140,7 @@ class LauncherService : Service, KoinComponent {
                 if(lastAgents.count() > 100) {
                     lastAgents.removeAt(0)
                 }
-                bestAgentTrainingScore = lastAgents.max()!!
+                bestAgentTrainingScore = if (lastAgents.count() > 0) lastAgents.max()!! else -1.0
                 lastAgents.add(perfDouble)
 
                 if (perfDouble > bestAgentTrainingScore) {

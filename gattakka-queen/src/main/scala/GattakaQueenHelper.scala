@@ -24,7 +24,11 @@ class GattakaQueenHelper {
     val totalWeigth = descriptors.view.map(_._1).sum
     () => {
       var left = Random.nextDouble * totalWeigth
-      descriptors.find(x => {left -= x._1; left <= 0.0}).get._2.createChromosome()
+      if (descriptors.size == 1) {
+        descriptors.head._2.createChromosome()
+      } else {
+        descriptors.find(x => {left -= x._1; left <= 0.0}).get._2.createChromosome()
+      }
     }
   }
 
