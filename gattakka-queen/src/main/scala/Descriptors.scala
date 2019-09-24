@@ -143,7 +143,7 @@ object Descriptors {
     makeInitializerRegularizerConstraint("kernel") ++
     makeInitializerRegularizerConstraint("bias"))
 
-  val DenseOutput1Layer = makeLayer("Dense", 1, Seq(
+  val DenseOutput1Layer = makeLayer("DenseOutput", 1, Seq(
     "units" -> LongGeneDescriptor(1, 1), // TODO: Extend
     "use_bias" -> BooleanDescriptor,
     "activation" -> EnumGeneDescriptor("sigmoid"),

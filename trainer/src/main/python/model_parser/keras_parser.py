@@ -11,6 +11,8 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.utils import plot_model
 from .preprocessor import *
 
+DenseOutput = Dense
+
 class StructureException(Exception):
     def __init__(self, message):
         super().__init__(message)

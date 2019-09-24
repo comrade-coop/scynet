@@ -3,13 +3,14 @@ package ai.scynet.queen
 import akka.actor.ActorRef
 import akka.actor.{ActorSystem, Props}
 import com.obecto.gattakka.genetics.operators._
-import com.obecto.gattakka.genetics.descriptors.{GeneDescriptor}
+import com.obecto.gattakka.genetics.descriptors.GeneDescriptor
 import com.obecto.gattakka.genetics.{Chromosome, Genome}
-import com.obecto.gattakka.{Pipeline, PipelineOperator, Population}
-import scala.io.Source
+import com.obecto.gattakka.{IndividualDescriptor, Pipeline, PipelineOperator, Population}
 
+import scala.io.Source
 import scala.util.Random
 import com.obecto.gattakka.messages.population.RefreshPopulation
+import spray.json.DefaultJsonProtocol
 
 class GattakaQueenHelper {
   def evaluator = classOf[QueenEvaluator]
@@ -36,16 +37,73 @@ class GattakaQueenHelper {
   val generateRandomNonInputLayer: () => Chromosome = generateRandomChromosome(Descriptors.NonInputLayers)
   val generateRandomOutputLayer: () => Chromosome = generateRandomChromosome(Descriptors.OutputLayers)
 
-  val initialChromosomes: List[Genome] = (1 to 1).map((i: Int) => {
-    new Genome(List(
-      Descriptors.AdamConfig.createChromosome(),
-      generateRandomInput()
-    ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomNonInputLayer())
-      ++ List(generateRandomOutputLayer())
-    )
-  }).toList
+  import java.nio.file.{Paths, Files}
+  var initialChromosomesTemp: List[Genome] = null
+
+
+  if (Files.exists(Paths.get(f"currentPopulation.txt"))) {
+    println("Reading input from file...")
+    val inputGenomes = for (line <- Source.fromFile(f"currentPopulation.txt").getLines) yield {
+      import spray.json._
+      import DefaultJsonProtocol._
+      import Converter.AnyJsonProtocol._
+
+      val genome = Converter.deserialize(line.parseJson.convertTo[Map[Any, Any]])
+
+      genome
+    }
+    initialChromosomesTemp = inputGenomes.toList
+  } else {
+    initialChromosomesTemp = (1 to 100).map((i: Int) => {
+      new Genome(List(
+        Descriptors.AdamConfig.createChromosome(),
+        generateRandomInput()
+      ) ++ (1 to (Random.nextInt(4) + 1)).map(x => generateRandomNonInputLayer())
+        ++ List(generateRandomOutputLayer())
+      )
+    }).toList
+    for (chromosome <- initialChromosomesTemp) {
+      import DefaultJsonProtocol._
+      import Converter.AnyJsonProtocol._
+      import spray.json._
+
+      val genome = Converter.serialize(chromosome).toJson.compactPrint
+      val deserialized = Converter.deserialize(genome.parseJson.convertTo[Map[Any, Any]])
+      val reserialized = Converter.serialize(deserialized).toJson.compactPrint
+      if(genome != reserialized) {
+        println(genome)
+        println(reserialized)
+        assert(false)
+      }
+    }
+  }
+
+  val initialChromosomes: List[Genome] = initialChromosomesTemp
+
+
 
   val pipelineOperators: List[PipelineOperator] = List(
+    new PipelineOperator {
+      override def apply(snapshot: List[IndividualDescriptor]): List[IndividualDescriptor] = {
+        import DefaultJsonProtocol._
+        import Converter.AnyJsonProtocol._
+        import spray.json._
+        import java.io.{IOException, File, PrintWriter}
+
+        val p = new PrintWriter(new File(f"currentPopulation1.txt"))
+
+        try {
+          for (descriptor <- snapshot) {
+            val genome = Converter.serialize(descriptor.genome).toJson.compactPrint
+//            println(s"$genome")
+            p.println(s"$genome")
+          }
+        } finally {
+          p.close()
+        }
+        snapshot
+      }
+    },
     // new PipelineOperator {
     //   def apply(descriptors: List[IndividualDescriptor]): List[IndividualDescriptor] = {
     //     descriptors filter (!_.fitness.isNaN)
