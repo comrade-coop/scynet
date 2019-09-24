@@ -54,7 +54,7 @@ class GattakaQueenHelper {
     }
     initialChromosomesTemp = inputGenomes.toList
   } else {
-    initialChromosomesTemp = (1 to 100).map((i: Int) => {
+    initialChromosomesTemp = (1 to 1).map((i: Int) => {
       new Genome(List(
         Descriptors.AdamConfig.createChromosome(),
         generateRandomInput()
@@ -62,20 +62,20 @@ class GattakaQueenHelper {
         ++ List(generateRandomOutputLayer())
       )
     }).toList
-    for (chromosome <- initialChromosomesTemp) {
-      import DefaultJsonProtocol._
-      import Converter.AnyJsonProtocol._
-      import spray.json._
-
-      val genome = Converter.serialize(chromosome).toJson.compactPrint
-      val deserialized = Converter.deserialize(genome.parseJson.convertTo[Map[Any, Any]])
-      val reserialized = Converter.serialize(deserialized).toJson.compactPrint
-      if(genome != reserialized) {
-        println(genome)
-        println(reserialized)
-        assert(false)
-      }
-    }
+//    for (chromosome <- initialChromosomesTemp) {
+//      import DefaultJsonProtocol._
+//      import Converter.AnyJsonProtocol._
+//      import spray.json._
+//
+//      val genome = Converter.serialize(chromosome).toJson.compactPrint
+//      val deserialized = Converter.deserialize(genome.parseJson.convertTo[Map[Any, Any]])
+//      val reserialized = Converter.serialize(deserialized).toJson.compactPrint
+//      if(genome != reserialized) {
+//        println(genome)
+//        println(reserialized)
+//        assert(false)
+//      }
+//    }
   }
 
   val initialChromosomes: List[Genome] = initialChromosomesTemp
