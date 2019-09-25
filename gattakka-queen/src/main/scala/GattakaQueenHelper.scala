@@ -90,7 +90,7 @@ class GattakaQueenHelper {
         import spray.json._
         import java.io.{IOException, File, PrintWriter}
 
-        val p = new PrintWriter(new File(f"currentPopulation1.txt"))
+        val p = new PrintWriter(new File(f"currentPopulation.txt"))
 
         try {
           for (descriptor <- snapshot) {
