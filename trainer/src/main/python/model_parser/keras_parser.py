@@ -104,6 +104,7 @@ def process_layers(structure):
     input_metadata = []  # [(Preprocessor, signal config), (...), ...]
     used_as_input = {}  # ID -> True/False; whether the given layer has been used as an input
 
+    has_output = False
     for i, layer in enumerate(layers):
         used_as_input[i] = False  # default value
         # TODO: Handle stacked LSTM case (insert return_sequences when applicable)
@@ -114,12 +115,20 @@ def process_layers(structure):
 
             input_metadata.append(metadata)
             model_inputs.append(output)
+        elif layer['type'] == "DenseOutput":
+            output, layer_used_input_indexes = process_non_input_layer(layer, i, outputs)
+            for k in layer_used_input_indexes:
+                used_as_input[k] = True
+            has_output = True
         else:
             output, layer_used_input_indexes = process_non_input_layer(layer, i, outputs)
             for k in layer_used_input_indexes:
                 used_as_input[k] = True
 
         outputs.append(output)
+
+    if not has_output:
+        raise Exception("No output layer")
 
     # all output tensors that haven't been used as an input in the graph are model outputs
     model_outputs = [outputs[i] for i in used_as_input if not used_as_input[i]]
