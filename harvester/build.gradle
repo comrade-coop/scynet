@@ -45,7 +45,6 @@ dependencies {
     implementation group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-alpha'
     // https://mvnrepository.com/artifact/com.tictactec/ta-lib
     compile group: 'com.tictactec', name: 'ta-lib', version: '0.4.0'
-
 }
 run{
     standardInput = System.in
