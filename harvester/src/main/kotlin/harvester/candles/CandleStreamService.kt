@@ -66,7 +66,7 @@ class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
             buffer.put(timestamp, ticker)
         }else if(timestamp < candle.beginningOfTick.toEpochMilli()){
             //We've already formed the candle, so we skip this ticker. Find a way to add ticker to candle later.
-            println("Skipping $ticker")
+            logger.trace("Skipping $ticker")
         }else{
             candle.addTicker(ticker)
         }

@@ -10,7 +10,8 @@ class JobSelectionService: LazyStreamService<Long, TrainingJob>() {
 
         inputStreams[0].listen{ timestamp: Long, trainingJob: TrainingJob, _ ->
             if(selectJob(trainingJob)) {
-                println("INFO: Selecting $timestamp")
+                //can set log level to  INFO when more complex selection is implemented
+                logger.trace("Selecting $timestamp")
                 cache.put(timestamp, trainingJob)
             }
         }

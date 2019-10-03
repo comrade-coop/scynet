@@ -34,11 +34,15 @@ import org.knowm.xchange.currency.CurrencyPair
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.nd4j.linalg.api.ndarray.INDArray
+import processors.ILazyStream
 import processors.ILazyStreamFactory
 import processors.LazyStreamFactory
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 class LauncherService : Service, KoinComponent {
+    private val streamProxies: HashSet<ILazyStream> = HashSet()
     protected val ignite: Ignite by inject()
 
     override fun init(ctx: ServiceContext?) {
@@ -46,7 +50,9 @@ class LauncherService : Service, KoinComponent {
     }
 
     override fun cancel(ctx: ServiceContext?) {
-
+        for(stream in streamProxies){
+            stream.dispose()
+        }
     }
 
     override fun execute(ctx: ServiceContext?) {
@@ -108,7 +114,8 @@ class LauncherService : Service, KoinComponent {
         // ------ Dataset Listeners
 
         val datasetStreamProxy = factory.getInstance(datasetStreamId)
-        datasetStreamProxy.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
+        streamProxies.add(datasetStreamProxy!!)
+        datasetStreamProxy!!.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
             // Listen operation implicitly start the service.
             println("\n\nDataset $datasetName ----> \n${dataset.first}   \n${dataset.second}\n\n")
         }
@@ -128,7 +135,8 @@ class LauncherService : Service, KoinComponent {
         val performanceFeedbackCache = ignite.getOrCreateCache<String, Double>("tmp_perf")
 
         var finishedJobsStreamProxy = factory.getInstance(finishedJobsStreamID)
-        finishedJobsStreamProxy.listen { t:Long, c: TrainingJob, _ ->
+        streamProxies.add(finishedJobsStreamProxy!!)
+        finishedJobsStreamProxy!!.listen { t:Long, c: TrainingJob, _ ->
             println("\nStream Output for **************************************************************** $t -> $c\n")
 
             if(c.status.statusID == StatusID.TRAINED) {
@@ -156,6 +164,9 @@ class LauncherService : Service, KoinComponent {
                     }
 
                     bestAgentPredictionStream?.dispose()
+                    if(bestAgentPredictionStream != null){
+                        streamProxies.remove(bestAgentPredictionStream!!)
+                    }
 
                     val bestAgentStreamID = UUID.randomUUID()
                     bestAgentPredictionStream = PredictingJobsStream(bestAgentStreamID,
@@ -167,7 +178,9 @@ class LauncherService : Service, KoinComponent {
                     factory.registerStream(bestAgentPredictionStream!!)
 
                     var bestAgentStreamProxy = factory.getInstance(bestAgentStreamID)
-                    bestAgentStreamProxy.listen { _: Long, prediction: String, _ ->
+                    streamProxies.add(bestAgentStreamProxy!!)
+
+                    bestAgentStreamProxy!!.listen { _: Long, prediction: String, _ ->
                         bestAgentLastPrediction = prediction
                     }
                 }

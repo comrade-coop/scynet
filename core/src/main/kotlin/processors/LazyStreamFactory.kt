@@ -4,6 +4,7 @@ import descriptors.LazyStreamDescriptor
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.services.ServiceContext
+import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.lang.IllegalArgumentException
@@ -13,7 +14,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class LazyStreamFactory: ILazyStreamFactory, KoinComponent {
-    
+    private val logger = LogManager.getLogger(this::class.qualifiedName)
     private val ignite: Ignite by inject()
     private val streamClasses: HashMap<String, KClass<out ILazyStream>>
     private lateinit var streamClassIds: IgniteCache<UUID, String>
@@ -40,16 +41,19 @@ class LazyStreamFactory: ILazyStreamFactory, KoinComponent {
     override fun registerStream(stream: ILazyStream){
         val streamId = stream.descriptor!!.id
         if(streamClassIds.containsKey(streamId)){
-            throw IllegalArgumentException("Stream with id: ${streamId} already registerd!")
+            logger.error("Stream with id: ${streamId} already registerd!")
+            return
         }
         streamClassIds.put(streamId, stream.classId)
         streamDescriptors.put(streamId, stream.descriptor)
         registerStreamClass(stream)
     }
 
-    override fun getInstance(streamId: UUID): ILazyStream{
-        if(!streamDescriptors.containsKey(streamId))
-            throw IllegalArgumentException("Stream with id: $streamId does not exist!")
+    override fun getInstance(streamId: UUID): ILazyStream?{
+        if(!streamDescriptors.containsKey(streamId)){
+            logger.error("Stream with id: $streamId does not exist!")
+            return null
+        }
         val streamClassId = streamClassIds.get(streamId)
         val stream = streamClasses[streamClassId]!!.createInstance()
         val streamDescriptor = streamDescriptors.get(streamId)

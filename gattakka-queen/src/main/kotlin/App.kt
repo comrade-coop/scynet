@@ -72,7 +72,7 @@ fun main(args: Array<String>) {
 	var reportedPerformance = emptyList<String>()
 
 	var streamProxy = streamManager.getInstance(finishedJobsStreamID)
-	var cursor =  streamProxy.listen { t:Long, c: TrainingJob, _ ->
+	var cursor =  streamProxy!!.listen { t:Long, c: TrainingJob, _ ->
 		println("\nStream Output for **************************************************************** $t -> $c\n")
 
 		if(c.status.statusID == StatusID.TRAINED) {
@@ -89,7 +89,7 @@ fun main(args: Array<String>) {
 	}
 
 	var streamProxyTemp = streamManager.getInstance(predictionJobStreamID)
-	var cursorTemp =  streamProxyTemp.listen { t:Long, c: TrainingJob, _ ->
+	var cursorTemp =  streamProxyTemp!!.listen { t:Long, c: TrainingJob, _ ->
 		println("\nStream Prediction Output for ()()()()()()()()()()()()()()()()()()()()()()()()()()()() $t -> $c\n")
 	}
 

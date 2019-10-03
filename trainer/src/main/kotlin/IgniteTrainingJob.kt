@@ -6,6 +6,7 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.lang.IgniteRunnable
+import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
@@ -18,7 +19,7 @@ import java.io.InputStreamReader
 import java.util.*
 
 class IgniteTrainingJob: IgniteRunnable, KoinComponent {
-
+    private val logger = LogManager.getLogger(this::class.qualifiedName)
     lateinit var trainingJob: TrainingJob;
     lateinit var addToFinishedJobsStream : (t: Long, tJob: TrainingJob) -> Unit;
     protected val ignite: Ignite by inject()
@@ -30,11 +31,11 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
     constructor(tJob: TrainingJob, func: (t: Long, tJob: TrainingJob) -> Unit){
         this.trainingJob = tJob
         this.addToFinishedJobsStream = func
-        println("INFO: Starting to train a job")
+        logger.info("Starting to train a job")
     }
 
     private fun initTrainer(){
-        println("WARNING: Initializing Trainer...")
+        logger.warn("Initializing Trainer...")
 
         val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
         val file = File(filePath)
@@ -61,7 +62,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
         val output  = BufferedReader(InputStreamReader(p.inputStream))
 
         for(out in output.lines()) {
-            println("Python[OUT]: ${out}")
+            logger.trace("Python[OUT]: $out")
 
             if (out.split("=")[0] == "DONE") {
 

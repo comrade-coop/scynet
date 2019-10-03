@@ -20,7 +20,7 @@ dependencies {
     compile group: 'io.ktor', name: 'ktor-server-netty', version: '1.2.4'
     compile "io.ktor:ktor-jackson:1.2.4"
 
-    compile("ch.qos.logback:logback-classic:1+")
+//    compile("ch.qos.logback:logback-classic:1+")
 
     implementation project (path: ':harvester', configuration: 'default')
     compile project(path: ':gattakka-queen', configuration: 'default')

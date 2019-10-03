@@ -9,20 +9,20 @@
 
         <!-- Rolling File Appender -->
         <RollingFile name="RollingFile">
-            <FileName>harvester/logs/mylog.log</FileName>
-            <FilePattern>harvester/logs/time-based-logs/%d{yyyy-MM-dd-hh-mm}.log</FilePattern>
+            <FileName>logs/harvester/mylog.log</FileName>
+            <FilePattern>logs/harvester/time-based-logs/%d{yyyy-MM-dd-hh-mm}.log</FilePattern>
             <PatternLayout>
                 <Pattern>%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n</Pattern>
             </PatternLayout>
             <Policies>
-                <TimeBasedTriggeringPolicy interval="60" modulate="true" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
             </Policies>
-            <DefaultRolloverStrategy max="192" />
+            <DefaultRolloverStrategy max="192000" />
         </RollingFile>
 
     </Appenders>
     <Loggers>
-        <Logger name="harvester" level="trace" additivity="false">
+        <Logger name="harvester" level="trace" additivity="true">
             <AppenderRef ref="RollingFile" />
             <AppenderRef ref="Console" />
         </Logger>

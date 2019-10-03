@@ -12,6 +12,7 @@ import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.cluster.ClusterGroup
 import org.apache.ignite.services.ServiceDeploymentException
 import org.apache.ignite.services.ServiceDescriptor
+import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.*
@@ -21,6 +22,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
+    protected val logger = LogManager.getLogger(this::class.qualifiedName)!!
     override var descriptor: LazyStreamDescriptor? = null
         set(value) {
             field = value
@@ -98,7 +100,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
                 try{
                     ignite.services().deployClusterSingleton(descriptor!!.id.toString(), streamService)
                 }catch (e: ServiceDeploymentException) {
-                    println(e)
+                    logger.error(e)
                 }
             }
             serviceInstance = getServiceProxy()
@@ -146,7 +148,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     override fun dispose(){
         serviceEngagementTimer.stop()
         serviceInstance = null
-        println("${descriptor!!.id} disposed successfully!")
+        logger.info("Engagement timer for ${descriptor!!.id} successfully stopped!")
     }
 
     override fun getCachee(): IgniteCache<Any, Any> {

@@ -88,7 +88,7 @@ fun main(args: Array<String>) {
 		routing {
             val wsConnections = Collections.synchronizedSet(LinkedHashSet<DefaultWebSocketSession>())
 
-            var jobs =  finishedJobStreamProxy.listen { t: Long, j: TrainingJob, _ ->
+            var jobs =  finishedJobStreamProxy!!.listen { t: Long, j: TrainingJob, _ ->
                 println("INFO: Job $t Finished $j")
                 val clean = j.copy(dataset = null)
                 val json = objectMapper.writeValueAsString(clean)

@@ -2,6 +2,7 @@ package ai.scynet.launcher
 
 import harvester.exchanges.TickerSaver
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
@@ -14,9 +15,9 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
 	val cfg = IgniteConfiguration()
-	val storageCfg = DataStorageConfiguration()
-	storageCfg.defaultDataRegionConfiguration.isPersistenceEnabled = true
-	cfg.dataStorageConfiguration = storageCfg
+//	val storageCfg = DataStorageConfiguration()
+//	storageCfg.defaultDataRegionConfiguration.isPersistenceEnabled = true
+//	cfg.dataStorageConfiguration = storageCfg
 	cfg.igniteInstanceName = "Scynet"
 	//cfg.setPeerClassLoadingEnabled(true)
 	val ignite = Ignition.start(cfg)
@@ -28,7 +29,7 @@ fun main(args: Array<String>) {
 		})
 	}
 
-	ignite.active(true)
+//	ignite.active(true)
 	val service = LauncherService()
 	ignite.services().deployClusterSingleton("launcher", service)
 
@@ -40,11 +41,20 @@ fun main(args: Array<String>) {
 				tickerWriter.stop()
 			}
 		})
-		GlobalScope.launch {
+		launch {
 			while(readLine() != "stop"){
 				println("Only stop command accepted!")
 			}
-			exitProcess(0)
+			ignite.services().cancel("launcher")
+			while(true){
+				val serviceDescriptors = ignite.services().serviceDescriptors()
+				if(serviceDescriptors!!.size != 1){
+					delay(10000)
+				}else{
+					ignite.services().cancelAll()
+					exitProcess(0)
+				}
+			}
 		}
 
 		tickerWriter.start()

@@ -6,6 +6,7 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.lang.IgniteRunnable
+import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
@@ -19,6 +20,7 @@ import java.util.*
 
 class IgnitePredictingJob: IgniteRunnable, KoinComponent {
 
+    private val logger = LogManager.getLogger(this::class.qualifiedName)
     private lateinit var agentId: String
     private lateinit var agentEgg: String
     private lateinit var x: INDArray
@@ -40,7 +42,7 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
     }
 
     private fun initTrainer(){
-        println("WARNING: Initializing Predictor... <--------------------------------------#-------------#-------#----#---#--#-##")
+        logger.warn("Initializing Predictor... <--------------------------------------#-------------#-------#----#---#--#-##")
 
         val xPath = "./trainer/src/main/kotlin/mock/temp/data/xTEMP${agentId}.npy"
 
@@ -55,7 +57,7 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
         val output  = BufferedReader(InputStreamReader(p.inputStream))
 
         for(out in output.lines()) {
-            println("Python[OUT]: ${out}")
+            logger.trace("Python[OUT]: ${out}")
 
             if (out.split("=")[0] == "PREDICTION_DONE") {
 

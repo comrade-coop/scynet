@@ -69,7 +69,7 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
                 .build()
 
         xchange.connect(productSubscription).blockingAwait()
-        println("Exchange connected")
+        logger.trace("Exchange connected")
 
         try{
             readTickersFromFile()
@@ -77,7 +77,7 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
         catch (e: FileNotFoundException) {
         }
 
-        println("\nnew tickers from exchange\n")
+        logger.trace("\nnew tickers from exchange\n")
         xChangeStream = xchange.streamingMarketDataService.getTicker(currencyPair).subscribe { ticker ->
             streamTicker(ticker)
         }
@@ -85,9 +85,9 @@ class XChangeStreamService: LazyStreamService<Long, Ticker>() {
 
     override fun cancel(ctx: ServiceContext?) {
         xChangeStream.dispose()
-        println("xChangeStream disposed!")
+        logger.trace("xChangeStream disposed!")
         xchange.disconnect()
-        println("xchange disconnected!")
+        logger.trace("xchange disconnected!")
         super.cancel(ctx)
     }
 

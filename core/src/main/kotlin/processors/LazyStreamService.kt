@@ -5,6 +5,8 @@ import descriptors.LazyStreamServiceDescriptor
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.services.ServiceContext
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.lang.IllegalStateException
@@ -13,8 +15,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
-
+    protected val logger = LogManager.getLogger(this::class.qualifiedName)!!
     override val engagementTimeoutSeconds = 10
+
     override var descriptor: LazyStreamServiceDescriptor? = null
     protected  val ignite: Ignite by inject()
     protected lateinit var context: ServiceContext
@@ -31,7 +34,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         private lateinit var task: TimerTask
         fun start(){
             task = getTimerTask()
-            println("Starting CountDown for $serviceClassAndName!")
+            logger.trace("Starting CountDown for $serviceClassAndName!")
             this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
         }
 
@@ -59,20 +62,20 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         cache = ignite.getOrCreateCache(serviceName)
         if(descriptor!!.inputStreamIds != null){
             inputStreamFactory = ignite.services().serviceProxy("lazyStreamFactory", ILazyStreamFactory::class.java, false)
-            inputStreams = ArrayList()
+            inputStreams = ArrayList()  
             for(stream in descriptor!!.inputStreamIds!! ){
-                inputStreams.add(inputStreamFactory.getInstance(stream))
+                inputStreams.add(inputStreamFactory.getInstance(stream)!!)
             }
         }
         if(!::countDown.isInitialized){
             countDown = CountDown()
         }
         countDown.start()
-        println("Service for $serviceClassAndName is initialized successfully!")
+        logger.info("Service for $serviceClassAndName is initialized successfully!")
     }
 
     override fun execute(ctx: ServiceContext?) {
-        println("Starting service for $serviceClassAndName")
+        logger.info("Starting service for $serviceClassAndName")
     }
     override fun cancel(ctx: ServiceContext?) {
         if(descriptor!!.inputStreamIds != null){
@@ -80,7 +83,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
                 stream.dispose()
             }
         }
-        println("Service for $serviceClassAndName successfully cancelled!")
+        logger.info("Service for $serviceClassAndName successfully cancelled!")
     }
 
     override fun engageLiveStream() {

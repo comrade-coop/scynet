@@ -11,6 +11,7 @@ import harvester.indicators.CompositeLengthIndicatorStream
 import harvester.labels.CandleLabelStream
 import harvester.pairs.PairingStream
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
@@ -84,7 +85,7 @@ fun main(){
     factory.registerStream(datasetStream)
 
     val datasetStreamProxy = factory.getInstance(datasetStreamId)
-    val cursor = datasetStreamProxy.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
+    val cursor = datasetStreamProxy!!.listen{ datasetName: String, dataset: Pair<INDArray, INDArray>, _ ->
         println("\n\nDataset $datasetName ----> \n${dataset.first}   \n${dataset.second}\n\n")
     }
 
@@ -97,13 +98,21 @@ fun main(){
                 tickerWriter.stop()
             }
         })
-        GlobalScope.launch {
+        launch {
             while(readLine() != "stop"){
                 println("Only stop command accepted!")
             }
             cursor.close()
             datasetStreamProxy.dispose()
-            exitProcess(0)
+            while(true){
+                val serviceDescriptors = ignite.services().serviceDescriptors()
+                if(serviceDescriptors!!.size != 1){
+                    delay(10000)
+                }else{
+                    ignite.services().cancelAll()
+                    exitProcess(0)
+                }
+            }
         }
 
         tickerWriter.start()

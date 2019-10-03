@@ -58,13 +58,8 @@ class GattakkaStreamService: LazyStreamService<Long, TrainingJob>() {
         helper.refreshPopulation(populationActor)
 
         system.systemImpl().start()
-        println("Started")
+        logger.info("Started GattakkaStreamService!")
 
-    }
-
-    override fun cancel(ctx: ServiceContext?) {
-
-        super.cancel(ctx)
     }
 
 }

@@ -6,5 +6,5 @@ import java.util.*
 
 interface ILazyStreamFactory: Service {
     fun registerStream(stream: ILazyStream)
-    fun getInstance(streamId: UUID): ILazyStream
+    fun getInstance(streamId: UUID): ILazyStream?
 }
