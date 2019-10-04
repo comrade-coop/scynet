@@ -15,12 +15,13 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
 	val cfg = IgniteConfiguration()
-//	val storageCfg = DataStorageConfiguration()
-//	storageCfg.defaultDataRegionConfiguration.isPersistenceEnabled = true
-//	cfg.dataStorageConfiguration = storageCfg
+	val storageCfg = DataStorageConfiguration()
+	storageCfg.defaultDataRegionConfiguration.isPersistenceEnabled = true
+	cfg.dataStorageConfiguration = storageCfg
 	cfg.igniteInstanceName = "Scynet"
 	//cfg.setPeerClassLoadingEnabled(true)
 	val ignite = Ignition.start(cfg)
+	ignite.active(true)
 
 	startKoin {
 		printLogger()
@@ -29,7 +30,6 @@ fun main(args: Array<String>) {
 		})
 	}
 
-//	ignite.active(true)
 	val service = LauncherService()
 	ignite.services().deployClusterSingleton("launcher", service)
 
