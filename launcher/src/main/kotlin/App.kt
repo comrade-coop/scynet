@@ -8,6 +8,7 @@ import org.apache.ignite.Ignite
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.DataStorageConfiguration
 import org.apache.ignite.configuration.IgniteConfiguration
+import org.apache.logging.log4j.LogManager
 import org.knowm.xchange.currency.CurrencyPair
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -29,7 +30,7 @@ fun main(args: Array<String>) {
 			single<Ignite> { ignite }
 		})
 	}
-
+	val logger = LogManager.getLogger("launcher")
 	val service = LauncherService()
 	ignite.services().deployClusterSingleton("launcher", service)
 

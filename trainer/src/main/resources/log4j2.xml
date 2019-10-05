@@ -9,8 +9,8 @@
 
         <!-- Rolling File Appender -->
         <RollingFile name="RollingFile">
-            <FileName>logs/launcher/mylog.log</FileName>
-            <FilePattern>logs/launcher/time-based-logs/%d{yyyy-MM-dd-hh-mm}.log</FilePattern>
+            <FileName>logs/trainer/mylog.log</FileName>
+            <FilePattern>logs/trainer/time-based-logs/%d{yyyy-MM-dd-hh-mm}.log</FilePattern>
             <PatternLayout>
                 <Pattern>%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n</Pattern>
             </PatternLayout>
@@ -22,15 +22,7 @@
 
     </Appenders>
     <Loggers>
-        <Logger name="ai.scynet.trainer" level="trace" additivity="true">
-            <AppenderRef ref="RollingFile" />
-            <AppenderRef ref="Console" />
-        </Logger>
-        <Logger name="harvester" level="trace" additivity="true">
-            <AppenderRef ref="RollingFile" />
-            <AppenderRef ref="Console" />
-        </Logger>
-        <Logger name="ai.scynet.queen" level="trace" additivity="true">
+        <Logger name="trainer" level="trace" additivity="true">
             <AppenderRef ref="RollingFile" />
             <AppenderRef ref="Console" />
         </Logger>
