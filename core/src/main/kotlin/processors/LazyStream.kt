@@ -31,7 +31,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     private val ignite: Ignite by inject()
     private var cache: IgniteCache<Long, V>? = null
     private var serviceInstance: ILazyStreamService? = null
-    private lateinit var  serviceEngagementTimer: ServiceEngagementTimer
+    private val  serviceEngagementTimer: ServiceEngagementTimer = ServiceEngagementTimer()
     protected abstract val streamServiceClass: KClass<out ILazyStreamService>
 
     constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, serviceProperties: Properties?): this(){
@@ -44,7 +44,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
         )
     }
 
-    private inner class ServiceEngagementTimer(private val delay: Long){
+    private inner class ServiceEngagementTimer(private val delay: Long = 10000){
         private val  timer = Timer(true)
         private lateinit var task: TimerTask
         fun start(){
@@ -80,9 +80,6 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     private  fun engageLiveStreamTimer() {
         if(serviceInstance == null){
             getOrCreateService()
-        }
-        if(!::serviceEngagementTimer.isInitialized){
-            serviceEngagementTimer = ServiceEngagementTimer(serviceInstance!!.engagementTimeoutSeconds * 500L)
         }
         serviceEngagementTimer.start()
     }

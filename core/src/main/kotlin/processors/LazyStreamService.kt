@@ -16,7 +16,6 @@ import kotlin.collections.ArrayList
 
 abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
     protected val logger = LogManager.getLogger(this::class.qualifiedName)!!
-    override val engagementTimeoutSeconds = 10
 
     override var descriptor: LazyStreamServiceDescriptor? = null
     protected  val ignite: Ignite by inject()
@@ -35,7 +34,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         fun start(){
             task = getTimerTask()
             logger.trace("Starting CountDown for $serviceClassAndName!")
-            this.timer.schedule(task, engagementTimeoutSeconds.toLong() * 1000)
+            this.timer.schedule(task, 20000)
         }
 
         fun restart(){

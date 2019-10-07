@@ -17,11 +17,6 @@ class JobSelectionService: LazyStreamService<Long, TrainingJob>() {
         }
     }
 
-    override fun cancel(ctx: ServiceContext?) {
-        inputStreams[0].dispose()
-        super.cancel(ctx)
-    }
-
     private fun selectJob(trainingJob: TrainingJob): Boolean{
         return true
     }

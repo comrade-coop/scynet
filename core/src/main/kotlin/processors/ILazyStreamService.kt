@@ -6,7 +6,6 @@ import java.util.*
 
 interface ILazyStreamService: Service{
     var descriptor: LazyStreamServiceDescriptor?
-    val engagementTimeoutSeconds: Int
 
     fun engageLiveStream()
 

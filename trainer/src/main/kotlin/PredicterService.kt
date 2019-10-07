@@ -28,10 +28,6 @@ class PredicterService: LazyStreamService<Long, String>() {
         }
     }
 
-    override fun cancel(ctx: ServiceContext?) {
-        inputStreams[0].dispose()
-        super.cancel(ctx)
-    }
 }
 
 
