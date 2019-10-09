@@ -54,7 +54,7 @@ class GattakaQueenHelper {
     }
     initialChromosomesTemp = inputGenomes.toList
   } else {
-    initialChromosomesTemp = (1 to 1).map((i: Int) => {
+    initialChromosomesTemp = (1 to 5).map((i: Int) => {
       new Genome(List(
         Descriptors.AdamConfig.createChromosome(),
         generateRandomInput()
@@ -91,6 +91,8 @@ class GattakaQueenHelper {
         import java.io.{IOException, File, PrintWriter}
 
         val p = new PrintWriter(new File(f"currentPopulation.txt"))
+
+        println(s"Running pipeline with ${snapshot.size} descriptors; ${snapshot.filter(_.fitness.isNaN).size} have NaN fitness")
 
         try {
           for (descriptor <- snapshot) {

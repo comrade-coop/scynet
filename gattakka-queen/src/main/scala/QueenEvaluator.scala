@@ -45,7 +45,8 @@ class QueenEvaluator extends Evaluator {
   }
  */
 
-  context.system.scheduler.scheduleOnce(180.seconds) {
+  context.system.scheduler.schedule(60.seconds, 60.seconds) {
+    println("Refreshing population")
     populationActor ! RefreshPopulation(false)
   }
 }
