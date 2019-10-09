@@ -5,12 +5,14 @@ import akka.actor.{ActorSystem, Props}
 import com.obecto.gattakka.genetics.operators._
 import com.obecto.gattakka.genetics.descriptors.GeneDescriptor
 import com.obecto.gattakka.genetics.{Chromosome, Genome}
-import com.obecto.gattakka.{IndividualDescriptor, Pipeline, PipelineOperator, Population}
+import com.obecto.gattakka.{IndividualDescriptor, IndividualState, Pipeline, PipelineOperator, Population}
 
 import scala.io.Source
 import scala.util.Random
 import com.obecto.gattakka.messages.population.RefreshPopulation
 import spray.json.DefaultJsonProtocol
+
+import scala.collection.mutable.ListBuffer
 
 class GattakaQueenHelper {
   def evaluator = classOf[QueenEvaluator]
@@ -118,6 +120,14 @@ class GattakaQueenHelper {
       val replicationChance = 0.1
       override val keepFirstChildOnly = true
       val parentSelectionStrategy = new TournamentSelectionStrategy(8)
+      override def apply(snapshot: List[IndividualDescriptor]): List[IndividualDescriptor] = {
+        val withoutDoomed = snapshot filter (_.state != IndividualState.DoomedToDie)
+        if (withoutDoomed.size >= parentCount) {
+          super.apply(snapshot)
+        } else {
+          snapshot
+        }
+      }
     },
     new BinaryMutationOperator {
       override def killParent = false
