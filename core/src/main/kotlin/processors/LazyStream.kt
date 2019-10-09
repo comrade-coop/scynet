@@ -46,7 +46,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
 
     private inner class ServiceEngagementTimer(private val delay: Long = 10000){
         private val  timer = Timer(true)
-        private lateinit var task: TimerTask
+        private  var task: TimerTask = getTimerTask()
         fun start(){
             task =  getTimerTask()
             timer.scheduleAtFixedRate(task, delay,delay)
@@ -74,7 +74,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     }
 
     private fun engageLiveStream(){
-        serviceInstance!!.engageLiveStream()
+        serviceInstance?.engageLiveStream()
     }
 
     private  fun engageLiveStreamTimer() {

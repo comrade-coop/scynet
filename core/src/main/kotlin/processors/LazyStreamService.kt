@@ -30,7 +30,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
 
     private inner class CountDown{
         private val timer = Timer(true)
-        private lateinit var task: TimerTask
+        private  var task: TimerTask = getTimerTask()
         fun start(){
             task = getTimerTask()
             logger.trace("Starting CountDown for $serviceClassAndName!")
@@ -86,7 +86,11 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
     }
 
     override fun engageLiveStream() {
-        this.countDown.restart()
+        try{
+            this.countDown.restart()
+        }catch (e: UninitializedPropertyAccessException){
+            logger.error(e)
+        }
     }
 
     override fun fillMissingStreamData(from: Long, to: Long) {
