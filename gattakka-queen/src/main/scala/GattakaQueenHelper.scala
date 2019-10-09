@@ -106,11 +106,11 @@ class GattakaQueenHelper {
         snapshot
       }
     },
-    // new PipelineOperator {
-    //   def apply(descriptors: List[IndividualDescriptor]): List[IndividualDescriptor] = {
-    //     descriptors filter (!_.fitness.isNaN)
-    //   }
-    // },
+     new PipelineOperator {
+       def apply(descriptors: List[IndividualDescriptor]): List[IndividualDescriptor] = {
+         descriptors filter (!_.fitness.isNaN)
+       }
+     },
     new EliteOperator {
       val elitePercentage = 0.2
     },

@@ -30,6 +30,7 @@ import io.ktor.server.netty.Netty
 import org.apache.ignite.Ignite
 import org.apache.ignite.services.Service
 import org.apache.ignite.services.ServiceContext
+import org.apache.logging.log4j.LogManager
 import org.knowm.xchange.currency.CurrencyPair
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -42,6 +43,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 class LauncherService : Service, KoinComponent {
+
+    private val logger = LogManager.getLogger(this::class.qualifiedName)
+
     private val streamProxies: HashSet<ILazyStream> = HashSet()
     protected val ignite: Ignite by inject()
 
@@ -137,11 +141,13 @@ class LauncherService : Service, KoinComponent {
         var finishedJobsStreamProxy = factory.getInstance(finishedJobsStreamID)
         streamProxies.add(finishedJobsStreamProxy!!)
         finishedJobsStreamProxy!!.listen { t:Long, c: TrainingJob, _ ->
-            println("\nStream Output for **************************************************************** $t -> $c\n")
+            logger.info("\nStream Output for **************************************************************** $t -> $c\n")
 
             if(c.status.statusID == StatusID.TRAINED) {
                 val perf = (c.status as TRAINED).results.getValue("performance")
                 val perfDouble = if (perf.toDoubleOrNull() != null) perf.toDouble() else 0.0
+
+                logger.info("Trained agent performance: ${perfDouble}")
 
                 performanceFeedbackCache.put(c.UUID.toString(), perfDouble)
 
@@ -150,6 +156,8 @@ class LauncherService : Service, KoinComponent {
                 }
                 bestAgentTrainingScore = if (lastAgents.count() > 0) lastAgents.max()!! else -1.0
                 lastAgents.add(perfDouble)
+
+                logger.info("Trained agent bestAgentTrainingScore: ${bestAgentTrainingScore}")
 
                 if (perfDouble > bestAgentTrainingScore) {
                     bestAgentTrainingScore = perfDouble
@@ -162,6 +170,8 @@ class LauncherService : Service, KoinComponent {
                     if (historyOfBestAccuracy.count() > 100) {
                         historyOfBestAccuracy.removeAt(0)
                     }
+
+                    logger.info("Switch best agent to: ${bestAgentId}")
 
                     bestAgentPredictionStream?.dispose()
                     if(bestAgentPredictionStream != null){
