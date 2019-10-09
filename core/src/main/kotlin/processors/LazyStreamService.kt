@@ -38,6 +38,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
                 this.timer.schedule(task, 20000)
             }catch (e: IllegalStateException){
                 logger.error(e)
+                logger.debug("$e from start")
                 logger.error(e.stackTrace)
             }
 
@@ -54,6 +55,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
                 timer.purge()
             }catch (e: IllegalStateException){
                 logger.error(e)
+                logger.debug("$e from stop")
                 logger.error(e.stackTrace)
             }
 
