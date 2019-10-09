@@ -10,18 +10,18 @@ class QueenEvaluator extends Evaluator {
 
   import com.obecto.gattakka.messages.evaluator._
   import context.dispatcher
-
+/*
   var requiredAmount = 10
   var refreshed = false
   var scheduled = false
-  val requiredRatio = 0.5
+  val requiredRatio = 0.0
 
   def tryRefresh() = {
     if (!scheduled) {
       scheduled = true
-      context.system.scheduler.scheduleOnce(1.seconds) {
+      context.system.scheduler.scheduleOnce(30.seconds) {
         scheduled = false
-        if (fitnesses.size >= requiredAmount && requiredAmount > 0 && !refreshed) {
+        if (fitnesses.size >= requiredAmount && !refreshed) {
           refreshed = true
           populationActor ! RefreshPopulation(false)
         }
@@ -42,5 +42,10 @@ class QueenEvaluator extends Evaluator {
     case x @ (_: SetFitness) =>
       originalReceive(x)
       tryRefresh()
+  }
+ */
+
+  context.system.scheduler.scheduleOnce(180.seconds) {
+    populationActor ! RefreshPopulation(false)
   }
 }

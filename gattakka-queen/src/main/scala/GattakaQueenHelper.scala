@@ -137,7 +137,7 @@ class GattakaQueenHelper {
     new DropMutationOperator {
       val mutationChance = 0.15
       val dropChance = 0.1
-      override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor)
+      override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor) && !Descriptors.OutputLayers.contains(chromosome.descriptor)
     },
     new PipelineOperator with MutationBaseOperator {
       val mutationChance = 0.15

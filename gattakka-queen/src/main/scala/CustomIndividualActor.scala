@@ -6,10 +6,11 @@ import com.obecto.gattakka.messages.individual.{Initialize}
 import java.io.{IOException, File, PrintWriter}
 import java.security.{MessageDigest}
 import spray.json._
+import scala.concurrent.duration._
 import Math.{abs}
 
 class CustomIndividualActor(genome: Genome) extends Individual(genome) {
-  // import context.dispatcher
+   import context.dispatcher
 
   var process: scala.sys.process.Process = null
   var stopping = false
@@ -32,18 +33,20 @@ class CustomIndividualActor(genome: Genome) extends Individual(genome) {
   }
 
   def dispatchFitness(fitness: Double, displayScore: Double, iterations: Int): Unit = {
-    super.dispatchFitness(fitness)
-    println("fitness is " + "->" * 20 + " " + fitness)
-    if (!fitness.isNaN && fitness != 0.0) {
-      val endTime = System.currentTimeMillis / 1000
-      val sign = if (displayScore > 0) 1 else 0
-      printToFile(new File(f"results/${abs(displayScore)}%06.2f-${shortHash}.txt")) { p =>
-        p.println(s"fitness = $fitness")
-        p.println(s"score = $displayScore")
-        p.println(s"iterations = $iterations")
-        p.println(s"time = ${endTime - startTime}s")
-        p.println(s"hash = $shortHash")
-        p.println(s"chromosome = $strategy")
+    context.system.scheduler.scheduleOnce(1.seconds) {
+      super.dispatchFitness(fitness)
+      println("fitness is " + "->" * 20 + " " + fitness)
+      if (!fitness.isNaN && fitness != 0.0) {
+        val endTime = System.currentTimeMillis / 1000
+        val sign = if (displayScore > 0) 1 else 0
+        printToFile(new File(f"results/${abs(displayScore)}%06.2f-${shortHash}.txt")) { p =>
+          p.println(s"fitness = $fitness")
+          p.println(s"score = $displayScore")
+          p.println(s"iterations = $iterations")
+          p.println(s"time = ${endTime - startTime}s")
+          p.println(s"hash = $shortHash")
+          p.println(s"chromosome = $strategy")
+        }
       }
     }
   }
