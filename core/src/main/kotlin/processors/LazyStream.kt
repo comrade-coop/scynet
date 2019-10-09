@@ -48,13 +48,24 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
         private val  timer = Timer(true)
         private  var task: TimerTask = getTimerTask()
         fun start(){
-            task =  getTimerTask()
-            timer.scheduleAtFixedRate(task, delay,delay)
+            try{
+                task =  getTimerTask()
+                timer.scheduleAtFixedRate(task, delay,delay)
+            }catch (e: IllegalStateException){
+                logger.error(e)
+                logger.error(e.stackTrace)
+            }
         }
 
         fun stop(){
-            task.cancel()
-            timer.purge()
+            try{
+                task.cancel()
+                timer.purge()
+            }catch (e: IllegalStateException){
+                logger.error(e)
+                logger.error(e.stackTrace)
+            }
+
         }
         private fun getTimerTask(): TimerTask = object : TimerTask(){
             override fun run() {

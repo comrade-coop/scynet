@@ -32,9 +32,15 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         private val timer = Timer(true)
         private  var task: TimerTask = getTimerTask()
         fun start(){
-            task = getTimerTask()
-            logger.trace("Starting CountDown for $serviceClassAndName!")
-            this.timer.schedule(task, 20000)
+            try {
+                task = getTimerTask()
+                logger.trace("Starting CountDown for $serviceClassAndName!")
+                this.timer.schedule(task, 20000)
+            }catch (e: IllegalStateException){
+                logger.error(e)
+                logger.error(e.stackTrace)
+            }
+
         }
 
         fun restart(){
@@ -43,8 +49,14 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         }
 
         private fun stop(){
-            task.cancel()
-            timer.purge()
+            try{
+                task.cancel()
+                timer.purge()
+            }catch (e: IllegalStateException){
+                logger.error(e)
+                logger.error(e.stackTrace)
+            }
+
         }
 
         private fun getTimerTask(): TimerTask = object : TimerTask(){
@@ -90,6 +102,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
             this.countDown.restart()
         }catch (e: UninitializedPropertyAccessException){
             logger.error(e)
+            logger.error(e.stackTrace)
         }
     }
 
