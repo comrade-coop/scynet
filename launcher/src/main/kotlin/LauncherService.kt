@@ -151,7 +151,7 @@ class LauncherService : Service, KoinComponent {
 
                 performanceFeedbackCache.put(c.UUID.toString(), perfDouble)
 
-                if(lastAgents.count() > 10) {
+                if(lastAgents.count() > 45) {
                     lastAgents.removeAt(0)
                 }
                 bestAgentTrainingScore = if (lastAgents.count() > 0) lastAgents.max()!! else -1.0
