@@ -70,10 +70,9 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
             }
         }
 
-        p.onExit().thenApply {
-            weightsFile.delete()
-            val xFile = File(xPath)
-            xFile.delete()
-        }
+        p.waitFor()
+        weightsFile.delete()
+        val xFile = File(xPath)
+        xFile.delete()
     }
 }

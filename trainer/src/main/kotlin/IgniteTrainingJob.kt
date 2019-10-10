@@ -80,12 +80,11 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
 
             }
         }
-        p.onExit().thenApply {
-            val weightsFile = File("./trainer/src/main/kotlin/mock/temp/results/${trainingJob.UUID}_w.h5")
-            weightsFile.delete()
+        p.waitFor()
+        val weightsFile = File("./trainer/src/main/kotlin/mock/temp/results/${trainingJob.UUID}_w.h5")
+        weightsFile.delete()
 
-            val modelFile = File("./trainer/src/main/kotlin/mock/temp/model/${trainingJob.UUID}.json")
-            modelFile.delete()
-        }
+        val modelFile = File("./trainer/src/main/kotlin/mock/temp/model/${trainingJob.UUID}.json")
+        modelFile.delete()
     }
 }
