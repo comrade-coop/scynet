@@ -85,7 +85,11 @@ object Converter {
         }
       }
 
-      layers.foreach(tryAddLayerToResult)
+      val (outputLayers, nonOutputLayers) = layers.partition(l => Descriptors.OutputLayers.map(_._2).contains(l))
+
+      nonOutputLayers.foreach(tryAddLayerToResult)
+      pending = Set()
+      outputLayers.foreach(tryAddLayerToResult)
 
       result
     }
