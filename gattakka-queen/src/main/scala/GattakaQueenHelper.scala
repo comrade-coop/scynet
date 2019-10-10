@@ -172,6 +172,19 @@ class GattakaQueenHelper {
     new ShuffleMutationOperator {
       val mutationChance = 0.1
     },
+    new PipelineOperator with MutationBaseOperator {
+      val mutationChance = 1.0
+      val requiredDescriptors = Descriptors.OutputLayers.map(_._2).toArray
+      def apply(genome: Genome): Genome = {
+        if (genome.chromosomes.exists(requiredDescriptors.contains(_))) {
+          genome
+        } else {
+          new Genome(genome.chromosomes :+
+            requiredDescriptors(rnd.nextInt(requiredDescriptors.size)).createChromosome(rnd)
+          )
+        }
+      }
+    },
     new DeduplicationOperator {},
     new LimitSizeOperator {
       val targetPopulationSize = 20
