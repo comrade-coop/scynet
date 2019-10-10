@@ -29,11 +29,20 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
     protected lateinit var inputStreams: ArrayList<ILazyStream>
 
     private inner class CountDown{
+        private var stop = false
         private val timer = Timer(true)
-        private  var task: TimerTask = getTimerTask()
+        private  var task: TimerTask = object : TimerTask(){
+            override fun run() {
+                if(stop){
+                    ignite.services().cancel(serviceName)
+                    stop()
+                }else{
+                    stop = true
+                }
+            }
+        }
         fun start(){
             try {
-                task = getTimerTask()
                 logger.trace("Starting CountDown for $serviceClassAndName!")
                 this.timer.schedule(task, 20000)
             }catch (e: IllegalStateException){
@@ -45,14 +54,14 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         }
 
         fun restart(){
-            stop()
-            start()
+            stop = false
         }
 
         private fun stop(){
             try{
                 task.cancel()
                 timer.purge()
+                timer.cancel()
             }catch (e: IllegalStateException){
                 logger.error(e)
                 logger.debug("$e from stop")
@@ -61,11 +70,6 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
 
         }
 
-        private fun getTimerTask(): TimerTask = object : TimerTask(){
-            override fun run() {
-                ignite.services().cancel(serviceName)
-            }
-        }
     }
 
     override fun init(ctx: ServiceContext?) {

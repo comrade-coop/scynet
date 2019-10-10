@@ -15,7 +15,7 @@ interface ILazyStream{
     fun <K, V> listen(callback: (K,V,V?) -> Unit): QueryCursor<Cache.Entry<K,V>>
     fun <K, V> listen(predicate: (K,V) -> Boolean, callback: (K,V,V?) -> Unit): AutoCloseable
 
-    fun getCachee(): IgniteCache<Any, Any>
+    fun getCache(): IgniteCache<Any, Any>
     fun dispose()
 
 }

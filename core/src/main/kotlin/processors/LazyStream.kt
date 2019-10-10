@@ -18,6 +18,7 @@ import org.koin.core.inject
 import java.util.*
 import javax.cache.Cache
 import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -32,6 +33,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     private var cache: IgniteCache<Long, V>? = null
     private var serviceInstance: ILazyStreamService? = null
     private val  serviceEngagementTimer: ServiceEngagementTimer = ServiceEngagementTimer()
+    private val cursors: HashSet<AutoCloseable> = HashSet()
     protected abstract val streamServiceClass: KClass<out ILazyStreamService>
 
     constructor(id: UUID, inputStreamIds: ArrayList<UUID>?, serviceProperties: Properties?): this(){
@@ -134,7 +136,9 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
         }
         query.initialQuery = ScanQuery<K,V>()
 
-        return cache!!.query(query)
+        val cursor = cache!!.query(query)
+        cursors.add(cursor)
+        return  cursor
      }
 
     override fun <K, V> listen(predicate: (K, V) -> Boolean, callback: (K, V, V?) -> Unit): AutoCloseable {
@@ -150,16 +154,21 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
         }
         query.initialQuery = ScanQuery<K,V>()
 
-        return cache!!.query(query)
+        val cursor = cache!!.query(query)
+        cursors.add(cursor)
+        return  cursor
     }
 
     override fun dispose(){
         serviceEngagementTimer.stop()
+        for (cursor in cursors){
+            cursor.close()
+        }
         serviceInstance = null
         logger.info("Engagement timer for ${descriptor!!.id} successfully stopped!")
     }
 
-    override fun getCachee(): IgniteCache<Any, Any> {
+    override fun getCache(): IgniteCache<Any, Any> {
         return cache as IgniteCache<Any, Any>
     }
 }
