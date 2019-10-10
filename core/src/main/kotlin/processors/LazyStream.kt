@@ -160,7 +160,6 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
     }
 
     override fun dispose(){
-        serviceEngagementTimer.stop()
         for (cursor in cursors){
             cursor.close()
         }

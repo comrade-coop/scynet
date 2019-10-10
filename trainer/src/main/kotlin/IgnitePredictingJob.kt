@@ -44,11 +44,15 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
     private fun initTrainer(){
         logger.warn("Initializing Predictor... <--------------------------------------#-------------#-------#----#---#--#-##")
 
-        val xPath = "./trainer/src/main/kotlin/mock/temp/data/xTEMP${agentId}.npy"
+        val xPath = "./trainer/src/main/kotlin/mock/temp/data/${agentId}.npy"
 
         // TODO: We don't even need to use csv when passing stuff to the trainer, that's cool, but discuss
         Nd4j.writeAsNumpy(x, File(xPath))
-
+        val weightsFile = File("./trainer/src/main/kotlin/mock/temp/results/${agentId}_w.h5")
+        val weightsCache = ignite.getOrCreateCache<String, ByteArray>("weights")
+        val weights = weightsCache.get(agentId)
+        weightsCache.close()
+        weightsFile.writeBytes(weights)
         // The arguments are as follows --agentId -x
         val pb = ProcessBuilder("bash", "./trainer/src/main/python/startPrediction.sh", agentId, xPath)
 
@@ -64,6 +68,12 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
                 var prediction = out.split("=")[1] // Parse the performance here
                 callback(if (prediction.toDoubleOrNull() != null) prediction.toDouble() else -1.0)
             }
+        }
+
+        p.onExit().thenApply {
+            weightsFile.delete()
+            val xFile = File(xPath)
+            xFile.delete()
         }
     }
 }

@@ -37,7 +37,7 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
     private fun initTrainer(){
         logger.warn("Initializing Trainer...")
 
-        val filePath = "./trainer/src/main/kotlin/mock/temp/temp${trainingJob.UUID}.json"
+        val filePath = "./trainer/src/main/kotlin/mock/temp/model/${trainingJob.UUID}.json"
         val file = File(filePath)
         file.writeText(trainingJob.egg)
 
@@ -68,11 +68,10 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
 
                 var perf = out.split("=")[1] // Parse the performance here
                 var weights: ByteArray = File("./trainer/src/main/kotlin/mock/temp/results/${trainingJob.UUID}_w.h5").readBytes() // Get the weights here or something (Maybe buffer array)
-
                 val jobId: String = trainingJob.UUID.toString()
-                var cache = ignite.getOrCreateCache<String, ByteArray>("weights")
-
+                val cache = ignite.getOrCreateCache<String, ByteArray>("weights")
                 cache.put(jobId, weights)
+                cache.close()
                 trainingJob.status = TRAINED(hashMapOf("performance" to perf, "weights" to jobId))
 
                 var timestamp = Date().time
@@ -80,6 +79,13 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
                 // Add the job to the finished jobs registry/stream or something
 
             }
+        }
+        p.onExit().thenApply {
+            val weightsFile = File("./trainer/src/main/kotlin/mock/temp/results/${trainingJob.UUID}_w.h5")
+            weightsFile.delete()
+
+            val modelFile = File("./trainer/src/main/kotlin/mock/temp/model/${trainingJob.UUID}.json")
+            modelFile.delete()
         }
     }
 }
