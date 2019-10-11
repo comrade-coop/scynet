@@ -149,7 +149,7 @@ class GattakaQueenHelper {
     new DropMutationOperator {
       val mutationChance = 0.15
       val dropChance = 0.1
-      override def mayDrop(chromosome: Chromosome): Boolean = !Descriptors.Configs.contains(chromosome.descriptor) && !Descriptors.OutputLayers.contains(chromosome.descriptor)
+      override def mayDrop(chromosome: Chromosome): Boolean = Descriptors.NonInputLayers.contains(chromosome.descriptor)
     },
     new PipelineOperator with MutationBaseOperator {
       val mutationChance = 0.15
@@ -176,10 +176,23 @@ class GattakaQueenHelper {
       val mutationChance = 1.0
       val requiredDescriptors = Descriptors.OutputLayers.map(_._2).toArray
       def apply(genome: Genome): Genome = {
-        if (genome.chromosomes.exists(requiredDescriptors.contains(_))) {
+        if (genome.chromosomes.exists(x => requiredDescriptors.contains(x.descriptor))) {
           genome
         } else {
-          new Genome(genome.chromosomes :+
+          Genome(genome.chromosomes :+
+            requiredDescriptors(rnd.nextInt(requiredDescriptors.size)).createChromosome(rnd)
+          )
+        }
+      }
+    },
+    new PipelineOperator with MutationBaseOperator {
+      val mutationChance = 1.0
+      val requiredDescriptors = Descriptors.InputLayers.map(_._2).toArray
+      def apply(genome: Genome): Genome = {
+        if (genome.chromosomes.exists(x => requiredDescriptors.contains(x.descriptor))) {
+          genome
+        } else {
+          Genome(genome.chromosomes :+
             requiredDescriptors(rnd.nextInt(requiredDescriptors.size)).createChromosome(rnd)
           )
         }
