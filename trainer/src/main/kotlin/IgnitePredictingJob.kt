@@ -51,7 +51,6 @@ class IgnitePredictingJob: IgniteRunnable, KoinComponent {
         val weightsFile = File("./trainer/src/main/kotlin/mock/temp/results/${agentId}_w.h5")
         val weightsCache = ignite.getOrCreateCache<String, ByteArray>("weights")
         val weights = weightsCache.get(agentId)
-        weightsCache.close()
         weightsFile.writeBytes(weights)
         // The arguments are as follows --agentId -x
         val pb = ProcessBuilder("bash", "./trainer/src/main/python/startPrediction.sh", agentId, xPath)

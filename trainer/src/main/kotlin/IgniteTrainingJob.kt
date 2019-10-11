@@ -71,7 +71,6 @@ class IgniteTrainingJob: IgniteRunnable, KoinComponent {
                 val jobId: String = trainingJob.UUID.toString()
                 val cache = ignite.getOrCreateCache<String, ByteArray>("weights")
                 cache.put(jobId, weights)
-                cache.close()
                 trainingJob.status = TRAINED(hashMapOf("performance" to perf, "weights" to jobId))
 
                 var timestamp = Date().time
