@@ -164,6 +164,7 @@ abstract class LazyStream<K, V>(): ILazyStream, KoinComponent {
             cursor.close()
         }
         serviceInstance = null
+        serviceEngagementTimer.stop()
         logger.info("Engagement timer for ${descriptor!!.id} successfully stopped!")
     }
 
