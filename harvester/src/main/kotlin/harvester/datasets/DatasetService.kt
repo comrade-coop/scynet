@@ -18,9 +18,13 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
     private var slide: Int? = null
     private val OUTPUT_INPUT: String = "outputInputLinkedList"
     private val LATEST_DATASET: String = "latestDataset"
+
+    //used only for evaluating agents on newest dataset.
+    private lateinit var datasetCache: IgniteCache<String, Pair<INDArray, INDArray>>
     override fun init(ctx: ServiceContext?) {
         super.init(ctx)
         outputInputCache = ignite.getOrCreateCache("outputInput")
+        datasetCache = ignite.getOrCreateCache("dataset")
         datasetSize = descriptor!!.properties!!.get("datasetSize") as Int
         slide = descriptor!!.properties!!.get("slide") as Int
     }
@@ -31,15 +35,18 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
             outputInputCache.put(OUTPUT_INPUT, LinkedList())
         inputStreams[0].listen{ _: Long, pair: Pair<Boolean, INDArray>, _ ->
                 var label: INDArray
+                logger.debug("pair.first -> ${pair.first}")
                 if(pair.first){
+                    logger.debug("label is true")
                     label = Nd4j.ones(1,1)
                 }else{
+                    logger.debug("label is false")
                     label = Nd4j.zeros(1,1)
                 }
                 val input = pair.second
                 val outputInputs = outputInputCache.get(OUTPUT_INPUT)
                 outputInputs.addLast(Pair(label,input))
-
+                logger.debug("outputInputs size -> ${outputInputs.size}")
                 if(outputInputs.size == datasetSize){
                     updateDataset(outputInputs)
                     repeat(slide!!){
@@ -61,9 +68,40 @@ class DatasetService: LazyStreamService<String, Pair<INDArray,INDArray>>() {
             labels = Nd4j.vstack( labels, outputInput.first)
             inputs = Nd4j.vstack(inputs,outputInput.second)
         }
+        if(!labelsVarietyCheck(labels)){
+            logger.warn("Dataset did not pass labels variety check")
+            //logger.warn(labels)
+            return
+        }
         val dataset = Pair(labels, inputs)
         saveCSV(dataset)
         cache.put(LATEST_DATASET, dataset)
+        datasetCache.put(LATEST_DATASET, dataset)
+        logger.warn("Dataset Updated")
+    }
+
+    private fun labelsVarietyCheck(labels: INDArray): Boolean{
+        val labelsLength = labels.size(0)
+        logger.debug("labelsLength -> $labelsLength")
+        logger.debug("labels array ->${labels.toString()} ")
+        println("labels console array -> $labels")
+        var onesCount = 0
+        var lastTenPercentOnesCount = 0
+        for(i in 0 until labelsLength){
+            if(labels.getDouble(i) > 0.0){
+                onesCount ++
+                if(i > labelsLength / 10 * 9){
+                    lastTenPercentOnesCount ++
+                }
+            }
+        }
+        if (onesCount < labelsLength / 10){
+            return false
+        }
+        if (lastTenPercentOnesCount < labelsLength / 100){
+            return false
+        }
+        return true
     }
 
     private fun saveCSV(dataset: Pair<INDArray, INDArray>){

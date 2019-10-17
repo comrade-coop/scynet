@@ -28,6 +28,8 @@ ap.add_argument("-id", "--UUID", required=False,
 ap.add_argument("-pr", "--predict", required=False,
     help="Predict", action='store_true')
 
+ap.add_argument("-ev", "--evaluate", required=False,
+                help="Evaluate on new dataset", action='store_true')
 ap.add_argument("-mp", "--model-path", required=False,
     help="Model file path")
 
@@ -75,6 +77,40 @@ if __name__ == "__main__":
 
         res = trainer.predict([x])
         print("PREDICTION_DONE=%s" % res[0][0])
+
+    elif args['evaluate']:
+        d = np.genfromtxt(args['data'], delimiter=",")
+        x = d[:,:-1]
+        y = d[:,-1]
+
+        evaluatorMap = {
+            'basic': CustomEvaluator
+            # Add more here
+            # (TODO: Discuss semantics around evaluator/trainer/executor addressing)
+        }
+
+        evaluator = evaluatorMap[args['evaluator']]
+
+        if evaluator is None:
+            print("No evaluator found")
+
+        data = {
+            "x": x,
+            "y": y
+        }
+
+        config = {
+            "type" : "classification",
+            "is_executor": False,
+            "split_strategy": None,
+            "environment": evaluator,
+        }
+
+        trainer = Trainer(data, config)
+        trainer.restore_model(args['model_path'], None, from_deep_copy=True) # TODO use UUID
+
+        trainer.evaluate()
+        print("EVALUATION_DONE=%s" % (trainer.val_accuracy)) # This is used as a signal to the ProcessBuilder to stop and gather stuff
 
     else:
 

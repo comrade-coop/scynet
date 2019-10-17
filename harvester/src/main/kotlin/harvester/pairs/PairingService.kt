@@ -16,6 +16,7 @@ class PairingService: LazyStreamService<Long, Pair<Boolean, INDArray>>(){
                 launch {
                     inputStreams[0].listen { timestamp: Long, label: Boolean, _ ->
                         firstMap.put(timestamp, label)
+                        logger.debug("pairingLabel for $timestamp --> $label")
                         if (secondMap.containsKey(timestamp))
                             streamPair(timestamp)
                     }
@@ -32,6 +33,7 @@ class PairingService: LazyStreamService<Long, Pair<Boolean, INDArray>>(){
 
     private fun streamPair(timestamp: Long){
         val pair = Pair(firstMap.get(timestamp)!!, secondMap.get(timestamp)!!)
+        logger.debug("pair label for $timestamp -> ${firstMap[timestamp]}")
         cache.put(timestamp, pair)
         firstMap.remove(timestamp)
         secondMap.remove(timestamp)

@@ -44,7 +44,7 @@ abstract class LazyStreamService<K, V> : ILazyStreamService, KoinComponent {
         fun start(){
             try {
                 logger.trace("Starting CountDown for $serviceClassAndName!")
-                this.timer.schedule(task, 20000)
+                this.timer.scheduleAtFixedRate(task, 20000, 20000)
             }catch (e: IllegalStateException){
                 logger.error(e)
                 logger.debug("$e from start")

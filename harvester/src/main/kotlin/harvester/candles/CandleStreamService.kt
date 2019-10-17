@@ -75,6 +75,7 @@ class CandleStreamService: LazyStreamService<Long, CandleDTO>(){
     private fun streamCandle(){
         val candle = candle.getCandle()
         if(candle != null){
+            logger.debug("candle -> ${candle.timestamp} ---> $candle")
             cache.put(candle.timestamp, candle)
         }
     }

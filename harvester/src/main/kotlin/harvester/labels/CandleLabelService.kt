@@ -30,9 +30,11 @@ class CandleLabelService: LazyStreamService <Long, Boolean>() {
                 val lowerTreshold = close * lowerTresholdPercentage!! / -100
                 gains.removeFirst()
                 val label = calculateLabel(upperTreshold, lowerTreshold)
+                logger.debug("label for $timestamp --> $label")
                 cache.put(timestamp, label)
             }
             val currentGain = candle.close - candle.open
+            logger.debug("currentGain for ${candle.timestamp}--> $currentGain")
             gains.addLast(Pair(candle.timestamp,Pair(candle.close, currentGain)))
         }
     }

@@ -103,13 +103,8 @@ class Trainer:
         self.config['json'] = keras_json
         self.keras_model, input_metadata = build_model(keras_json)
 
-        x_train, y_train, x_test, y_test, validation_split = self.split_strategy(0.1, 0.1)
-
-        self.data["x_train"] = x_train
-        self.data["y_train"] = y_train 
-        self.data["x_test"] = x_test
-        self.data["y_test"] = y_test
-
+        validation_split = 0.1
+        self.loadData(0.1, validation_split)
         early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
 
         self.keras_model.summary()
@@ -123,6 +118,33 @@ class Trainer:
         )
         
         self.val_loss, _ = self.keras_model.evaluate(self.data["x_test"], self.data["y_test"])
+
+        self.val_accuracy = self.getPrecision()
+
+
+        # std communication TODO Discuss
+
+        # print('score = ' + str(-val_loss), file=real_stdout)
+        # print('display_score = ' + str(-val_loss), file=real_stdout)
+
+
+
+
+    def evaluate(self):
+        self.loadData(0.1, 0.1)
+        self.val_accuracy = self.getPrecision()
+
+    def loadData(self, test_split, validation_split):
+        x_train, y_train, x_test, y_test, validation_split = self.split_strategy(test_split, validation_split)
+
+        self.data["x_train"] = x_train
+        self.data["y_train"] = y_train
+        self.data["x_test"] = x_test
+        self.data["y_test"] = y_test
+
+
+    def getPrecision(self):
+
         y_predicted = self.predict(self.data['x_test'])
         y_predicted = np.transpose(y_predicted)[0]
         y_test = self.data['y_test']
@@ -145,13 +167,5 @@ class Trainer:
             elif y_test[i] == 0 and y_predicted[i] == 0:
                 tn += 1
 
-        precission = tp / (tp + fp + .000001)
-        
-        self.val_accuracy = precission
+        return tp / (tp + fp + .000001)
 
-
-
-        # std communication TODO Discuss
-        
-        # print('score = ' + str(-val_loss), file=real_stdout) 
-        # print('display_score = ' + str(-val_loss), file=real_stdout)
